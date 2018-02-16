@@ -1,10 +1,10 @@
-LOW = 0x0;
-HIGH = 0x1;
-ANALOG_MAX = 1023;
+var LOW = 0x0;
+var HIGH = 0x1;
+var ANALOG_MAX = 1023;
 
-INPUT = 0x0;
-OUTPUT = 0x1;
-INPUT_PULLUP = 0x2;
+var INPUT = 0x0;
+var OUTPUT = 0x1;
+var INPUT_PULLUP = 0x2;
 
 function Frame(previousFrame) {
   if (typeof(previousFrame) === "undefined") {

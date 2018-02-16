@@ -350,21 +350,20 @@ function generateGif(frameManager, isCorrect) {
   var gifOutput = document.getElementById("gif-output");
   gifOutput.innerHTML = "Generating gif . . .";
 
-  var gif = new GIF({workers: 4, quality: 10, workerScript: "js/gif/gif.worker.js", transparent: 0xFFFFFF, width: canvas.width, height: canvas.height});
-  var ctx = canvas.getContext("2d");
-
-  var img = document.getElementById("shield-img");
-  if (!img.complete || ((typeof(img.naturalWidth) !== "undefined") && img.naturalWidth === 0)) {
-    gifOutput.innerHTML = "Please wait for the page to finish loading";
-    running = false;
-    return;
+  var board = null;
+  try {
+    board = new BOARDS[document.getElementById("board").value]();
+  } catch(e) {
+    gifOutput.innerHTML = "Please specify a valid board";
+    return
   }
-
-  var board = new BOARDS[document.getElementById("board").value]();
 
   var canvas = document.createElement("canvas");
   canvas.height = board.canvasHeight;
   canvas.width = board.canvasWidth;
+
+  var gif = new GIF({workers: 4, quality: 10, workerScript: "js/gif/gif.worker.js", transparent: 0xFFFFFF, width: canvas.width, height: canvas.height});
+  var ctx = canvas.getContext("2d");
 
   var onFinished = function(gif, e) {
     gifOutput.innerHTML = "";

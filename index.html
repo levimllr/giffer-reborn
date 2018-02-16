@@ -37,12 +37,18 @@
           <br>
           <div class="input-group">
             <span class="input-group-addon">Name:</span>
-	    <input type="text" maxlength="20" class="form-control" id="name">
+	    <input type="text" maxlength="20" class="form-control" id="name" value="Example">
 	  </div>
 	  <br>
 	  <div class="input-group">
+	    <span class="input-group-addon">Board:</span>
+            <select id="board">
+	      <option selected>LED Board</option>
+	    </select>
+          </div>
+	  <div class="input-group">
 	    <span class="input-group-addon">Exercise Number:</span>
-            <input type="number" class="form-control" value="1" min="0" max="99" id="exercise-number">
+            <input type="number" class="form-control" min="0" max="99" id="exercise-number">
           </div>
           <div class="btn-group" data-toggle="buttons">
               <label class="btn btn-primary active">
