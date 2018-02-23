@@ -26,7 +26,7 @@ if (typeof(localStorage.analogPins) !== "undefined") {
 
 document.getElementById("name").value = (typeof(localStorage.name) === "undefined") ? "" : localStorage.name;
 document.getElementById("exercise-number").value = (typeof(localStorage.exerciseNumber) === "undefined") ? "" : localStorage.exerciseNumber;
-document.getElementById("board").value = (typeof(localStorage.board) === "undefined") ? "" : localStorage.board;
+//document.getElementById("board").value = (typeof(localStorage.board) === "undefined") ? "" : localStorage.board;
 
 editor.setValue(code);
 editor.focus();
