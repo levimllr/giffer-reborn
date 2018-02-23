@@ -1,28 +1,3 @@
-#editor-container {
-    height: 100%;
-}
-
-.header-element {
-    font-family: ubuntu, menlo, monaco, monospace;
-    padding-top: 7px;
-}
-
-.title-text {
-    font-size: 30px;
-}
-
-.by-text {
-    font-size: 20px;
-}
-
-.main {
-    margin-top: 0;
-    margin-left: 1em;
-    margin-right: 1em;
-    color: black;
-    height: 100%;
-}
-
 html, body {
     margin-top: 0;
     height: 100%;
@@ -36,14 +11,14 @@ html, body {
     margin-bottom: 20px;
 }
 
-.btn {
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
 
 .maintext {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
+}
+
+label.btn {
+    margin-bottom: 0;
 }
 
 .fileinput {
@@ -56,27 +31,32 @@ html, body {
 }
 
 #editor {
-    position: relative;
-    float: left;
-    height: calc(100% - 108px);
-    width: 60%;
-    margin-right: 10px;
-    margin-top: 0px;
+    display: block;
+    height: 100%;
     font: 12px 'dejavu sans mono', menlo, monaco, monospace;
-    border-radius: 10px 6px 6px 10px;
+    border-radius: 10px;
 }
 
-.right-panel {
-    float: left;
-    width: 35%;
+.tab-content, .nav-tabs {
+    margin-top: 15px;
 }
 
-#output-panel {
-    height: 30%;
+.tab-content {
+    min-height: 200px;
+}
+
+.progress-bar {
+    border-radius: 2px;
+    height: 15px;
 }
 
 #gif-panel {
-    height: 270px;
+    min-height: 270px;
+}
+
+#gif-loading {
+    height: 100%;
+    width: 100%;
 }
 
 #gif-output {
@@ -88,7 +68,7 @@ html, body {
     font-family: monospace;
     background-color: #202020;
     color: white;
-    height: calc(100% - 40px);
     border-radius: 0px 0px 4px 4px;
     overflow: auto;
+    height: 300px;
 }
