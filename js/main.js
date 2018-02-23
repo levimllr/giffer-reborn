@@ -44,7 +44,6 @@ function getBoard(exercise){ //no need to test for undefined
   }
 }
 
-
 var code = getCode();
 var currentBoard = getBoard(localStorage.exerciseNumber);
 

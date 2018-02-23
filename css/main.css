@@ -50,6 +50,11 @@ label.btn {
     height: 15px;
 }
 
+#right-container {
+    border: 1px black;
+}
+
+
 #gif-panel {
     min-height: 270px;
 }
