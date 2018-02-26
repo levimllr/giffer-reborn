@@ -92,7 +92,7 @@ new Clipboard("#copy-page", {
     $(out).css("font-family", "monospace");
     out.innerHTML = lastContent.out.split("\n").slice(0, 30).join("\n");
     divWrapper.appendChild(out);
-    output("Copied! Go to \"Prepare an answer\" on Neo, then click the \"<>\" button and paste by pressing Control + V ");
+    println("Copied! Go to \"Prepare an answer\" on Neo, then click the \"<>\" button and paste by pressing Control + V ");
     return divWrapper.innerHTML;
   }
 });
@@ -167,12 +167,59 @@ var running = false;
 var lastContent = {frameManager: null, output: null};
 
 function frameManagerFromJSON(string) {
+  //Modifying __proto__ is the same speed as manually copying everything
+  //See: https://jsperf.com/parse-json-into-an-object-and-assign-a-prototype
+  //(also, I couldn't get manual copying to work without hard-coding the fields like Paul was doing)
+  
   var data = JSON.parse(string);
-  var f = Object.assign(new FrameManager(), data);
-  for(var i in f.frames){
-    f.frames[i] = Object.assign(new Frame(), data[i]);
+  data.__proto__ = FrameManager.prototype;
+  for(var f of data.frames){
+    f.__proto__ = Frame.prototype;
   }
-  return f;
+  return data;
+}
+
+
+var STATUS_TYPES = ["info", "danger", "success"];
+
+function setStatus(blurb, type, isAnimated){
+  resetStatus();
+  
+  var gifLoadingStatus = document.getElementById("gif-loading-status");
+  gifLoadingStatus.innerHTML = blurb;
+  
+  var gifLoadingBar = document.getElementById("gif-loading-bar");
+  gifLoadingBar.classList.add("bg-" + type);
+  gifLoadingBar.style.display = "flex";
+  if(isAnimated){
+    gifLoadingBar.classList.add("progress-bar-animated");
+  }
+}
+
+function showGif(){  
+  var gifOutput = document.getElementById("gif-output");
+  gifOutput.style.display = "inline";
+  
+  var gifLoading = document.getElementById("gif-loading");
+  gifLoading.style.display = "none";
+}
+
+function resetStatus(){
+  var gifOutput = document.getElementById("gif-output");
+  gifOutput.style.display = "none";
+  
+  var gifLoading = document.getElementById("gif-loading");
+  gifLoading.style.display = "inline";
+  
+  var gifLoadingStatus = document.getElementById("gif-loading-status");
+  gifLoadingStatus.innerHTML = "Nothing to show . . .";
+  
+  var gifLoadingBar = document.getElementById("gif-loading-bar");
+  gifLoadingBar.classList.remove("progress-bar-animated");
+  gifLoadingBar.style.display = "none";
+  for(var status of STATUS_TYPES){
+    gifLoadingBar.classList.remove("bg-" + status);
+  }
 }
 
 function runCode() {
@@ -186,57 +233,31 @@ function runCode() {
   //TODO: ui element for this?
   var doGrade = exerciseField.value != "";
   
-  var gifOutput = document.getElementById("gif-output");
-  gifOutput.style.display = "none";
-  
-  var gifLoading = document.getElementById("gif-loading");
-  gifLoading.style.display = "inline";
-  
-  var gifLoadingStatus = document.getElementById("gif-loading-status");
-  
-  var gifLoadingBar = document.getElementById("gif-loading-bar");
-  gifLoadingBar.style.display = "block";
-  
-  gifLoadingBar.classList.add("progress-bar-animated");
-  gifLoadingBar.classList.add("bg-info");
-  gifLoadingBar.classList.remove("bg-danger");
-  
   document.getElementById("console-output").innerHTML = "";
   
   var jscpp = new Worker("js/JSCPP-WebWorker.js");
   
-  gifLoadingStatus.innerHTML = "Running your code . . .";
+  setStatus("Running your code . . .", "info", true);
   
   jscpp.onmessage = function(e) {
     var message = JSON.parse(e.data);
-    console.log(message);
     if (message.type === "frameManager") {
       var newFrameManager = frameManagerFromJSON(message.frameManager);
       lastContent.frameManager = newFrameManager;
       lastContent.output = $("#console-output")[0].innerHTML;
       
-      newline(); newline();
+      print("\n\n");
       if (doGrade) {
+        setStatus("Grading gif . . .", "success", true);
         gradeFrameManager(newFrameManager);
       } else {
-        
-        gifLoadingStatus.innerHTML = "Generating gif . . .";
-        
-        gifLoadingBar.classList.remove("bg-info");
-        gifLoadingBar.classList.add("bg-success");
-        
+        setStatus("Generating gif . . .", "success", true);
         generateGif(newFrameManager);
       }
       
-      gifLoading.style.display = "none";
-      gifOutput.style.display = "inline";
       
     } else if (message.type === "output") {
-      var parts = message.text.split("\n");
-      for (var part of parts) {
-        output(part);
-        newline();
-      }
+      print(message.text);
     } else if (message.type === "newFrame") {
       //output("(Switching to frame " + message.newFrameNumber + " with a delay of " + message.delay + ")");
       //newline();
@@ -270,15 +291,12 @@ function runCode() {
         type: "error"
       }]);
       editor.navigateTo(startOfErrorObj.row, startOfErrorObj.column);
-      output("Error: " + errorObj.slice(errorObj.indexOf(matches[0]) + matches[0].length + 1));
+      println("Error: " + errorObj.slice(errorObj.indexOf(matches[0]) + matches[0].length + 1));
       } else {
-      output("Warning: Unusual error!\n\n" + errorObj);
+      println("Warning: Unusual error!\n\n" + errorObj);
     }
     running = false;
-    gifLoadingStatus.innerHTML = "An error occurred!";
-    gifLoadingBar.classList.remove("progress-bar-animated");
-    gifLoadingBar.classList.remove("bg-info");
-    gifLoadingBar.classList.add("bg-danger");
+    setStatus("An error occurred!", "danger", false);
     return true;
   };
   
@@ -292,9 +310,10 @@ function runCode() {
 function gradeFrameManager(studentFM) {
   var xmlhttp = new XMLHttpRequest();
   var exerciseNum = $("#exercise-number")[0].valueAsNumber;
-  $("#gif-output").text("Getting grading file . . .");
+  setStatus("Getting grading file . . .", "info", true);
   if (isNaN(exerciseNum)) {
-    output("Please input a valid exercise number to grade.");
+    println("Please input a valid exercise number to grade.");
+    setStatus("Error!", "danger", false);
     running = false;
     return;
   }
@@ -302,27 +321,26 @@ function gradeFrameManager(studentFM) {
   var handleResponse = function () {
     try {
       if (this.status === 200) {
-        $("#gif-output").text("Grading . . .");
+        setStatus("Grading . . .", "info", true);
         var correctFM = frameManagerFromJSON(this.responseText);
         generateGif(studentFM, compareFrameManagers(studentFM, correctFM));
-        } else if (this.status === 404) {
-        output("The grading file for exercise " + exerciseNum + " does not exist.");
-        running = false;
-        return;
-        } else {
-        output("An error occurred getting the grading file.");
+      } else {
+        println("An error occurred getting the grading file.");
+        setStatus("Error!", "danger", false);
         running = false;
         return;
       }
       } catch (e) {
       console.log(e);
-      output("An error occurred parsing the grading file.");
+      println("An error occurred parsing the grading file.");
+      setStatus("Error!", "danger", false);
       running = false;
     }
   };
   xmlhttp.addEventListener("load", handleResponse);
   var handleError = function () {
-    output("An error occurred getting the grading file.");
+    println("An error occurred getting the grading file.");
+    setStatus("Error!", "danger", false);
     running = false;
   };
   xmlhttp.addEventListener("error", handleError);
@@ -332,17 +350,17 @@ function gradeFrameManager(studentFM) {
 
 function compareFrameManagers(fm1, fm2) {
   if (fm1.frames.length !== fm2.frames.length) {
-    output("Gifs are different lengths");
+    println("Gifs are different lengths");
     return false;
   }
   var onewayFrameCompare = function (f1, f2) {
     if (!Object.keys(f1.ledStates).every(function (element) {
       if (!(f1.getPinState(element) === f2.getPinState(element))) {
-        output("Found difference in pin states on pin " + element);
+        println("Found difference in pin states on pin " + element);
         return false;
       }
       if (!((f1.getPinState(element) === HIGH) ? (f1.getPinMode(element) === f2.getPinMode(element)) : true)) {
-        output("Found difference in pin modes on pin " + element);
+        println("Found difference in pin modes on pin " + element);
         return false;
       }
       return true;
@@ -350,16 +368,16 @@ function compareFrameManagers(fm1, fm2) {
       return false;
     }
     if (!(f1.postDelay === f2.postDelay)) {
-      output("Found difference in delays");
+      println("Found difference in delays");
       return false;
     }
     if (f1.outputText.length !== f2.outputText.length) {
-      output("Found difference in number of Serial prints");
+      println("Found difference in number of Serial prints");
       return false;
     }
     for (var i in f1.outputText) {
       if (f1.outputText[i].trim() !== f2.outputText[i].trim()) {
-        output("Found difference in output text (\"" + f1.outputText[i].trim() + "\" vs \"" + f2.outputText[i].trim() + "\")");
+        println("Found difference in output text (\"" + f1.outputText[i].trim() + "\" vs \"" + f2.outputText[i].trim() + "\")");
         return false;
       }
     }
@@ -370,7 +388,7 @@ function compareFrameManagers(fm1, fm2) {
     if (onewayFrameCompare(element, fm2.frames[key]) && onewayFrameCompare(fm2.frames[key], element)) {
       return true;
       } else {
-      output(" in frame " + key);
+      println(" in frame " + key);
       return false;
     }
     })) {
@@ -380,7 +398,7 @@ function compareFrameManagers(fm1, fm2) {
     if (onewayFrameCompare(element, fm1.frames[key]) && onewayFrameCompare(fm1.frames[key], element)) {
       return true;
       } else {
-      output(" in frame " + key);
+      println(" in frame " + key);
       return false;
     }
     })) {
@@ -397,7 +415,7 @@ function generateGif(frameManager, isCorrect) {
   try {
     board = new BOARDS[document.getElementById("board").value]();
   } catch(e) {
-    gifOutput.innerHTML = "Please specify a valid board";
+    setStatus("Invalid Board!", "danger", false);
     return
   }
   
@@ -418,6 +436,7 @@ function generateGif(frameManager, isCorrect) {
     img.src = "data:image/gif;base64," + btoa(binString);
     img.id = "output-image";
     gifOutput.appendChild(img);
+    showGif();
   };
   gif.on("finished", onFinished);
   
@@ -538,8 +557,6 @@ function saveFrameManager() {
   }
 }
 
-//Utilities and general IO
-
 //Simple hash function, thanks to http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
 String.prototype.hashCode = function(){
 	var hash = 0;
@@ -558,15 +575,21 @@ function blobToDataURL(blob, callback) {
   a.readAsDataURL(blob);
 }
 
-function t(text) {
-  return document.createTextNode(text);
+function print(text){
+  if(text !== undefined){
+    while(text.includes("\n")){
+      var add = text.substring(0, text.indexOf("\n"));
+      $("#console-output").append(document.createTextNode(add));
+      $("#console-output").append(document.createElement("br"));
+      
+      text = text.substring(text.indexOf("\n") + 1);
+    }
+    $("#console-output").append(document.createTextNode(text));
+  }
 }
 
-function output(text) {
-  $("#console-output").append(t(text));
-}
-
-function newline() {
+function println(text){
+  print(text);
   $("#console-output").append(document.createElement("br"));
 }
 
