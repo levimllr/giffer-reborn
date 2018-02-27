@@ -13,7 +13,8 @@
     <nav class="navbar sticky-top navbar-light bg-light">
       <p class="navbar-brand">Giffer Reborn</p>
       <form class="form-inline my-2 my-lg-0">
-        <button class="btn btn-outline-success my-2 my-sm-0" onclick="runCode()" type="button">Run</button>
+        <button class="btn btn-outline-info my-2 my-sm-0" id="copy-page" type="button">Copy Page</button>
+        <button class="btn btn-outline-success my-2 my-sm-0" id="run-button" onclick="runCode()" type="button">Run</button>
       </form>
     </nav>
     <div class="container-fluid">
@@ -52,13 +53,13 @@
                             <option selected>LED Board</option>
                           </select>
                           <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button">Load Board</button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="loadBoard()">Load Board</button>
                           </div>
                         </div>
                         <div class="input-group mb-3">
                           <input type="text" id="exercise-number" class="form-control" placeholder="Exercise Number (leave blank for no grading)">
                           <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button">Load Exercise</button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="loadExercise()">Load Exercise</button>
                           </div>
                         </div>
                       </div>
@@ -121,7 +122,6 @@
     
     <div id="highlight-storage" style="display: none; width: 0.01px; height: 0.01px;"></div>
     
-    <script src="js/Board.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/jquery-2.2.1.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -130,6 +130,7 @@
     <script src="js/FileSaver.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/highlight.pack.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/Board.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/main.js" type="text/javascript" charset="utf-8"></script>
   </body>
 </html>

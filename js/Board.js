@@ -1,4 +1,5 @@
-function Board() {
+function Board(setup) {
+  //All boards must be able to recreate themselves based on this.getSetup()
 }
 
 Board.prototype.canvasWidth = null;
@@ -7,6 +8,7 @@ Board.prototype.context = null;
 Board.prototype.analogPins = [];
 
 Board.imageURL = null;
+
 
 Board.prototype.setContext = function(context){
   this.context = context;
@@ -46,7 +48,7 @@ Board.prototype.draw = function(ctx, frame, index, frameManager) {
   this.drawInfo();
 }
 
-function LEDBoard() {
+function LEDBoard(setup) {
   this.ledLookup = {
     2: {x: 87, y: 165, color: "red"},
     3: {x: 87, y: 140, color: "green"},
@@ -66,12 +68,21 @@ function LEDBoard() {
   };
   this.canvasWidth = 300;
   this.canvasHeight = 195;
+  this.analogPins = (setup === undefined || setup.analogPins === undefined) ? [] : setup.analogPins;
   this.DOMPins = [];
 }
+
 
 LEDBoard.prototype = Object.create(Board.prototype);
 
 LEDBoard.prototype.imageURL = "/img/shield.gif";
+LEDBoard.prototype.type = "LED Board";
+
+LEDBoard.prototype.getSetup = function(){
+  this.updateInputs();
+  return {analogPins: this.analogPins};
+}
+
 
 LEDBoard.prototype.draw = function(ctx, frame, index, frameManager){
   
@@ -97,11 +108,17 @@ LEDBoard.prototype.draw = function(ctx, frame, index, frameManager){
   this.drawInfo(ctx, frame, index, frameManager);
 }
 
+LEDBoard.prototype.removePin = function (pin) {
+  console.log(pin);
+  this.DOMPins.remove($(pin).parent().parent()[0]);
+  $(pin).parent().parent().remove();
+  saveContext();
+}
 LEDBoard.prototype.addPin = function addPin(number, value) {
     var newContent = $(`<tr class="input-pin">
     <td><input type="number" class="form-control pin-number" value="2" min="0" max="255"/></td>
     <td><input type="number" class="form-control pin-value" value="0" min="0" max="1023"/></td>
-    <td><button class="btn btn-danger" style="width: 100%;" onclick="$(this).parent().parent().remove()">Remove</button></td>
+    <td><button class="btn btn-danger" style="width: 100%;" onclick="currentBoard.removePin(this)">Remove</button></td>
     </tr>`);
     $("#analog-table-tbody").append(newContent);
     numberField = newContent.find(".pin-number")[0];
@@ -110,9 +127,9 @@ LEDBoard.prototype.addPin = function addPin(number, value) {
       numberField.valueAsNumber = Number(number);
     }
     if (value) {
-      valueField.find(".pin-value")[0].valueAsNumber = Number(value);
+      valueField.valueAsNumber = Number(value);
     }
-    return newContent
+    this.DOMPins.push(newContent[0]);
   }
 
 
@@ -128,16 +145,14 @@ LEDBoard.prototype.activate = function(){
             </thead>
             <tbody id="analog-table-tbody"></tbody>
           </table>
-          <button class="btn btn-success" id="add-pin">Add pin</button>`);
+          <button class="btn btn-success" id="add-pin" onclick="currentBoard.addPin(); saveContext()">Add pin</button>`);
           
   $("#edit").append(setup);
-  document.getElementById("add-pin").onclick = this.addPin;
           
   
   for (var i = 0; i < this.analogPins.length; i++) {
     var pin = this.analogPins[i];
-    var DOMPin = displayPin(pin.pin_number, pin.pin_value);
-    this.DOMPins.append(DOMPin);
+    this.addPin(pin.pin_number, pin.pin_value);
   }
 }
 
@@ -153,9 +168,6 @@ LEDBoard.prototype.updateInputs = function(){
 }
 
 
-
-
-
 var BOARDS = {
   "LED Board": LEDBoard
 };
@@ -166,4 +178,21 @@ for(var b in BOARDS){
     BOARDS[b].prototype.shieldImg.src = BOARDS[b].prototype.imageURL;
     console.log("Loaded background image for board: " + b);
   }
+}
+
+var defaultBoard = new LEDBoard();
+
+function createBoard(type, setup){
+  if(type === null || !(type in BOARDS)){
+    console.log("Invalid board type -- loading defaultBoard");
+    return defaultBoard;
+  }
+  var m;
+  try {
+    m = JSON.parse(setup)
+  } catch (e) {
+    console.log("Invalid setup -- loading with setup = {}");
+    m = {};
+  }
+  return new BOARDS[type](m);
 }

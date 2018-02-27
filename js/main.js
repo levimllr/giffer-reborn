@@ -2,58 +2,59 @@
 var editor = ace.edit("editor");
 editor.getSession().setMode("ace/mode/c_cpp");
 
-var defaultCode = `
-void setup() {
+var defaultCode = `void setup() {
   pinMode(3, OUTPUT);
 }
 
 void loop() {
   digitalWrite(3, HIGH);
-  delay(100);
+  delay(500);
   digitalWrite(3, LOW);
-  delay(100);
+  delay(500);
 }`;
-
-var defaultBoard = new LEDBoard();
 
 var nameField = document.getElementById("name");
 var exerciseField = document.getElementById("exercise-number");
 var boardField = document.getElementById("board");
 
-var exerciseNumber = (typeof(localStorage.exerciseNumber) === "undefined") ? "" : localStorage.exerciseNumber;
-
-var savedCode = (typeof(localStorage.savedCode) === "undefined" || localStorage.savedCode === "" || localStorage.savedBoards === "[]") ? {} : JSON.parse(localStorage.savedCode);
-var savedBoards = (typeof(localStorage.savedBoards) === "undefined" || localStorage.savedBoards === "" || localStorage.savedBoards === "[]") ? {} : JSON.parse(localStorage.savedBoards);
-
-
-function getCode(exercise){ //no need to test for undefined
-  if(savedCode.hasOwnProperty(exercise)){
-    return savedCode[exercise];
+function getFromStorage(item, ifEmpty){
+  var i = localStorage.getItem(item);
+  if(i === null || i === undefined || i === ""){
+    return (ifEmpty !== null && ifEmpty !== undefined) ? ifEmpty : "";
   } else {
-    return defaultCode; //TODO: exercise has default code
-  }
-}
-function getBoard(exercise){ //no need to test for undefined
-  if(savedBoards.hasOwnProperty(exercise)){
-    //TODO: var b = savedBoards[exercise];
-    //b.__proto__ = Board.prototype;
-    //return b;
-    return defaultBoard;
-  } else {
-    return defaultBoard; //TODO: exercise has default board
+    return i;
   }
 }
 
-var code = getCode();
-var currentBoard = getBoard(localStorage.exerciseNumber);
+function setToStorage(item, value){
+  localStorage.setItem(item, value);
+}
+
+/*
+  TODO:
+  Exercise:
+   - board.type
+   - board.setup
+   - startingCode
+   - frameManager
+*/
+
+function loadBoard(){
+  $("#edit").empty();
+  currentBoard = createBoard(boardField.value);
+  currentBoard.activate();
+}
+
+var currentBoard = createBoard(getFromStorage("board-type"), getFromStorage("board-setup"));
 
 currentBoard.activate();
 
-nameField.value = (typeof(localStorage.name) === "undefined") ? "" : localStorage.name;
-exerciseField.value = (typeof(localStorage.exerciseNumber) === "undefined") ? "" : localStorage.exerciseNumber;
-boardField.value = "LED Board";
+nameField.value = getFromStorage("name");
+exerciseField.value = getFromStorage("exercise-number");
 
-editor.setValue(code);
+boardField.value = getFromStorage("board-type");
+
+editor.setValue(getFromStorage("code", defaultCode));
 editor.focus();
 
 editor.commands.addCommand({
@@ -66,7 +67,7 @@ new Clipboard("#copy-page", {
   text: function() {
     var outputGif = $("#confirmation-gif").clone()[0];
     if (typeof(outputGif) === "undefined") {
-      $("#console-output").text("Please generate a graded gif first.");
+      println("Please generate a graded gif first.");
       return undefined;
     }
     var preDom = document.createElement("pre");
@@ -90,7 +91,7 @@ new Clipboard("#copy-page", {
     divWrapper.appendChild(makeHeading("Serial Output"));
     var out = document.createElement("div");
     $(out).css("font-family", "monospace");
-    out.innerHTML = lastContent.out.split("\n").slice(0, 30).join("\n");
+    out.innerHTML = lastContent.output.split("\n").slice(0, 30).join("\n");
     divWrapper.appendChild(out);
     println("Copied! Go to \"Prepare an answer\" on Neo, then click the \"<>\" button and paste by pressing Control + V ");
     return divWrapper.innerHTML;
@@ -127,7 +128,7 @@ function nextJSON() {
 }
 
 function loadFile(file) { //TODO: once saveFile is refactored
-  document.getElementById("console-output").innerHTML = "Loading file . . .";
+  setStatus("Loading file . . .", "info", "true");
   var reader = new FileReader();
   reader.onload = function(event) {
     try {
@@ -140,15 +141,9 @@ function loadFile(file) { //TODO: once saveFile is refactored
         img.src = obj.img;
         img.id = "output-image";
         gifOutput.appendChild(img);
+        showGif();
       }
-      $("#analog-table-tbody").empty();
-      if (typeof(obj.analogPins) !== "undefined") {
-        var analogPins = obj.analogPins;
-        for (var i = 0; i < analogPins.length; i++) {
-          var pin = analogPins[i];
-          addPin(pin.pin_number, pin.pin_value);
-        }
-      }
+      //TODO: set board
       document.getElementById("console-output").innerHTML = obj.consoleOutput;
       document.getElementById("name").value = obj.name;
       document.getElementById("exercise-number").value = obj.exercise;
@@ -187,12 +182,13 @@ function setStatus(blurb, type, isAnimated){
   
   var gifLoadingStatus = document.getElementById("gif-loading-status");
   gifLoadingStatus.innerHTML = blurb;
-  
-  var gifLoadingBar = document.getElementById("gif-loading-bar");
-  gifLoadingBar.classList.add("bg-" + type);
-  gifLoadingBar.style.display = "flex";
-  if(isAnimated){
-    gifLoadingBar.classList.add("progress-bar-animated");
+  if(type !== ""){
+    var gifLoadingBar = document.getElementById("gif-loading-bar");
+    gifLoadingBar.classList.add("bg-" + type);
+    gifLoadingBar.style.display = "flex";
+    if(isAnimated){
+      gifLoadingBar.classList.add("progress-bar-animated");
+    }
   }
 }
 
@@ -202,6 +198,8 @@ function showGif(){
   
   var gifLoading = document.getElementById("gif-loading");
   gifLoading.style.display = "none";
+  
+  $("#copy-page").css("visibility", "visible");
 }
 
 function resetStatus(){
@@ -220,18 +218,17 @@ function resetStatus(){
   for(var status of STATUS_TYPES){
     gifLoadingBar.classList.remove("bg-" + status);
   }
+  
+  $("#copy-page").css("visibility", "hidden");
 }
 
 function runCode() {
-  saveCode();
+  saveContext();
   
   if (running) {
     return;
   }
   running = true;
-  
-  //TODO: ui element for this?
-  var doGrade = exerciseField.value != "";
   
   document.getElementById("console-output").innerHTML = "";
   
@@ -246,16 +243,13 @@ function runCode() {
       lastContent.frameManager = newFrameManager;
       lastContent.output = $("#console-output")[0].innerHTML;
       
-      print("\n\n");
-      if (doGrade) {
-        setStatus("Grading gif . . .", "success", true);
+      if (currentExercise.number !== null) {
+        setStatus("Grading . . .", "success", true);
         gradeFrameManager(newFrameManager);
       } else {
         setStatus("Generating gif . . .", "success", true);
         generateGif(newFrameManager);
       }
-      
-      
     } else if (message.type === "output") {
       print(message.text);
     } else if (message.type === "newFrame") {
@@ -264,11 +258,8 @@ function runCode() {
     }
   };
   
-  var prefix = "#include \"Arduino.h\"\n"
-           + "typedef unsigned char byte;\n"
-           + "//Begin Student Code: \n";
-  var code = prefix + editor.getValue() + "\n" 
-           + "int main() { setup(); loop(); return 0;}\n";
+  var prefix = "#include \"Arduino.h\"\ntypedef unsigned char byte;\n";
+  var code = prefix + editor.getValue() + "\nint main() { setup(); loop(); return 0;}\n";
            
   jscpp.onerror = function(e) {
     console.log(e);
@@ -302,50 +293,59 @@ function runCode() {
   
   currentBoard.updateInputs();
   
-  
-  
   jscpp.postMessage({code: code, analogPins: currentBoard.analogPins});
 }
 
-function gradeFrameManager(studentFM) {
-  var xmlhttp = new XMLHttpRequest();
-  var exerciseNum = $("#exercise-number")[0].valueAsNumber;
+var currentExercise = {number: null, frameManager: null};
+function loadExercise(){
   setStatus("Getting grading file . . .", "info", true);
+  var exerciseNum = parseInt($("#exercise-number")[0].value);
   if (isNaN(exerciseNum)) {
-    println("Please input a valid exercise number to grade.");
-    setStatus("Error!", "danger", false);
+    setStatus("Invalid exercise.  Gifs will not be graded.", "");
+    document.getElementById("run-button").innerHTML = "Run";
+    return;
+  }
+  
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
+  
+  var handleError = function(){
+    setStatus("Error fetching grading file . . .", "danger", false);
+  }
+  
+  xmlhttp.onerror = handleError;
+  xmlhttp.onabort = handleError;
+  xmlhttp.ontimeout = handleError;
+  xmlhttp.onload = function(){
+    if (this.status === 200) {
+        currentExercise.frameManager = frameManagerFromJSON(this.responseText);
+        currentExercise.number = exerciseNum;
+        setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
+        document.getElementById("run-button").innerHTML = "Run and Grade";
+    } else {
+        handleError();
+    }
+  }
+  
+  xmlhttp.send();
+}
+
+
+loadExercise();
+
+function gradeFrameManager(studentFM) {
+  if(currentExercise.number === null){
+    setStatus("Please load an exercise first", "danger", false);
     running = false;
     return;
   }
-  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
-  var handleResponse = function () {
-    try {
-      if (this.status === 200) {
-        setStatus("Grading . . .", "info", true);
-        var correctFM = frameManagerFromJSON(this.responseText);
-        generateGif(studentFM, compareFrameManagers(studentFM, correctFM));
-      } else {
-        println("An error occurred getting the grading file.");
-        setStatus("Error!", "danger", false);
-        running = false;
-        return;
-      }
-      } catch (e) {
-      console.log(e);
-      println("An error occurred parsing the grading file.");
-      setStatus("Error!", "danger", false);
-      running = false;
-    }
-  };
-  xmlhttp.addEventListener("load", handleResponse);
-  var handleError = function () {
-    println("An error occurred getting the grading file.");
-    setStatus("Error!", "danger", false);
-    running = false;
-  };
-  xmlhttp.addEventListener("error", handleError);
-  xmlhttp.addEventListener("abort", handleError);
-  xmlhttp.send();
+  println("Now grading according to exercise " + currentExercise.number);
+  
+  var isCorrect = compareFrameManagers(studentFM, currentExercise.frameManager);
+  
+  generateGif(studentFM, isCorrect);
+  
+  running = false;
 }
 
 function compareFrameManagers(fm1, fm2) {
@@ -445,9 +445,7 @@ function generateGif(frameManager, isCorrect) {
   var timeString = date.toLocaleTimeString();
   
   var name = document.getElementById("name").value;
-  localStorage.name = name;
   var exerciseNumber = document.getElementById("exercise-number").value;
-  localStorage.exerciseNumber = exerciseNumber;
   
   board.prepare();
   board.setContext({
@@ -476,8 +474,6 @@ function generateGif(frameManager, isCorrect) {
     generateConfirmationGif(isCorrect);
   }
   
-  $("#copy-page").css("visibility", "visible");
-  //$("#download-page").css("visibility", "visible");
   
   running = false;
 }
@@ -529,16 +525,16 @@ function generateConfirmationGif(isCorrect) {
   gif.render();
 }
 
-function saveCode() {
-  //localStorage.code = editor.getValue();
-  //localStorage.analogPins = JSON.stringify(board);
-  savedCode[exerciseNumber] = editor.getValue();
-  savedBoards[exerciseNumber] = currentBoard;
-  localStorage.savedCode = JSON.stringify(savedCode);
-  localStorage.savedBoards = JSON.stringify(savedBoards);
+function saveContext() {
+  setToStorage("name", document.getElementById("name").value); 
+  setToStorage("board-type", document.getElementById("board").value); 
+  currentBoard.updateInputs();
+  setToStorage("board-setup", JSON.stringify(currentBoard.getSetup())); 
+  setToStorage("code", editor.getValue()); 
+  setToStorage("exercise-number", currentExercise.number); 
 }
 
-function saveJSON(name, exercise, img) {
+function saveJSON() {
   var obj = {};
   obj.code = editor.getValue();
   obj.consoleOutput = document.getElementById("console-output").innerHTML;
@@ -546,7 +542,8 @@ function saveJSON(name, exercise, img) {
   obj.exercise = exerciseField.value;
   var image = document.getElementById("output-image");
   obj.img = (image !== null) ? image.src : null;
-  obj.board = currentBoard;
+  obj.boardSetup = currentBoard.getSetup();
+  obj.boardType = currentBoard.type;
   var jsonString = JSON.stringify(obj);
   saveAs(new Blob([jsonString], {type: "application/json;charset=utf-8"}), name.replace(/ /g,'') + "_Exercise" + exerciseNumber + ".giffer");
 }
@@ -568,6 +565,13 @@ String.prototype.hashCode = function(){
 	}
 	return hash;
 };
+
+Array.prototype.remove = function(element){
+  var index = this.indexOf(element);
+  if (index > -1) {
+    this.splice(index, 1);
+  }
+}
 
 function blobToDataURL(blob, callback) {
   var a = new FileReader();

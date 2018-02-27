@@ -3,15 +3,6 @@ html, body {
     height: 100%;
 }
 
-#tab-div {
-    height: 30%;
-    margin-top: 10px;
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-bottom: 20px;
-}
-
-
 .maintext {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
@@ -19,6 +10,10 @@ html, body {
 
 label.btn {
     margin-bottom: 0;
+}
+
+.form-inline .btn {
+    margin-left: 10px;
 }
 
 .fileinput {
@@ -35,6 +30,10 @@ label.btn {
     height: 100%;
     font: 12px 'dejavu sans mono', menlo, monaco, monospace;
     border-radius: 10px;
+}
+
+#copy-page {
+    visibility: hidden;
 }
 
 .tab-content, .nav-tabs {
@@ -54,7 +53,6 @@ label.btn {
     border: 1px black;
 }
 
-
 #gif-panel {
     min-height: 270px;
 }
@@ -73,7 +71,8 @@ label.btn {
     font-family: monospace;
     background-color: #202020;
     color: white;
-    border-radius: 0px 0px 4px 4px;
+    border-radius: 4px 4px 4px 4px;
+    padding: 4px;
     overflow: auto;
     height: 300px;
 }
