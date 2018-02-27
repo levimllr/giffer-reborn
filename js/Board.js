@@ -188,11 +188,15 @@ function createBoard(type, setup){
     return defaultBoard;
   }
   var m;
-  try {
-    m = JSON.parse(setup)
-  } catch (e) {
-    console.log("Invalid setup -- loading with setup = {}");
-    m = {};
+  if(setup instanceof String){
+    try {
+      m = JSON.parse(setup);
+    } catch (e) {
+      console.log("Invalid setup -- loading with setup = {}");
+      m = {};
+    }
+  } else {
+    m = setup;
   }
   return new BOARDS[type](m);
 }

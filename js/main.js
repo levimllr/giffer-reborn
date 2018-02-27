@@ -30,18 +30,15 @@ function setToStorage(item, value){
   localStorage.setItem(item, value);
 }
 
-/*
-  TODO:
-  Exercise:
-   - board.type
-   - board.setup
-   - startingCode
-   - frameManager
-*/
-
 function loadBoard(){
   $("#edit").empty();
   currentBoard = createBoard(boardField.value);
+  currentBoard.activate();
+}
+
+function loadBoardFromExercise(exercise){
+  $("#edit").empty();
+  currentBoard = createBoard(exercise.board.type, exercise.board.setup);
   currentBoard.activate();
 }
 
@@ -162,11 +159,14 @@ var running = false;
 var lastContent = {frameManager: null, output: null};
 
 function frameManagerFromJSON(string) {
+  return frameManagerFromParsedJSON(JSON.parse(string));
+}
+
+function frameManagerFromParsedJSON(data){
   //Modifying __proto__ is the same speed as manually copying everything
   //See: https://jsperf.com/parse-json-into-an-object-and-assign-a-prototype
   //(also, I couldn't get manual copying to work without hard-coding the fields like Paul was doing)
   
-  var data = JSON.parse(string);
   data.__proto__ = FrameManager.prototype;
   for(var f of data.frames){
     f.__proto__ = Frame.prototype;
@@ -296,20 +296,31 @@ function runCode() {
   jscpp.postMessage({code: code, analogPins: currentBoard.analogPins});
 }
 
-var currentExercise = {number: null, frameManager: null};
+/*
+  TODO:
+  Exercise:
+   - board.type
+   - board.setup
+   - startingCode
+   - frameManager
+*/
+var currentExercise = {number: null};
 function loadExercise(){
   setStatus("Getting grading file . . .", "info", true);
   var exerciseNum = parseInt($("#exercise-number")[0].value);
   if (isNaN(exerciseNum)) {
     setStatus("Invalid exercise.  Gifs will not be graded.", "");
+    currentExercise = {number: null};
     document.getElementById("run-button").innerHTML = "Run";
     return;
   }
   
   var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
+  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager"); 
+  //TODO: .FrameManager should be some other extension
   
   var handleError = function(){
+    currentExercise = {number: null};
     setStatus("Error fetching grading file . . .", "danger", false);
   }
   
@@ -318,8 +329,20 @@ function loadExercise(){
   xmlhttp.ontimeout = handleError;
   xmlhttp.onload = function(){
     if (this.status === 200) {
-        currentExercise.frameManager = frameManagerFromJSON(this.responseText);
-        currentExercise.number = exerciseNum;
+        var data = JSON.parse(this.responseText);
+        if(!data.board) {
+          //This is a FrameManager--not an exercise.
+          currentExercise.frameManager = frameManagerFromJSON(this.responseText);
+          currentExercise.number = exerciseNum;
+        } else {
+          currentExercise.board = data.board;
+          currentExercise.startingCode = data.startingCode;
+          currentExercise.frameManager = frameManagerFromParsedJSON(data.frameManager);
+          currentExercise.number = exerciseNum;
+          
+          loadBoardFromExercise(currentExercise);
+        }
+        //set code to exercise start code?
         setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
         document.getElementById("run-button").innerHTML = "Run and Grade";
     } else {
@@ -375,7 +398,7 @@ function compareFrameManagers(fm1, fm2) {
       println("Found difference in number of Serial prints");
       return false;
     }
-    for (var i in f1.outputText) {
+    for (var i = 0; i < f1.length; i++) {
       if (f1.outputText[i].trim() !== f2.outputText[i].trim()) {
         println("Found difference in output text (\"" + f1.outputText[i].trim() + "\" vs \"" + f2.outputText[i].trim() + "\")");
         return false;
@@ -383,7 +406,8 @@ function compareFrameManagers(fm1, fm2) {
     }
     return true;
   };
-  
+  //console.log(fm1);
+  //console.log(fm2);
   if (!fm1.frames.every(function (element, key) {
     if (onewayFrameCompare(element, fm2.frames[key]) && onewayFrameCompare(fm2.frames[key], element)) {
       return true;
@@ -552,6 +576,14 @@ function saveFrameManager() {
   if (lastContent !== null && $("#exercise-number")[0].valueAsNumber !== NaN) {
     saveAs(new Blob([JSON.stringify(lastContent.frameManager)], {type: "application/json;charset=utf-8"}), "Exercise_" + $("#exercise-number")[0].value + ".FrameManager");
   }
+}
+
+function saveExercise(){
+  var exercise = {};
+  exercise.board = {type: currentBoard.type, setup: currentBoard.getSetup()}
+  exercise.startingCode = defaultCode;//editor.getValue();
+  exercise.frameManager = lastContent.frameManager;
+  saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + $("#exercise-number")[0].value);
 }
 
 //Simple hash function, thanks to http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
