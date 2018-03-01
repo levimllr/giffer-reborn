@@ -61,6 +61,7 @@ function FrameManager() {
   this.frames = [];
   this.frames[0] = new Frame();
   this.currentFrame = 0;
+  this.elapsedTime = 0;
 }
 
 FrameManager.prototype.getPinMode = function (pinNumber, frame) {
@@ -89,6 +90,7 @@ FrameManager.prototype.setPinState = function (pinNumber, state) {
 
 FrameManager.prototype.nextFrame = function (delay) {
   this.frames[this.currentFrame].postDelay = delay;
+  this.elapsedTime += delay;
   this.frames.push(new Frame(this.frames[this.currentFrame]));
   this.currentFrame++;
 };
@@ -100,3 +102,5 @@ FrameManager.prototype.getOutputText = function (frame) {
 FrameManager.prototype.addOutputText = function (text) {
   this.frames[this.currentFrame].addOutputText(text);
 };
+
+

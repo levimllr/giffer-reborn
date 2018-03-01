@@ -657,3 +657,4 @@ function makeHeading(heading) {
   $(obj).text(heading);
   return obj;
 }
+

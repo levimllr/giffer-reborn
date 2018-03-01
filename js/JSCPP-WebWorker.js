@@ -17,11 +17,7 @@ var load = function(rt) {
 
   frameManager = new FrameManager();
 
-  for (var i = 0; i < analogPins.length; i++) {
-    var pin = analogPins[i];
-    frameManager.setPinMode(pin.pin_number, INPUT);
-    frameManager.setPinState(pin.pin_number, pin.pin_value);
-  }
+  setAllInputPinsToTime(frameManager, 0);
 
   var pinMode = function (rt, _this, pinNumber, mode) {
     if (mode > 2) {
@@ -69,11 +65,16 @@ var load = function(rt) {
 
   var delay = function (rt, _this, ms) {
     frameManager.nextFrame(ms.v);
+    
+    setAllInputPinsToTime(frameManager, frameManager.elapsedTime);
+    console.log(frameManager);
+    
     var message = {delay: ms.v, newFrameNumber: frameManager.currentFrame, type: "newFrame"};
     this.postMessage(JSON.stringify(message));
   };
   rt.regFunc(delay, "global", "delay", [rt.primitiveType("unsigned long")], rt.voidTypeLiteral);
 
+    
   // STRING ///////////////////////////////////////////////////////
   //Define type
   var string_t = rt.newClass("String", [
@@ -169,10 +170,47 @@ arduino_h = {
   load: load
 };
 
+var pinKeyframes;
+var sortedPinKeyframes;
+function setPinKeyframes(pkfs){
+  pinKeyframes = pkfs;
+  sortedPinKeyframes = {};
+  for(var frame of pinKeyframes){
+    if(!sortedPinKeyframes[frame.pin]){
+      sortedPinKeyframes[frame.pin] = []
+    }
+    sortedPinKeyframes[frame.pin].push({time: frame.time, value: frame.value});
+  }
+  for(var pin in sortedPinKeyframes){
+    sortedPinKeyframes[pin].sort(function(a, b){
+      return a.time - b.time;
+    });
+  }
+}
+
+function getPinValueAtTime(pin, time){
+  var values = sortedPinKeyframes[pin];
+  var lastValue = 0;
+  for(var pair of values){
+    if(pair.time <= time){
+      lastValue = pair.value;
+    } else {
+      return lastValue;
+    }
+  }
+  return lastValue;
+}
+
+function setAllInputPinsToTime(frameManager, time){
+  for (var pin in sortedPinKeyframes) {
+    frameManager.setPinMode(pin, INPUT);
+    frameManager.setPinState(pin, getPinValueAtTime(pin, time));
+  }
+}
 
 function messageHandler(event) {
   var code = event.data.code;
-  analogPins = event.data.analogPins;
+  setPinKeyframes(event.data.pinKeyframes);
   var config = {
     includes: {
       "Arduino.h": arduino_h //defined in Arduino.js

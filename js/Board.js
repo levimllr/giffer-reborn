@@ -153,7 +153,7 @@ LEDBoard.prototype.activate = function(){
           <table class="table" id="keyframe-table">
             <thead>
               <tr>
-                <th>At time(ms)</th>
+                <th>At time (ms)</th>
                 <th>Change pin</th>
                 <th>To value</th>
                 <th>Remove</th>
@@ -179,7 +179,7 @@ LEDBoard.prototype.updateInputs = function(){
     var keyframeTime = keyframe.find(".keyframe-time")[0].valueAsNumber;
     var keyframePin = keyframe.find(".keyframe-pin")[0].valueAsNumber;
     var keyframeValue = keyframe.find(".keyframe-value")[0].valueAsNumber;
-    out.push({time: keyframeTime, pin: keyframePin, alue: keyframeValue});
+    out.push({time: keyframeTime, pin: keyframePin, value: keyframeValue});
   }
   this.pinKeyframes = out;
 }
