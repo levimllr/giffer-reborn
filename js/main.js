@@ -21,6 +21,9 @@ var defaultSuffix = `int main() {
 }
 `;
 
+
+var STATUS_TYPES = ["info", "danger", "success"];
+
 var nameField = document.getElementById("name");
 var exerciseField = document.getElementById("exercise-number");
 var boardField = document.getElementById("board");
@@ -46,6 +49,7 @@ function loadBoard(){
 
 function loadBoardFromExercise(exercise){
   $("#edit").empty();
+  console.log(exercise);
   currentBoard = createBoard(exercise.board.type, exercise.board.setup);
   currentBoard.activate();
 }
@@ -183,8 +187,6 @@ function frameManagerFromParsedJSON(data){
 }
 
 
-var STATUS_TYPES = ["info", "danger", "success"];
-
 function setStatus(blurb, type, isAnimated){
   resetStatus();
   
@@ -266,7 +268,10 @@ function runCode() {
     }
   };
   
-  var prefix = "#include \"Arduino.h\"\ntypedef unsigned char byte;\n";
+  var prefix = `
+#include \"Arduino.h\"
+typedef unsigned char byte;
+`;
   var suffix = currentExercise.suffix;
   var code = prefix + editor.getValue() + suffix;
   
@@ -305,13 +310,13 @@ function runCode() {
   jscpp.postMessage({code: code, pinKeyframes: currentBoard.pinKeyframes});
 }
 
-var currentExercise = {number: null};
+var currentExercise = {number: null, suffix: defaultSuffix};
 function loadExercise(){
   setStatus("Getting grading file . . .", "info", true);
   var exerciseNum = parseInt($("#exercise-number")[0].value);
   if (isNaN(exerciseNum)) {
     setStatus("Invalid exercise.  Gifs will not be graded.", "");
-    currentExercise = {number: null};
+    currentExercise = {number: null, suffix: defaultSuffix};
     document.getElementById("run-button").innerHTML = "Run";
     return;
   }
@@ -320,7 +325,7 @@ function loadExercise(){
   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager"); 
   
   var handleError = function(){
-    currentExercise = {number: null};
+    currentExercise = {number: null, suffix: defaultSuffix};
     setStatus("Error fetching grading file . . .", "danger", false);
   }
   

@@ -74,7 +74,11 @@ function LEDBoard(setup) {
   };
   this.canvasWidth = 300;
   this.canvasHeight = 195;
-  this.pinKeyframes = (setup === undefined || setup.pinKeyframes === undefined) ? [] : setup.pinKeyframes;
+  console.log(setup);
+  if(setup && setup.pinKeyframes){
+    this.pinKeyframes = setup.pinKeyframes;
+  }
+  console.log(this.pinKeyframes);
   this.DOMKeyframes = [];
 }
 
@@ -130,12 +134,12 @@ LEDBoard.prototype.addKeyframe = function(time, pin, value) {
   
   if (time) {
     timeField = newContent.find(".keyframe-time")[0];
-    timeField.valueAsNumber = Number(number);
+    timeField.valueAsNumber = Number(time);
   }
   
   if (pin) {
     pinField = newContent.find(".keyframe-pin")[0];
-    pinField.valueAsNumber = Number(number);
+    pinField.valueAsNumber = Number(pin);
   }
   
   if (value) {
@@ -144,7 +148,7 @@ LEDBoard.prototype.addKeyframe = function(time, pin, value) {
   }
   
   this.DOMKeyframes.push(newContent[0]);
-  saveContext(); //runs updateInputs
+  
 }
 
 
@@ -165,7 +169,7 @@ LEDBoard.prototype.activate = function(){
           
   $("#edit").append(setup);
           
-  
+  console.log(this);
   for (var i = 0; i < this.pinKeyframes.length; i++) {
     var keyframe = this.pinKeyframes[i];
     this.addKeyframe(keyframe.time, keyframe.pin, keyframe.value);
@@ -204,6 +208,7 @@ function createBoard(type, setup){
     console.log("Invalid board type -- loading defaultBoard");
     return defaultBoard;
   }
+  console.log(setup);
   var m;
   if(setup instanceof String){
     try {
@@ -215,6 +220,7 @@ function createBoard(type, setup){
   } else {
     m = setup;
   }
+  console.log(m);
   return new BOARDS[type](m);
 }
 
