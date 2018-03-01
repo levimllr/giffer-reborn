@@ -11,7 +11,15 @@ void loop() {
   delay(500);
   digitalWrite(3, LOW);
   delay(500);
-}`;
+}
+`;
+
+var defaultSuffix = `int main() { 
+  setup(); 
+  loop();
+  return 0;
+}
+`;
 
 var nameField = document.getElementById("name");
 var exerciseField = document.getElementById("exercise-number");
@@ -124,7 +132,7 @@ function nextJSON() {
   loadFile(files[currentFile]);
 }
 
-function loadFile(file) { //TODO: once saveFile is refactored
+function loadFile(file) { 
   setStatus("Loading file . . .", "info", "true");
   var reader = new FileReader();
   reader.onload = function(event) {
@@ -259,8 +267,9 @@ function runCode() {
   };
   
   var prefix = "#include \"Arduino.h\"\ntypedef unsigned char byte;\n";
-  var code = prefix + editor.getValue() + "\nint main() { setup(); loop(); return 0;}\n";
-           
+  var suffix = currentExercise.suffix;
+  var code = prefix + editor.getValue() + suffix;
+  
   jscpp.onerror = function(e) {
     console.log(e);
     var errorObj = e.message;
@@ -293,17 +302,9 @@ function runCode() {
   
   currentBoard.updateInputs();
   
-  jscpp.postMessage({code: code, analogPins: currentBoard.analogPins});
+  jscpp.postMessage({code: code, pinKeyframes: currentBoard.pinKeyframes});
 }
 
-/*
-  TODO:
-  Exercise:
-   - board.type
-   - board.setup
-   - startingCode
-   - frameManager
-*/
 var currentExercise = {number: null};
 function loadExercise(){
   setStatus("Getting grading file . . .", "info", true);
@@ -317,7 +318,6 @@ function loadExercise(){
   
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager"); 
-  //TODO: .FrameManager should be some other extension
   
   var handleError = function(){
     currentExercise = {number: null};
@@ -334,13 +334,24 @@ function loadExercise(){
           //This is a FrameManager--not an exercise.
           currentExercise.frameManager = frameManagerFromJSON(this.responseText);
           currentExercise.number = exerciseNum;
+          currentExercise.suffix = defaultSuffix;
+          
         } else {
+          currentExercise.number = exerciseNum;
           currentExercise.board = data.board;
           currentExercise.startingCode = data.startingCode;
+          currentExercise.suffix = data.suffix;
           currentExercise.frameManager = frameManagerFromParsedJSON(data.frameManager);
-          currentExercise.number = exerciseNum;
           
+          document.getElementById("export-exercise-number").value = currentExercise.number;
+          document.getElementById("export-exercise-starting").value = currentExercise.startingCode;
+          document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
+  
           loadBoardFromExercise(currentExercise);
+          
+          if(confirm("Load Starting Code?  This will overwrite your existing code!!!")){
+            editor.setValue(currentExercise.startingCode);
+          }
         }
         //set code to exercise start code?
         setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
@@ -352,7 +363,6 @@ function loadExercise(){
   
   xmlhttp.send();
 }
-
 
 loadExercise();
 
@@ -406,8 +416,7 @@ function compareFrameManagers(fm1, fm2) {
     }
     return true;
   };
-  //console.log(fm1);
-  //console.log(fm2);
+  
   if (!fm1.frames.every(function (element, key) {
     if (onewayFrameCompare(element, fm2.frames[key]) && onewayFrameCompare(fm2.frames[key], element)) {
       return true;
@@ -579,11 +588,24 @@ function saveFrameManager() {
 }
 
 function saveExercise(){
+  
+  $("#exercise-modal").modal('show');
+}
+
+function exportExercise(){
   var exercise = {};
+  exercise.number = document.getElementById("export-exercise-number").value;
+  exercise.startingCode = document.getElementById("export-exercise-starting").value;
+  exercise.suffix = document.getElementById("export-exercise-suffix").value;
   exercise.board = {type: currentBoard.type, setup: currentBoard.getSetup()}
-  exercise.startingCode = defaultCode;//editor.getValue();
   exercise.frameManager = lastContent.frameManager;
-  saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + $("#exercise-number")[0].value);
+  
+  saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + exercise.number + ".FrameManager");
+
+}
+
+function updateSuffix() {
+  currentExercise.suffix = document.getElementById("export-exercise-suffix").value;
 }
 
 //Simple hash function, thanks to http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
@@ -612,6 +634,7 @@ function blobToDataURL(blob, callback) {
 }
 
 function print(text){
+  console.log(text);
   if(text !== undefined){
     while(text.includes("\n")){
       var add = text.substring(0, text.indexOf("\n"));

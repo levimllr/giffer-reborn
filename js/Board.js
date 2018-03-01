@@ -5,10 +5,16 @@ function Board(setup) {
 Board.prototype.canvasWidth = null;
 Board.prototype.canvasHeight = null;
 Board.prototype.context = null;
-Board.prototype.analogPins = [];
+Board.prototype.pinKeyframes = [];
+/*Format:
+[
+{time: t, pin: #, value: t},
+{time: t, pin: #, value: t},
+{time: t, pin: #, value: t},
+]
+*/
 
 Board.imageURL = null;
-
 
 Board.prototype.setContext = function(context){
   this.context = context;
@@ -68,8 +74,8 @@ function LEDBoard(setup) {
   };
   this.canvasWidth = 300;
   this.canvasHeight = 195;
-  this.analogPins = (setup === undefined || setup.analogPins === undefined) ? [] : setup.analogPins;
-  this.DOMPins = [];
+  this.pinKeyframes = (setup === undefined || setup.pinKeyframes === undefined) ? [] : setup.pinKeyframes;
+  this.DOMKeyframes = [];
 }
 
 
@@ -80,12 +86,11 @@ LEDBoard.prototype.type = "LED Board";
 
 LEDBoard.prototype.getSetup = function(){
   this.updateInputs();
-  return {analogPins: this.analogPins};
+  return {pinKeyframes: this.pinKeyframes};
 }
 
 
 LEDBoard.prototype.draw = function(ctx, frame, index, frameManager){
-  
   
   ctx.drawImage(this.shieldImg, 0, 0);
   
@@ -108,63 +113,75 @@ LEDBoard.prototype.draw = function(ctx, frame, index, frameManager){
   this.drawInfo(ctx, frame, index, frameManager);
 }
 
-LEDBoard.prototype.removePin = function (pin) {
-  console.log(pin);
-  this.DOMPins.remove($(pin).parent().parent()[0]);
-  $(pin).parent().parent().remove();
-  saveContext();
+LEDBoard.prototype.removeKeyframe = function (keyframe) {
+  this.DOMKeyframes.remove($(keyframe).parent().parent()[0]);
+  $(keyframe).parent().parent().remove();
+  saveContext(); //runs updateInputs
 }
-LEDBoard.prototype.addPin = function addPin(number, value) {
-    var newContent = $(`<tr class="input-pin">
-    <td><input type="number" class="form-control pin-number" value="2" min="0" max="255"/></td>
-    <td><input type="number" class="form-control pin-value" value="0" min="0" max="1023"/></td>
-    <td><button class="btn btn-danger" style="width: 100%;" onclick="currentBoard.removePin(this)">Remove</button></td>
-    </tr>`);
-    $("#analog-table-tbody").append(newContent);
-    numberField = newContent.find(".pin-number")[0];
-    valueField = newContent.find(".pin-value")[0];
-    if (number) {
-      numberField.valueAsNumber = Number(number);
-    }
-    if (value) {
-      valueField.valueAsNumber = Number(value);
-    }
-    this.DOMPins.push(newContent[0]);
+
+LEDBoard.prototype.addKeyframe = function(time, pin, value) {
+  var newContent = $(`<tr class="input-keyframe">
+  <td><input type="number" class="form-control keyframe-time" value="0" min="0"/></td>
+  <td><input type="number" class="form-control keyframe-pin" value="0" min="0" max="255"/></td>
+  <td><input type="number" class="form-control keyframe-value" value="0" min="0" max="1023"/></td>
+  <td><button class="btn btn-danger keyframe-remove" onclick="currentBoard.removeKeyframe(this)">-</button></td>
+  </tr>`);
+  $("#keyframe-table-tbody").append(newContent);
+  
+  if (time) {
+    timeField = newContent.find(".keyframe-time")[0];
+    timeField.valueAsNumber = Number(number);
   }
+  
+  if (pin) {
+    pinField = newContent.find(".keyframe-pin")[0];
+    pinField.valueAsNumber = Number(number);
+  }
+  
+  if (value) {
+    valueField = newContent.find(".keyframe-value")[0];
+    valueField.valueAsNumber = Number(value);
+  }
+  
+  this.DOMKeyframes.push(newContent[0]);
+  saveContext(); //runs updateInputs
+}
 
 
 LEDBoard.prototype.activate = function(){
   var setup = $(`
-          <table class="table table-bordered" id="analog-table">
+          <table class="table" id="keyframe-table">
             <thead>
               <tr>
-                <th>Pin Num</th>
-                <th>Value</th>
+                <th>At time(ms)</th>
+                <th>Change pin</th>
+                <th>To value</th>
                 <th>Remove</th>
               </tr>
             </thead>
-            <tbody id="analog-table-tbody"></tbody>
+            <tbody id="keyframe-table-tbody"></tbody>
           </table>
-          <button class="btn btn-success" id="add-pin" onclick="currentBoard.addPin(); saveContext()">Add pin</button>`);
+          <button class="btn btn-success" id="add-keyframe" onclick="currentBoard.addKeyframe(); saveContext()">Add</button>`);
           
   $("#edit").append(setup);
           
   
-  for (var i = 0; i < this.analogPins.length; i++) {
-    var pin = this.analogPins[i];
-    this.addPin(pin.pin_number, pin.pin_value);
+  for (var i = 0; i < this.pinKeyframes.length; i++) {
+    var keyframe = this.pinKeyframes[i];
+    this.addKeyframe(keyframe.time, keyframe.pin, keyframe.value);
   }
 }
 
 LEDBoard.prototype.updateInputs = function(){
   var out = [];
-  for (var i = 0; i < this.DOMPins.length; i++) {
-  var pin = $(this.DOMPins[i]);
-    var pin_number = pin.find(".pin-number")[0].valueAsNumber;
-    var pin_value = pin.find(".pin-value")[0].valueAsNumber;
-    out.push({pin_number: pin_number, pin_value: pin_value});
+  for (var i = 0; i < this.DOMKeyframes.length; i++) {
+    var keyframe = $(this.DOMKeyframes[i]);
+    var keyframeTime = keyframe.find(".keyframe-time")[0].valueAsNumber;
+    var keyframePin = keyframe.find(".keyframe-pin")[0].valueAsNumber;
+    var keyframeValue = keyframe.find(".keyframe-value")[0].valueAsNumber;
+    out.push({time: keyframeTime, pin: keyframePin, alue: keyframeValue});
   }
-  this.analogPins = out;
+  this.pinKeyframes = out;
 }
 
 
@@ -200,3 +217,4 @@ function createBoard(type, setup){
   }
   return new BOARDS[type](m);
 }
+

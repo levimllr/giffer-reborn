@@ -12,6 +12,10 @@ label.btn {
     margin-bottom: 0;
 }
 
+#file-op-buttons {
+    margin-bottom: 5px;
+}
+
 .form-inline .btn {
     margin-left: 10px;
 }
@@ -49,9 +53,6 @@ label.btn {
     height: 15px;
 }
 
-#right-container {
-    border: 1px black;
-}
 
 #gif-panel {
     min-height: 270px;
@@ -75,4 +76,12 @@ label.btn {
     padding: 4px;
     overflow: auto;
     height: 300px;
+}
+
+.keyframe-remove {
+    float: right;
+}
+
+div.form-group label {
+    font-weight: bolder;
 }
