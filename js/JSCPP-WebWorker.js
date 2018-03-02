@@ -1,5 +1,8 @@
 importScripts("FrameManager.js");
 
+var breakpoints = [];
+var frameManager;
+
 var load = function(rt) {
 
   // PIN FUNCTIONS ////////////////////////////////////////////////
@@ -207,17 +210,78 @@ function setAllInputPinsToTime(frameManager, time){
   }
 }
 
-function messageHandler(event) {
-  var code = event.data.code;
-  setPinKeyframes(event.data.pinKeyframes);
-  var config = {
-    includes: {
-      "Arduino.h": arduino_h //defined in Arduino.js
-    }
-  };
-  JSCPP.run(code, "", config);
+var cppdebugger = null;
+var lastLine = null;
+
+function submitFrameManager() {
   var out = {frameManager: JSON.stringify(frameManager), type: "frameManager"};
   this.postMessage(JSON.stringify(out));
+}
+
+function submitDebuggerState() {
+  this.postMessage(JSON.stringify({type: "debuginfo",
+                                   variables: cppdebugger.variable(),
+                                   node: cppdebugger.nextNode()}));
+}
+
+function qualifiedContinue() {
+  if (cppdebugger.continue() === false) {
+    submitDebuggerState();
+  } else {
+    submitFrameManager();
+  }
+}
+
+function setLineByLine(state) {
+  cppdebugger.stopConditions["lineChanged"] = state;
+}
+
+function messageHandler(event) {
+  if (event.data.type == "code") {
+    var code = event.data.code;
+    analogPins = event.data.analogPins;
+    var debugging = event.data.debugging;
+    var config = {
+      includes: {
+        "Arduino.h": arduino_h //defined in Arduino.js
+      },
+      debug: debugging
+    };
+    cppdebugger = JSCPP.run(code, "", config);
+
+    if (config.debug) {
+      cppdebugger.conditions["breakpoints"] = function (prev, next) {
+        var previous = lastLine;
+        lastLine = next.sLine;
+        if (breakpoints.includes(next.sLine) && previous !== next.sLine) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      cppdebugger.stopConditions["breakpoints"] = true;
+      setLineByLine(false);
+
+      qualifiedContinue();
+    } else {
+      submitFrameManager();
+    }
+  } else if (event.data.type == "breakpoints") {
+    breakpoints = event.data.breakpoints;
+  } else if (event.data.type == "debugger") {
+    if (cppdebugger === null || cppdebugger.done) {
+      return;
+    }
+    if (event.data.action == "continue") {
+      setLineByLine(false);
+      qualifiedContinue();
+    }
+    else if (event.data.action == "stepInto") {
+      setLineByLine(true);
+      qualifiedContinue();
+    }
+  }
 }
 
 this.addEventListener("message", messageHandler, false);

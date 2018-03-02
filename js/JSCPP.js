@@ -20117,6 +20117,12 @@ CRuntime.prototype.makeTypeString = function(type) {
         };
       })(this)).join(",") + ")";
     }
+  } else if (type.type === "function") {
+    ret = this.makeTypeString(type.retType) + " ()" + "(" + type.signature.map((function(_this) {
+      return function(e) {
+        return _this.makeTypeString(e);
+      };
+    })(this)).join(",") + ")";
   }
   return ret;
 };
@@ -25694,7 +25700,7 @@ Formatter.prototype.format = function(/*mixed...*/ filler){
   var position = 0;
   for(var i = 0, token; i < this._tokens.length; i++){
     token = this._tokens[i];
-    
+
     if(typeof token == 'string'){
       str += token;
     }else{
@@ -25825,7 +25831,7 @@ Formatter.prototype.format = function(/*mixed...*/ filler){
         if(token.period != '.'){
           token.precision = 6;
         }
-        this.formatDouble(token); 
+        this.formatDouble(token);
       }else if(token.isObject){
         this.formatObject(token);
       }
@@ -25854,7 +25860,7 @@ Formatter.prototype.formatInt = function(token) {
   // otherwise, (-10).toString(16) is '-a' instead of 'fffffff6'
   if(i < 0 && (token.isUnsigned || token.base != 10)){
     i = 0xffffffff + i + 1;
-  } 
+  }
 
   if(i < 0){
     token.arg = (- i).toString(token.base);
@@ -25901,11 +25907,11 @@ Formatter.prototype.formatDouble = function(token) {
 
   switch(token.doubleNotation) {
     case 'e': {
-      token.arg = f.toExponential(token.precision); 
+      token.arg = f.toExponential(token.precision);
       break;
     }
     case 'f': {
-      token.arg = f.toFixed(token.precision); 
+      token.arg = f.toFixed(token.precision);
       break;
     }
     case 'g': {
@@ -25916,12 +25922,12 @@ Formatter.prototype.formatDouble = function(token) {
         //print('forcing exponential notation for f=' + f);
         token.arg = f.toExponential(token.precision > 0 ? token.precision - 1 : token.precision);
       }else{
-        token.arg = f.toPrecision(token.precision); 
+        token.arg = f.toPrecision(token.precision);
       }
 
       // In C, unlike 'f', 'gG' removes trailing 0s from fractional part, unless alternative format flag ('#').
       // But ECMAScript formats toPrecision as 0.00100000. So remove trailing 0s.
-      if(!token.alternative){ 
+      if(!token.alternative){
         //print('replacing trailing 0 in \'' + s + '\'');
         token.arg = token.arg.replace(/(\..*[^0])0*e/, '$1e');
         // if fractional part is entirely 0, remove it and decimal point
