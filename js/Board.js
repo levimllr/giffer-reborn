@@ -40,10 +40,10 @@ Board.prototype.drawInfo = function(ctx, frame, index, frameManager){
   ctx.fillText("PostDelay: " + frame.postDelay, this.shieldImg.width + 10, 35);
   ctx.fillText("By " + this.context.name, this.shieldImg.width + 10, 55);
   ctx.fillText("Exercise " + this.context.exerciseNumber, this.shieldImg.width + 10, 75);
-  
+
   ctx.fillText(this.context.dateString, this.shieldImg.width + 10, 115);
   ctx.fillText(this.context.timeString, this.shieldImg.width + 10, 135);
-  
+
   ctx.font = "bold 15px monospace";
   ctx.fillStyle = ((typeof(this.context.isCorrect) === "undefined") || (this.context.isCorrect === false)) ? "red" : "green";
   var gradeText = (this.context.isCorrect === true) ? "Correct" : ((this.context.isCorrect === false) ? "Incorrect" : "Ungraded");
@@ -63,7 +63,7 @@ function LEDBoard(setup) {
     6: {x: 87, y: 65, color: "red"},
     7: {x: 87, y: 35, color: "green"},
     8: {x: 87, y: 10, color: "red"},
-    
+
     9: {x: 5, y: 165, color: "orange"},
     10: {x: 5, y: 140, color: "orange"},
     11: {x: 5, y: 115, color: "orange"},
@@ -74,11 +74,9 @@ function LEDBoard(setup) {
   };
   this.canvasWidth = 300;
   this.canvasHeight = 195;
-  console.log(setup);
   if(setup && setup.pinKeyframes){
     this.pinKeyframes = setup.pinKeyframes;
   }
-  console.log(this.pinKeyframes);
   this.DOMKeyframes = [];
 }
 
@@ -95,9 +93,9 @@ LEDBoard.prototype.getSetup = function(){
 
 
 LEDBoard.prototype.draw = function(ctx, frame, index, frameManager){
-  
+
   ctx.drawImage(this.shieldImg, 0, 0);
-  
+
   for (var i = 2; i <= 15; i++) {
     if (frame.getPinState(i) >= 1) { //if it's on
       var alpha = (frame.getPinMode(i) === OUTPUT) ? 1 : 0.2; //Make sure it's an output, otherwise dim it
@@ -131,24 +129,24 @@ LEDBoard.prototype.addKeyframe = function(time, pin, value) {
   <td><button class="btn btn-danger keyframe-remove" onclick="currentBoard.removeKeyframe(this)">-</button></td>
   </tr>`);
   $("#keyframe-table-tbody").append(newContent);
-  
+
   if (time) {
     timeField = newContent.find(".keyframe-time")[0];
     timeField.valueAsNumber = Number(time);
   }
-  
+
   if (pin) {
     pinField = newContent.find(".keyframe-pin")[0];
     pinField.valueAsNumber = Number(pin);
   }
-  
+
   if (value) {
     valueField = newContent.find(".keyframe-value")[0];
     valueField.valueAsNumber = Number(value);
   }
-  
+
   this.DOMKeyframes.push(newContent[0]);
-  
+
 }
 
 
@@ -166,10 +164,9 @@ LEDBoard.prototype.activate = function(){
             <tbody id="keyframe-table-tbody"></tbody>
           </table>
           <button class="btn btn-success" id="add-keyframe" onclick="currentBoard.addKeyframe(); saveContext()">Add</button>`);
-          
+
   $("#edit").append(setup);
-          
-  console.log(this);
+
   for (var i = 0; i < this.pinKeyframes.length; i++) {
     var keyframe = this.pinKeyframes[i];
     this.addKeyframe(keyframe.time, keyframe.pin, keyframe.value);
@@ -208,7 +205,6 @@ function createBoard(type, setup){
     console.log("Invalid board type -- loading defaultBoard");
     return defaultBoard;
   }
-  console.log(setup);
   var m;
   if(setup instanceof String){
     try {
@@ -220,7 +216,5 @@ function createBoard(type, setup){
   } else {
     m = setup;
   }
-  console.log(m);
   return new BOARDS[type](m);
 }
-

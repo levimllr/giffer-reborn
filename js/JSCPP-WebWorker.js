@@ -65,16 +65,15 @@ var load = function(rt) {
 
   var delay = function (rt, _this, ms) {
     frameManager.nextFrame(ms.v);
-    
+
     setAllInputPinsToTime(frameManager, frameManager.elapsedTime);
-    console.log(frameManager);
-    
+
     var message = {delay: ms.v, newFrameNumber: frameManager.currentFrame, type: "newFrame"};
     this.postMessage(JSON.stringify(message));
   };
   rt.regFunc(delay, "global", "delay", [rt.primitiveType("unsigned long")], rt.voidTypeLiteral);
 
-    
+
   // STRING ///////////////////////////////////////////////////////
   //Define type
   var string_t = rt.newClass("String", [
@@ -177,7 +176,7 @@ function setPinKeyframes(pkfs){
   sortedPinKeyframes = {};
   for(var frame of pinKeyframes){
     if(!sortedPinKeyframes[frame.pin]){
-      sortedPinKeyframes[frame.pin] = []
+      sortedPinKeyframes[frame.pin] = [];
     }
     sortedPinKeyframes[frame.pin].push({time: frame.time, value: frame.value});
   }

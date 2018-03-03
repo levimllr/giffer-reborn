@@ -14,8 +14,8 @@ void loop() {
 }
 `;
 
-var defaultSuffix = `int main() { 
-  setup(); 
+var defaultSuffix = `int main() {
+  setup();
   loop();
   return 0;
 }
@@ -49,7 +49,6 @@ function loadBoard(){
 
 function loadBoardFromExercise(exercise){
   $("#edit").empty();
-  console.log(exercise);
   currentBoard = createBoard(exercise.board.type, exercise.board.setup);
   currentBoard.activate();
 }
@@ -136,7 +135,7 @@ function nextJSON() {
   loadFile(files[currentFile]);
 }
 
-function loadFile(file) { 
+function loadFile(file) {
   setStatus("Loading file . . .", "info", "true");
   var reader = new FileReader();
   reader.onload = function(event) {
@@ -168,6 +167,8 @@ function loadFile(file) {
 }
 
 var running = false;
+var canvas = document.createElement("canvas");
+var rendererTimeoutHandle = null;
 var lastContent = {frameManager: null, output: null};
 
 function frameManagerFromJSON(string) {
@@ -178,7 +179,7 @@ function frameManagerFromParsedJSON(data){
   //Modifying __proto__ is the same speed as manually copying everything
   //See: https://jsperf.com/parse-json-into-an-object-and-assign-a-prototype
   //(also, I couldn't get manual copying to work without hard-coding the fields like Paul was doing)
-  
+
   data.__proto__ = FrameManager.prototype;
   for(var f of data.frames){
     f.__proto__ = Frame.prototype;
@@ -189,7 +190,7 @@ function frameManagerFromParsedJSON(data){
 
 function setStatus(blurb, type, isAnimated){
   resetStatus();
-  
+
   var gifLoadingStatus = document.getElementById("gif-loading-status");
   gifLoadingStatus.innerHTML = blurb;
   if(type !== ""){
@@ -202,57 +203,58 @@ function setStatus(blurb, type, isAnimated){
   }
 }
 
-function showGif(){  
+function showGif(){
   var gifOutput = document.getElementById("gif-output");
   gifOutput.style.display = "inline";
-  
+
   var gifLoading = document.getElementById("gif-loading");
   gifLoading.style.display = "none";
-  
+
   $("#copy-page").css("visibility", "visible");
 }
 
 function resetStatus(){
   var gifOutput = document.getElementById("gif-output");
   gifOutput.style.display = "none";
-  
+
   var gifLoading = document.getElementById("gif-loading");
   gifLoading.style.display = "inline";
-  
+
   var gifLoadingStatus = document.getElementById("gif-loading-status");
   gifLoadingStatus.innerHTML = "Nothing to show . . .";
-  
+
   var gifLoadingBar = document.getElementById("gif-loading-bar");
   gifLoadingBar.classList.remove("progress-bar-animated");
   gifLoadingBar.style.display = "none";
   for(var status of STATUS_TYPES){
     gifLoadingBar.classList.remove("bg-" + status);
   }
-  
+
   $("#copy-page").css("visibility", "hidden");
 }
 
 function runCode() {
   saveContext();
-  
+
   if (running) {
     return;
   }
   running = true;
-  
+
   document.getElementById("console-output").innerHTML = "";
-  
+
   var jscpp = new Worker("js/JSCPP-WebWorker.js");
-  
+
   setStatus("Running your code . . .", "info", true);
-  
+
   jscpp.onmessage = function(e) {
     var message = JSON.parse(e.data);
     if (message.type === "frameManager") {
+      jscpp.terminate();
       var newFrameManager = frameManagerFromJSON(message.frameManager);
       lastContent.frameManager = newFrameManager;
       lastContent.output = $("#console-output")[0].innerHTML;
-      
+
       if (currentExercise.number !== null) {
         setStatus("Grading . . .", "success", true);
         gradeFrameManager(newFrameManager);
@@ -267,14 +269,14 @@ function runCode() {
       //newline();
     }
   };
-  
+
   var prefix = `
 #include \"Arduino.h\"
 typedef unsigned char byte;
 `;
   var suffix = currentExercise.suffix;
   var code = prefix + editor.getValue() + suffix;
-  
+
   jscpp.onerror = function(e) {
     console.log(e);
     var errorObj = e.message;
@@ -304,14 +306,14 @@ typedef unsigned char byte;
     setStatus("An error occurred!", "danger", false);
     return true;
   };
-  
+
   currentBoard.updateInputs();
-  
+
   jscpp.postMessage({code: code, pinKeyframes: currentBoard.pinKeyframes});
 }
 
 var currentExercise = {number: null, suffix: defaultSuffix};
-function loadExercise(){
+function loadExercise() {
   setStatus("Getting grading file . . .", "info", true);
   var exerciseNum = parseInt($("#exercise-number")[0].value);
   if (isNaN(exerciseNum)) {
@@ -320,19 +322,19 @@ function loadExercise(){
     document.getElementById("run-button").innerHTML = "Run";
     return;
   }
-  
+
   var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager"); 
-  
-  var handleError = function(){
+  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
+
+  var handleError = function() {
     currentExercise = {number: null, suffix: defaultSuffix};
     setStatus("Error fetching grading file . . .", "danger", false);
-  }
-  
+  };
+
   xmlhttp.onerror = handleError;
   xmlhttp.onabort = handleError;
   xmlhttp.ontimeout = handleError;
-  xmlhttp.onload = function(){
+  xmlhttp.onload = function() {
     if (this.status === 200) {
         var data = JSON.parse(this.responseText);
         if(!data.board) {
@@ -340,20 +342,20 @@ function loadExercise(){
           currentExercise.frameManager = frameManagerFromJSON(this.responseText);
           currentExercise.number = exerciseNum;
           currentExercise.suffix = defaultSuffix;
-          
+
         } else {
           currentExercise.number = exerciseNum;
           currentExercise.board = data.board;
           currentExercise.startingCode = data.startingCode;
           currentExercise.suffix = data.suffix;
           currentExercise.frameManager = frameManagerFromParsedJSON(data.frameManager);
-          
+
           document.getElementById("export-exercise-number").value = currentExercise.number;
           document.getElementById("export-exercise-starting").value = currentExercise.startingCode;
           document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
-  
+
           loadBoardFromExercise(currentExercise);
-          
+
           if(confirm("Load Starting Code?  This will overwrite your existing code!!!")){
             editor.setValue(currentExercise.startingCode);
           }
@@ -364,8 +366,8 @@ function loadExercise(){
     } else {
         handleError();
     }
-  }
-  
+  };
+
   xmlhttp.send();
 }
 
@@ -378,11 +380,11 @@ function gradeFrameManager(studentFM) {
     return;
   }
   println("Now grading according to exercise " + currentExercise.number);
-  
+
   var isCorrect = compareFrameManagers(studentFM, currentExercise.frameManager);
-  
+
   generateGif(studentFM, isCorrect);
-  
+
   running = false;
 }
 
@@ -413,7 +415,7 @@ function compareFrameManagers(fm1, fm2) {
       println("Found difference in number of Serial prints");
       return false;
     }
-    for (var i = 0; i < f1.length; i++) {
+    for (var i = 0; i < f1.outputText.length; i++) {
       if (f1.outputText[i].trim() !== f2.outputText[i].trim()) {
         println("Found difference in output text (\"" + f1.outputText[i].trim() + "\" vs \"" + f2.outputText[i].trim() + "\")");
         return false;
@@ -421,7 +423,7 @@ function compareFrameManagers(fm1, fm2) {
     }
     return true;
   };
-  
+
   if (!fm1.frames.every(function (element, key) {
     if (onewayFrameCompare(element, fm2.frames[key]) && onewayFrameCompare(fm2.frames[key], element)) {
       return true;
@@ -446,107 +448,100 @@ function compareFrameManagers(fm1, fm2) {
 }
 
 function generateGif(frameManager, isCorrect) {
-  
+
   var gifOutput = document.getElementById("gif-output");
-  
+
   var board = null;
   try {
     board = new BOARDS[document.getElementById("board").value]();
   } catch(e) {
     setStatus("Invalid Board!", "danger", false);
-    return
+    return;
   }
-  
-  var canvas = document.createElement("canvas");
+
   canvas.height = board.canvasHeight;
   canvas.width = board.canvasWidth;
-  
-  var gif = new GIF({workers: 4, quality: 10, workerScript: "js/gif/gif.worker.js", transparent: 0xFFFFFF, width: canvas.width, height: canvas.height});
   var ctx = canvas.getContext("2d");
-  
-  var onFinished = function(gif, e) {
-    gifOutput.innerHTML = "";
-    var img = document.createElement("img");
-    var binString = "";
-    e.forEach(function (element) {
-      binString += String.fromCharCode(element);
-    });
-    img.src = "data:image/gif;base64," + btoa(binString);
-    img.id = "output-image";
-    gifOutput.appendChild(img);
-    showGif();
-  };
-  gif.on("finished", onFinished);
-  
+
   var date = new Date();
   var dateString = date.toDateString();
   var timeString = date.toLocaleTimeString();
-  
+
   var name = document.getElementById("name").value;
   var exerciseNumber = document.getElementById("exercise-number").value;
-  
-  board.prepare();
-  board.setContext({
-    isCorrect: isCorrect,
-    dateString: dateString,
-    timeString: timeString,
-    exerciseNumber: exerciseNumber,
-    name: name
-  });
-  
+
   var drawFrame = function(frame, index, array) {
+    if (index == 0) {
+      board.prepare();
+      board.setContext({
+        isCorrect: isCorrect,
+        dateString: dateString,
+        timeString: timeString,
+        exerciseNumber: exerciseNumber,
+        name: name
+      });
+    }
+
     ctx.globalAlpha = 1;
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     board.draw(ctx, frame, index, frameManager);
-    
-    var realDelay = (frame.postDelay === 0) ? 15 : frame.postDelay;
-    gif.addFrame(ctx, {copy: true, delay: realDelay});
+
+    var nextIndex = (index + 1) % array.length;
+    rendererTimeoutHandle = setTimeout(drawFrame, frame.postDelay, array[nextIndex], nextIndex, array);
   };
-  
-  frameManager.frames.forEach(drawFrame);
-  gif.render();
-  
+
+  if (rendererTimeoutHandle !== null) {
+    clearTimeout(rendererTimeoutHandle);
+    rendererTimeoutHandle = null;
+  }
+
+  drawFrame(frameManager.frames[0], 0, frameManager.frames);
+
+  gifOutput.innerHTML = "";
+  gifOutput.append(canvas);
+  showGif();
+
   if ((isCorrect === true) || (isCorrect === false)) {
     generateConfirmationGif(isCorrect);
   }
-  
-  
+
+
   running = false;
 }
 
 function generateConfirmationGif(isCorrect) {
   var name = document.getElementById("name").value;
   var exercise = document.getElementById("exercise-number").value;
-  
+
   var canvas = document.createElement("canvas");
   canvas.height = 110;
   canvas.width = 300;
-  
+
   var gif = new GIF({workers: 4, quality: 10, workerScript: "js/gif/gif.worker.js", transparent: 0xFFFFFF, width: canvas.width, height: canvas.height});
   var ctx = canvas.getContext("2d");
-  
+
   ctx.globalAlpha = 1;
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
+
   ctx.globalAlpha = 1;
   ctx.fillStyle = "black";
   ctx.font = "15px monospace";
   ctx.fillText("Student: " + name, 5, 25);
   ctx.fillText("Exercise: " + exercise, 5, 45);
   ctx.fillText("Confirmation Hash: " + (name + exercise).hashCode(), 5, 65);
-  
+
   gif.addFrame(ctx, {copy: true, delay: 500});
-  
+
   ctx.font = "bold 15px monospace";
   ctx.fillStyle = ((typeof(isCorrect) === "undefined") || (isCorrect === false)) ? "red" : "green";
   var gradeText = (isCorrect === true) ? "Correct" : "Incorrect";
   ctx.fillText(gradeText, 5, 85);
-  
+
   gif.addFrame(ctx, {copy: true, delay: 500});
-  
+
   gif.on("finished", function(gif, e) {
     var container = $("#confirmation-gif-container")[0];
     container.innerHTML = "";
@@ -559,17 +554,17 @@ function generateConfirmationGif(isCorrect) {
     img.id = "confirmation-gif";
     container.appendChild(img);
   });
-  
+
   gif.render();
 }
 
 function saveContext() {
-  setToStorage("name", document.getElementById("name").value); 
-  setToStorage("board-type", document.getElementById("board").value); 
+  setToStorage("name", document.getElementById("name").value);
+  setToStorage("board-type", document.getElementById("board").value);
   currentBoard.updateInputs();
-  setToStorage("board-setup", JSON.stringify(currentBoard.getSetup())); 
-  setToStorage("code", editor.getValue()); 
-  setToStorage("exercise-number", currentExercise.number); 
+  setToStorage("board-setup", JSON.stringify(currentBoard.getSetup()));
+  setToStorage("code", editor.getValue());
+  setToStorage("exercise-number", currentExercise.number === null ? "" : currentExercise.number);
 }
 
 function saveJSON() {
@@ -593,7 +588,7 @@ function saveFrameManager() {
 }
 
 function saveExercise(){
-  
+
   $("#exercise-modal").modal('show');
 }
 
@@ -604,7 +599,7 @@ function exportExercise(){
   exercise.suffix = document.getElementById("export-exercise-suffix").value;
   exercise.board = {type: currentBoard.type, setup: currentBoard.getSetup()}
   exercise.frameManager = lastContent.frameManager;
-  
+
   saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + exercise.number + ".FrameManager");
 
 }
@@ -614,7 +609,7 @@ function updateSuffix() {
 }
 
 //Simple hash function, thanks to http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
-String.prototype.hashCode = function(){
+String.prototype.hashCode = function() {
 	var hash = 0;
 	if (this.length == 0) return hash;
 	for (var i = 0; i < this.length; i++) {
@@ -625,12 +620,12 @@ String.prototype.hashCode = function(){
 	return hash;
 };
 
-Array.prototype.remove = function(element){
+Array.prototype.remove = function(element) {
   var index = this.indexOf(element);
   if (index > -1) {
     this.splice(index, 1);
   }
-}
+};
 
 function blobToDataURL(blob, callback) {
   var a = new FileReader();
@@ -639,13 +634,12 @@ function blobToDataURL(blob, callback) {
 }
 
 function print(text){
-  console.log(text);
   if(text !== undefined){
     while(text.includes("\n")){
       var add = text.substring(0, text.indexOf("\n"));
       $("#console-output").append(document.createTextNode(add));
       $("#console-output").append(document.createElement("br"));
-      
+
       text = text.substring(text.indexOf("\n") + 1);
     }
     $("#console-output").append(document.createTextNode(text));
@@ -662,4 +656,3 @@ function makeHeading(heading) {
   $(obj).text(heading);
   return obj;
 }
-
