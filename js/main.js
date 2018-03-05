@@ -28,29 +28,29 @@ var nameField = document.getElementById("name");
 var exerciseField = document.getElementById("exercise-number");
 var boardField = document.getElementById("board");
 
-function getFromStorage(item, ifEmpty){
+function getFromStorage(item, ifEmpty) {
   var i = localStorage.getItem(item);
-  if(i === null || i === undefined || i === ""){
+  if(i === null || i === undefined || i === "") {
     return (ifEmpty !== null && ifEmpty !== undefined) ? ifEmpty : "";
   } else {
     return i;
   }
 }
 
-function setToStorage(item, value){
+function setToStorage(item, value) {
   localStorage.setItem(item, value);
 }
 
-function loadBoard(){
-  $("#edit").empty();
-  currentBoard = createBoard(boardField.value);
-  currentBoard.activate();
+function loadBoard() {
+  loadBoardFromExercise({board: {type: boardField.value, setup: ""}});
 }
 
-function loadBoardFromExercise(exercise){
+function loadBoardFromExercise(exercise) {
+  setStatus("Loading", "info", true);
   $("#edit").empty();
   currentBoard = createBoard(exercise.board.type, exercise.board.setup);
   currentBoard.activate();
+  setStatus("Loaded board", "success", false);
 }
 
 var currentBoard = createBoard(getFromStorage("board-type"), getFromStorage("board-setup"));
@@ -168,6 +168,21 @@ function loadFile(file) {
 
 var running = false;
 var canvas = document.createElement("canvas");
+canvas.onclick = function(event) {
+  var totalOffsetX = 0;
+  var totalOffsetY = 0;
+  var currentElement = this;
+
+  do{
+      totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+      totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+  }
+  while(currentElement = currentElement.offsetParent)
+
+  var x = event.pageX - totalOffsetX;
+  var y = event.pageY - totalOffsetY;
+  console.log("Click at (" + x + ", " + y + ")");
+}
 var rendererTimeoutHandle = null;
 var lastContent = {frameManager: null, output: null};
 
@@ -175,35 +190,35 @@ function frameManagerFromJSON(string) {
   return frameManagerFromParsedJSON(JSON.parse(string));
 }
 
-function frameManagerFromParsedJSON(data){
+function frameManagerFromParsedJSON(data) {
   //Modifying __proto__ is the same speed as manually copying everything
   //See: https://jsperf.com/parse-json-into-an-object-and-assign-a-prototype
   //(also, I couldn't get manual copying to work without hard-coding the fields like Paul was doing)
 
   data.__proto__ = FrameManager.prototype;
-  for(var f of data.frames){
+  for(var f of data.frames) {
     f.__proto__ = Frame.prototype;
   }
   return data;
 }
 
 
-function setStatus(blurb, type, isAnimated){
+function setStatus(blurb, type, isAnimated) {
   resetStatus();
 
   var gifLoadingStatus = document.getElementById("gif-loading-status");
   gifLoadingStatus.innerHTML = blurb;
-  if(type !== ""){
+  if(type !== "") {
     var gifLoadingBar = document.getElementById("gif-loading-bar");
     gifLoadingBar.classList.add("bg-" + type);
     gifLoadingBar.style.display = "flex";
-    if(isAnimated){
+    if(isAnimated) {
       gifLoadingBar.classList.add("progress-bar-animated");
     }
   }
 }
 
-function showGif(){
+function showGif() {
   var gifOutput = document.getElementById("gif-output");
   gifOutput.style.display = "inline";
 
@@ -213,7 +228,9 @@ function showGif(){
   $("#copy-page").css("visibility", "visible");
 }
 
-function resetStatus(){
+function resetStatus() {
+  stopRendering();
+  
   var gifOutput = document.getElementById("gif-output");
   gifOutput.style.display = "none";
 
@@ -226,11 +243,12 @@ function resetStatus(){
   var gifLoadingBar = document.getElementById("gif-loading-bar");
   gifLoadingBar.classList.remove("progress-bar-animated");
   gifLoadingBar.style.display = "none";
-  for(var status of STATUS_TYPES){
+  for(var status of STATUS_TYPES) {
     gifLoadingBar.classList.remove("bg-" + status);
   }
 
   $("#copy-page").css("visibility", "hidden");
+  
 }
 
 function runCode() {
@@ -356,7 +374,7 @@ function loadExercise() {
 
           loadBoardFromExercise(currentExercise);
 
-          if(confirm("Load Starting Code?  This will overwrite your existing code!!!")){
+          if(confirm("Load Starting Code?  This will overwrite your existing code!!!")) {
             editor.setValue(currentExercise.startingCode);
           }
         }
@@ -374,7 +392,7 @@ function loadExercise() {
 loadExercise();
 
 function gradeFrameManager(studentFM) {
-  if(currentExercise.number === null){
+  if(currentExercise.number === null) {
     setStatus("Please load an exercise first", "danger", false);
     running = false;
     return;
@@ -447,20 +465,27 @@ function compareFrameManagers(fm1, fm2) {
   return true;
 }
 
+function stopRendering(){
+  if (rendererTimeoutHandle !== null) {
+    clearTimeout(rendererTimeoutHandle);
+    rendererTimeoutHandle = null;
+  }
+}
+
 function generateGif(frameManager, isCorrect) {
 
   var gifOutput = document.getElementById("gif-output");
 
-  var board = null;
-  try {
-    board = new BOARDS[document.getElementById("board").value]();
-  } catch(e) {
-    setStatus("Invalid Board!", "danger", false);
-    return;
-  }
+  //var board = null;
+  //try {
+  //  board = new BOARDS[document.getElementById("board").value]();
+  //} catch(e) {
+  //  setStatus("Invalid Board!", "danger", false);
+  //  return;
+  //}
 
-  canvas.height = board.canvasHeight;
-  canvas.width = board.canvasWidth;
+  canvas.height = currentBoard.canvasHeight;
+  canvas.width = currentBoard.canvasWidth;
   var ctx = canvas.getContext("2d");
 
   var date = new Date();
@@ -471,34 +496,28 @@ function generateGif(frameManager, isCorrect) {
   var exerciseNumber = document.getElementById("exercise-number").value;
 
   var drawFrame = function(frame, index, array) {
-    if (index == 0) {
-      board.prepare();
-      board.setContext({
-        isCorrect: isCorrect,
-        dateString: dateString,
-        timeString: timeString,
-        exerciseNumber: exerciseNumber,
-        name: name
-      });
-    }
-
     ctx.globalAlpha = 1;
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    board.draw(ctx, frame, index, frameManager);
+    currentBoard.draw(ctx, frame, index, frameManager);
 
     var nextIndex = (index + 1) % array.length;
     rendererTimeoutHandle = setTimeout(drawFrame, frame.postDelay, array[nextIndex], nextIndex, array);
   };
 
-  if (rendererTimeoutHandle !== null) {
-    clearTimeout(rendererTimeoutHandle);
-    rendererTimeoutHandle = null;
-  }
+  stopRendering();
 
+  currentBoard.setContext({
+    isCorrect: isCorrect,
+    dateString: dateString,
+    timeString: timeString,
+    exerciseNumber: exerciseNumber,
+    name: name
+  });
+  
   drawFrame(frameManager.frames[0], 0, frameManager.frames);
-
+      
   gifOutput.innerHTML = "";
   gifOutput.append(canvas);
   showGif();
@@ -587,12 +606,12 @@ function saveFrameManager() {
   }
 }
 
-function saveExercise(){
+function saveExercise() {
 
   $("#exercise-modal").modal('show');
 }
 
-function exportExercise(){
+function exportExercise() {
   var exercise = {};
   exercise.number = document.getElementById("export-exercise-number").value;
   exercise.startingCode = document.getElementById("export-exercise-starting").value;
@@ -633,20 +652,30 @@ function blobToDataURL(blob, callback) {
   a.readAsDataURL(blob);
 }
 
-function print(text){
-  if(text !== undefined){
-    while(text.includes("\n")){
+function print(text, color) {
+  if (text !== undefined) {
+    while (text.includes("\n")) {
       var add = text.substring(0, text.indexOf("\n"));
-      $("#console-output").append(document.createTextNode(add));
+      var s = document.createElement("span");
+      s.append(document.createTextNode(add));
+      if(color) {
+        s.style.color = color;
+      }
+      $("#console-output").append(s);
       $("#console-output").append(document.createElement("br"));
 
       text = text.substring(text.indexOf("\n") + 1);
     }
-    $("#console-output").append(document.createTextNode(text));
+    var s = document.createElement("span");
+    s.append(document.createTextNode(text));
+    if (color) {
+      s.style.color = color;
+    }
+    $("#console-output").append(s);
   }
 }
 
-function println(text){
+function println(text, color) {
   print(text);
   $("#console-output").append(document.createElement("br"));
 }
