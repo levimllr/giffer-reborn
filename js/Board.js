@@ -178,13 +178,12 @@ LEDBoard.prototype.draw = function(ctx, frame, index, frameManager){
 function KSBoard(setup) {
   if(setup && setup.pinKeyframes){
     this.pinKeyframes = setup.pinKeyframes;
-    console.log(setup);
   }
 }
 
 KSBoard.prototype = Object.create(Board.prototype);
 
-KSBoard.prototype.imageURL = "/img/KS-Shield.gif";
+KSBoard.prototype.imageURL = "/img/KS-Shield.png";
 KSBoard.prototype.type = "KS Board";
 KSBoard.prototype.canvasWidth = 450;
 KSBoard.prototype.canvasHeight = 350;
@@ -202,6 +201,7 @@ KSBoard.prototype.canvasHeight = 350;
   D14: M2 DIR
   D15: M1 DIR
   
+  TODO?
   D18: TACH 2 
   D19: TACH 1
   
@@ -213,6 +213,27 @@ KSBoard.prototype.canvasHeight = 350;
   D3: US ECHO
   
 */
+
+KSBoard.prototype.drawInfo = function(ctx, frame, index, frameManager){
+  ctx.globalAlpha = 1;
+  ctx.textAlign = "start";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "black";
+  ctx.font = "15px monospace";
+  var y = 270;
+  ctx.fillText("Frame: " + index, 10, y + 10);
+  ctx.fillText("PostDelay: " + frame.postDelay, 10, y + 30);
+  ctx.fillText("By " + this.context.name, 10, y + 50);
+  ctx.fillText("Exercise " + this.context.exerciseNumber, 10, y + 70);
+
+  ctx.fillText(this.context.dateString, 200, y + 10);
+  ctx.fillText(this.context.timeString, 200, y + 30);
+
+  ctx.font = "bold 15px monospace";
+  ctx.fillStyle = ((typeof(this.context.isCorrect) === "undefined") || (this.context.isCorrect === false)) ? "red" : "green";
+  var gradeText = (this.context.isCorrect === true) ? "Correct" : ((this.context.isCorrect === false) ? "Incorrect" : "Ungraded");
+  ctx.fillText(gradeText, 200, y + 70);
+}
 
 KSBoard.prototype.draw = function(ctx, frame, index, frameManager){
 
@@ -251,27 +272,70 @@ KSBoard.prototype.draw = function(ctx, frame, index, frameManager){
   
   //Draw buttons
   ctx.fillStyle = "saddlebrown";
-  if(frame.getPinState(56) === ANALOG_MAX){
+  if (frame.getPinState(56) === ANALOG_MAX) {
     ctx.beginPath();
     ctx.arc(270, 127, 5, 0, 2 * Math.PI);
     ctx.fill();
   }
-  if(frame.getPinState(55) === ANALOG_MAX){
+  if (frame.getPinState(55) === ANALOG_MAX) {
     ctx.beginPath();
     ctx.arc(295, 127, 5, 0, 2 * Math.PI);
     ctx.fill();
   }
-  if(frame.getPinState(54) === ANALOG_MAX){
+  if (frame.getPinState(54) === ANALOG_MAX) {
     ctx.beginPath();
     ctx.arc(320, 127, 5, 0, 2 * Math.PI);
     ctx.fill();
   }
   
-  //Draw motor directions
+  //Draw motors
+  var VALUE_TO_RPM_MIN = 250;
+  var VALUE_TO_RPM_MUL = 2.7;
+  var drawMotor = function(x, y, directionClockwise, speedValue) {
+    ctx.strokeStyle = "blue";
+    ctx.fillStyle = "blue";
+    ctx.lineWidth = 4;
+    var radius = 25;
+    var arrowSize = 15;
+    if (directionClockwise) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, 3 * Math.PI / 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y - radius + arrowSize/2);
+      ctx.lineTo(x, y - radius - arrowSize/2);
+      ctx.lineTo(x + arrowSize, y - radius);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, -Math.PI / 2, Math.PI);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y - radius + arrowSize/2);
+      ctx.lineTo(x, y - radius - arrowSize/2);
+      ctx.lineTo(x - arrowSize, y - radius);
+      ctx.fill();
+    }
+    if(speedValue != 0){
+      var RPM = Math.max(0, VALUE_TO_RPM_MUL * (speedValue - VALUE_TO_RPM_MIN));
+      ctx.font = "20px arial";
+      ctx.fillStyle = "red";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(Math.floor(RPM), x, y - 10);
+      ctx.font = "12px arial";
+      ctx.fillText("RPM", x, y + 10);
+    }
+  }
   
-  
-  //Draw motor speeds
-  
+  if (frame.getPinMode(14) === OUTPUT) {
+    var speed = frame.getPinMode(12) === OUTPUT ? frame.getPinState(12) : 0;
+    drawMotor(170, 34, frame.getPinState(14) === ANALOG_MAX, speed);
+  }
+  if (frame.getPinMode(15) === OUTPUT) {
+    var speed = frame.getPinMode(11) === OUTPUT ? frame.getPinState(11) : 0;
+    drawMotor(415, 34, frame.getPinState(15) === ANALOG_MAX, speed);
+  }
   
   //Draw US
   if (frame.getPinState(4) >= 1 && frame.getPinMode(4) === OUTPUT) { 
