@@ -32,7 +32,11 @@
                         <a class="nav-link active" id="controls-tab" data-toggle="tab" href="#controls" aria-controls="controls" aria-selected="true">Controls</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" id="edit-tab" data-toggle="tab" href="#edit" aria-controls="edit" aria-selected="false">Configure Board</a>
+                        <a class="nav-link" id="edit-tab" data-toggle="tab" href="#edit" aria-controls="edit" aria-selected="false">
+                          <span class="d-inline-block" id="edit-tooltip" tabindex="0" data-toggle="tooltip" title="Board cannot be changed while an exercise is selected">
+                            Configure Board
+                          </span>
+                        </a>
                       </li>
                       <li class="nav-item">
                           <a class="nav-link" id="debug-tab" data-toggle="tab" href="#debug" aria-controls="edit" aria-selected="false">Debugging</a>
@@ -215,7 +219,7 @@ return 0;
     <div id="highlight-storage" style="display: none; width: 0.01px; height: 0.01px;"></div>
 
     <script src="js/jquery-2.2.1.min.js" type="text/javascript" charset="utf-8"></script>
-    <script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/bootstrap.bundle.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/FrameManager.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/gif/gif.js" type="text/javascript" charset="utf-8"></script>

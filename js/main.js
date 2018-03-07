@@ -40,7 +40,6 @@ var defaultSuffix = `int main() {
 }
 `;
 
-
 var STATUS_TYPES = ["info", "danger", "success"];
 
 var nameField = document.getElementById("name");
@@ -60,26 +59,32 @@ function setToStorage(item, value) {
   localStorage.setItem(item, value);
 }
 
-function loadBoard() {
-  loadBoardFromExercise({board: {type: boardField.value, setup: ""}});
+var currentBoard;
+function loadBoard(type, setup) {
+  if(type && setup){
+    setStatus("Loading board", "info", true);
+    $("#edit").empty();
+    currentBoard = createBoard(type, setup);
+    currentBoard.activate();
+    boardField.value = currentBoard.type;
+    setStatus("Loaded board", "success", false);
+  } else {
+    loadBoard(boardField.value, "");
+  }
+}
+
+function loadDefaultBoard() {
+  laodBoard("LED Board", "");
 }
 
 function loadBoardFromExercise(exercise) {
-  setStatus("Loading", "info", true);
-  $("#edit").empty();
-  currentBoard = createBoard(exercise.board.type, exercise.board.setup);
-  currentBoard.activate();
-  setStatus("Loaded board", "success", false);
+  loadBoard(exercise.board.type, exercise.board.setup);
 }
 
-var currentBoard = createBoard(getFromStorage("board-type"), getFromStorage("board-setup"));
-
-currentBoard.activate();
+loadBoard(getFromStorage("board-type"), getFromStorage("board-setup"));
 
 nameField.value = getFromStorage("name");
 exerciseField.value = getFromStorage("exercise-number");
-
-boardField.value = getFromStorage("board-type");
 
 editor.setValue(getFromStorage("code", defaultCode), -1);
 editor.focus();
@@ -170,7 +175,6 @@ function loadFile(file) {
         gifOutput.appendChild(img);
         showGif();
       }
-      //TODO: set board
       document.getElementById("console-output").innerHTML = obj.consoleOutput;
       document.getElementById("name").value = obj.name;
       document.getElementById("exercise-number").value = obj.exercise;
@@ -207,7 +211,6 @@ function frameManagerFromParsedJSON(data) {
   }
   return data;
 }
-
 
 function setStatus(blurb, type, isAnimated) {
   resetStatus();
@@ -306,7 +309,7 @@ function fixOutputContent() {
 
 function debugCleanup() {
   removeMarker();
-  fixOutputContent();
+  //fixOutputContent();
 }
 
 function debugContinue() {
@@ -360,8 +363,8 @@ function debugShowCurrentState(fm) {
   var dateString = date.toDateString();
   var timeString = date.toLocaleTimeString();
 
-  var name = document.getElementById("name").value;
-  var exerciseNumber = document.getElementById("exercise-number").value;
+  var name = nameField.value;
+  var exerciseNumber = exerciseField.value;
   currentBoard.setContext({
     isCorrect: undefined,
     dateString: dateString,
@@ -370,22 +373,11 @@ function debugShowCurrentState(fm) {
     name: name
   });
 
-  var canvas = document.createElement("canvas");
-  canvas.height = currentBoard.canvasHeight;
-  canvas.width = currentBoard.canvasWidth;
-
   fm.frames.forEach(currentBoard.advance.bind(currentBoard));
 
   currentBoard.draw(canvas.getContext("2d"));
-
-  var gifOutput = document.getElementById("gif-output");
-  gifOutput.innerHTML = "";
-  gifOutput.append(canvas);
-
-  gifOutput.style.display = "inline";
-
-  var gifLoading = document.getElementById("gif-loading");
-  gifLoading.style.display = "none";
+  
+  showGif();
 }
 
 var markedLine = null;
@@ -393,6 +385,14 @@ var markedLine = null;
 function runCode() {
   saveContext();
 
+  var debugging = document.getElementById("debugging-enabled").checked;
+  
+  if (debugging) {
+    document.getElementById("run-button").innerHTML = "Debugging...";
+  } else {
+    document.getElementById("run-button").innerHTML = "Running...";
+  }
+  
   if (running) {
     return;
   }
@@ -413,9 +413,11 @@ function runCode() {
       lastContent.output = $("#console-output")[0].innerHTML;
 
       if (currentExercise.number !== null) {
+        document.getElementById("run-button").innerHTML = "Run and Grade";
         setStatus("Grading . . .", "success", true);
         gradeFrameManager(newFrameManager);
       } else {
+        document.getElementById("run-button").innerHTML = "Run";
         setStatus("Generating gif . . .", "success", true);
         generateGif(newFrameManager);
       }
@@ -448,7 +450,6 @@ typedef unsigned char byte;
 `;
   var suffix = currentExercise.suffix;
   var code = prefix + editor.getValue() + suffix;
-  var debugging = document.getElementById("debugging-enabled").checked;
 
   jscpp.onerror = function(e) {
     console.log(e);
@@ -487,13 +488,21 @@ typedef unsigned char byte;
 }
 
 var currentExercise = {number: null, suffix: defaultSuffix};
-function loadExercise() {
+function clearExercise(){
+  setStatus("Exercise not found.  Gifs will not be graded.", "");
+  currentExercise = {number: null, suffix: defaultSuffix};
+  document.getElementById("run-button").innerHTML = "Run";
+  //Don't set board... makes for easier modifications
+  
+  $("#control-tabs a[href=\"#edit\"]")[0].classList.remove("disabled");
+  $("#edit-tooltip").tooltip("disable");
+}
+
+function loadExercise(promptForOverwrite) {
   setStatus("Getting grading file . . .", "info", true);
   var exerciseNum = parseInt($("#exercise-number")[0].value);
   if (isNaN(exerciseNum)) {
-    setStatus("Invalid exercise.  Gifs will not be graded.", "");
-    currentExercise = {number: null, suffix: defaultSuffix};
-    document.getElementById("run-button").innerHTML = "Run";
+    clearExercise();
     return;
   }
 
@@ -501,47 +510,51 @@ function loadExercise() {
   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
 
   var handleError = function() {
-    currentExercise = {number: null, suffix: defaultSuffix};
-    setStatus("Error fetching grading file . . .", "danger", false);
+    clearExercise();
+    //setStatus("Error fetching grading file . . .", "danger", false);
   };
 
   xmlhttp.onerror = handleError;
   xmlhttp.onabort = handleError;
   xmlhttp.ontimeout = handleError;
   xmlhttp.onload = function() {
+    $("#control-tabs a[href=\"#edit\"]")[0].classList.add("disabled");
+    $("#edit-tooltip").tooltip("enable");
     if (this.status === 200) {
-        var data = JSON.parse(this.responseText);
-        if(!data.board) {
-          //This is a FrameManager--not an exercise.
-          currentExercise.frameManager = frameManagerFromJSON(this.responseText);
-          currentExercise.number = exerciseNum;
-          currentExercise.suffix = defaultSuffix;
+      var data = JSON.parse(this.responseText);
+      if(!data.board) {
+        //This is a FrameManager--not an exercise.
+        currentExercise.frameManager = frameManagerFromJSON(this.responseText);
+        currentExercise.number = exerciseNum;
+        currentExercise.suffix = defaultSuffix;
+        
+        loadDefaultBoard();
 
-        } else {
-          currentExercise.number = exerciseNum;
-          currentExercise.board = data.board;
-          currentExercise.startingCode = data.startingCode;
-          currentExercise.suffix = data.suffix;
-          currentExercise.frameManager = frameManagerFromParsedJSON(data.frameManager);
+      } else {
+        currentExercise.number = exerciseNum;
+        currentExercise.board = data.board;
+        currentExercise.startingCode = data.startingCode;
+        currentExercise.suffix = data.suffix;
+        currentExercise.frameManager = frameManagerFromParsedJSON(data.frameManager);
 
-          document.getElementById("export-exercise-number").value = currentExercise.number;
-          document.getElementById("export-exercise-starting").value = currentExercise.startingCode;
-          document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
+        document.getElementById("export-exercise-number").value = currentExercise.number;
+        document.getElementById("export-exercise-starting").value = currentExercise.startingCode;
+        document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
 
-          loadBoardFromExercise(currentExercise);
+        loadBoardFromExercise(currentExercise);
 
-          if(confirm("Load Starting Code?  This will overwrite your existing code!!!")) {
-            editor.setValue(currentExercise.startingCode);
-          }
+        if(promptForOverwrite && confirm("Load Starting Code?  This will overwrite your existing code!!!")) {
+          editor.setValue(currentExercise.startingCode);
         }
-        //set code to exercise start code?
-        setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
-        document.getElementById("run-button").innerHTML = "Run and Grade";
+      }
+      //set code to exercise start code?
+      setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
+      document.getElementById("run-button").innerHTML = "Run and Grade";
     } else {
-        handleError();
+      handleError();
     }
   };
-
+  
   xmlhttp.send();
 }
 
