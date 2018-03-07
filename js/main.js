@@ -13,6 +13,11 @@ editor.on("guttermousedown", function(e) {
   e.stop();
 });
 
+editor.setOptions({
+  maxLines: Infinity,
+  minLines: 50
+});
+
 var Range = ace.require('ace/range').Range;
 var prefix = "#include \"Arduino.h\"\ntypedef unsigned char byte;\n";
 
