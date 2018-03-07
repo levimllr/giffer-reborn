@@ -221,7 +221,8 @@ function submitFrameManager() {
 function submitDebuggerState() {
   this.postMessage(JSON.stringify({type: "debuginfo",
                                    variables: cppdebugger.variable(),
-                                   node: cppdebugger.nextNode()}));
+                                   node: cppdebugger.nextNode(),
+                                   frameManager: frameManager}));
 }
 
 function qualifiedContinue() {

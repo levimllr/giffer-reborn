@@ -95,12 +95,12 @@ Board.prototype.activate = function(){
     var keyframe = this.pinKeyframes[i];
     this.addKeyframe(keyframe.time, keyframe.pin, keyframe.value);
   }
-}
+};
 
 Board.prototype.getSetup = function(){
   this.updateInputs();
   return {pinKeyframes: this.pinKeyframes};
-}
+};
 
 Board.prototype.updateInputs = function(){
   var out = [];
@@ -112,7 +112,7 @@ Board.prototype.updateInputs = function(){
     out.push({time: keyframeTime, pin: keyframePin, value: keyframeValue});
   }
   this.pinKeyframes = out;
-}
+};
 
 /**
   Light Sculpture Board
@@ -135,11 +135,11 @@ function LEDBoard(setup) {
     14: {x: 5, y: 35, color: "yellow"},
     15: {x: 5, y: 7, color: "yellow"}
   };
-  
+
   if(setup && setup.pinKeyframes){
     this.pinKeyframes = setup.pinKeyframes;
   }
-  
+
 }
 
 LEDBoard.prototype = Object.create(Board.prototype);
@@ -148,7 +148,16 @@ LEDBoard.prototype.type = "LED Board";
 LEDBoard.prototype.canvasWidth = 300;
 LEDBoard.prototype.canvasHeight = 195;
 
-LEDBoard.prototype.draw = function(ctx, frame, index, frameManager){
+LEDBoard.prototype.advance = function(frame, index, frameManager) {
+  this.currentFrame = frame;
+  this.currentIndex = index;
+  this.frameManager = frameManager;
+};
+
+LEDBoard.prototype.draw = function(ctx) {
+  var frame = this.currentFrame;
+  var index = this.currentIndex;
+  var frameManager = this.frameManager;
 
   ctx.drawImage(this.shieldImg, 0, 0);
 
@@ -168,9 +177,9 @@ LEDBoard.prototype.draw = function(ctx, frame, index, frameManager){
       ctx.fill();
     }
   }
-  
+
   this.drawInfo(ctx, frame, index, frameManager);
-}
+};
 
 /**
   Kinetic Sculpture Board
@@ -193,28 +202,37 @@ KSBoard.prototype.canvasHeight = 350;
   A5/D54: BTN-UP
   A6/D55: BTN-MODE
   A7/D56: BTN-DOWN
-  
+
   D13: D1
-  
+
   D12: M2 SPD
   D11: M1 SPD
-  
+
   D14: M2 DIR
   D15: M1 DIR
-  
-  D18: TACH 2 
+
+  D18: TACH 2
   D19: TACH 1
-  
+
   D6: LED GRN
   D7: LED BLUE
   D8: LED RED
-  
+
   D4: US TRIG
   D3: US ECHO
-  
+
 */
 
-KSBoard.prototype.draw = function(ctx, frame, index, frameManager){
+KSBoard.prototype.advance = function(frame, index, frameManager) {
+  this.currentFrame = frame;
+  this.currentIndex = index;
+  this.frameManager = frameManager;
+};
+
+KSBoard.prototype.draw = function(ctx){
+  var frame = this.currentFrame;
+  var index = this.currentIndex;
+  var frameManager = this.frameManager;
 
   ctx.drawImage(this.shieldImg, 0, 0, 450, 255);
 
@@ -228,7 +246,7 @@ KSBoard.prototype.draw = function(ctx, frame, index, frameManager){
     ctx.arc(209, 171, 7, 0, 2 * Math.PI);
     ctx.fill();
   }
-  
+
   //Draw LEDs
   var r = 0;
   var g = 0;
@@ -248,7 +266,7 @@ KSBoard.prototype.draw = function(ctx, frame, index, frameManager){
     ctx.arc(x, 33, 7, 0, 2 * Math.PI);
     ctx.fill();
   }
-  
+
   //Draw buttons
   ctx.fillStyle = "saddlebrown";
   if(frame.getPinState(56) === ANALOG_MAX){
@@ -266,15 +284,15 @@ KSBoard.prototype.draw = function(ctx, frame, index, frameManager){
     ctx.arc(320, 127, 5, 0, 2 * Math.PI);
     ctx.fill();
   }
-  
+
   //Draw motor directions
-  
-  
+
+
   //Draw motor speeds
-  
-  
+
+
   //Draw US
-  if (frame.getPinState(4) >= 1 && frame.getPinMode(4) === OUTPUT) { 
+  if (frame.getPinState(4) >= 1 && frame.getPinMode(4) === OUTPUT) {
     ctx.strokeStyle = "red";
     for (var i = 140; i > 90; i -= 10) {
       ctx.beginPath();
@@ -282,7 +300,7 @@ KSBoard.prototype.draw = function(ctx, frame, index, frameManager){
       ctx.stroke();
     }
   }
-  if (frame.getPinState(3) >= 1 && frame.getPinMode(3) === INPUT) { 
+  if (frame.getPinState(3) >= 1 && frame.getPinMode(3) === INPUT) {
     ctx.strokeStyle = "red";
     for (var i = 140; i > 90; i -= 10) {
       ctx.beginPath();
@@ -290,9 +308,9 @@ KSBoard.prototype.draw = function(ctx, frame, index, frameManager){
       ctx.stroke();
     }
   }
-  
+
   this.drawInfo(ctx, frame, index, frameManager);
-}
+};
 
 var BOARDS = {
   "LED Board": LEDBoard,

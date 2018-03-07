@@ -291,8 +291,21 @@ function removeMarker() {
   }
 }
 
-function debugContinue() {
+function fixOutputContent() {
+  var gifOutput = document.getElementById("gif-output");
+  gifOutput.style.display = "none";
+
+  var gifLoading = document.getElementById("gif-loading");
+  gifLoading.style.display = "inline";
+}
+
+function debugCleanup() {
   removeMarker();
+  fixOutputContent();
+}
+
+function debugContinue() {
+  debugCleanup();
   try {
     jscpp.postMessage({type: "debugger", action: "continue"});
   } catch (e) {
@@ -301,7 +314,7 @@ function debugContinue() {
 }
 
 function debugStepInto() {
-  removeMarker();
+  debugCleanup();
   try {
     jscpp.postMessage({type: "debugger", action: "stepInto"});
   } catch (e) {
@@ -335,6 +348,39 @@ function debugRenderVariables(vars) {
 
     tbody.append(tr);
   });
+}
+
+function debugShowCurrentState(fm) {
+  var date = new Date();
+  var dateString = date.toDateString();
+  var timeString = date.toLocaleTimeString();
+
+  var name = document.getElementById("name").value;
+  var exerciseNumber = document.getElementById("exercise-number").value;
+  currentBoard.setContext({
+    isCorrect: undefined,
+    dateString: dateString,
+    timeString: timeString,
+    exerciseNumber: exerciseNumber,
+    name: name
+  });
+
+  var canvas = document.createElement("canvas");
+  canvas.height = currentBoard.canvasHeight;
+  canvas.width = currentBoard.canvasWidth;
+
+  fm.frames.forEach(currentBoard.advance.bind(currentBoard));
+
+  currentBoard.draw(canvas.getContext("2d"));
+
+  var gifOutput = document.getElementById("gif-output");
+  gifOutput.innerHTML = "";
+  gifOutput.append(canvas);
+
+  gifOutput.style.display = "inline";
+
+  var gifLoading = document.getElementById("gif-loading");
+  gifLoading.style.display = "none";
 }
 
 var markedLine = null;
@@ -386,6 +432,8 @@ function runCode() {
         "fullLine",
         false);
       debugRenderVariables(message.variables);
+      var fm = frameManagerFromParsedJSON(message.frameManager);
+      debugShowCurrentState(fm);
     }
   };
 
@@ -570,7 +618,7 @@ function compareFrameManagers(fm1, fm2) {
 
 function stopRendering(){
   if (rendererTimeoutHandle !== null) {
-    clearTimeout(rendererTimeoutHandle);
+    cancelAnimationFrame(rendererTimeoutHandle);
     rendererTimeoutHandle = null;
   }
 }
@@ -578,15 +626,6 @@ function stopRendering(){
 function generateGif(frameManager, isCorrect) {
 
   var gifOutput = document.getElementById("gif-output");
-
-  //var board = null;
-  //try {
-  //  board = new BOARDS[document.getElementById("board").value]();
-  //} catch(e) {
-  //  setStatus("Invalid Board!", "danger", false);
-  //  return;
-  //}
-
   canvas.height = currentBoard.canvasHeight;
   canvas.width = currentBoard.canvasWidth;
   var ctx = canvas.getContext("2d");
@@ -607,11 +646,21 @@ function generateGif(frameManager, isCorrect) {
     if (speed === 0 || cumulativeTime < desiredWait) {
       partial = drawFrame.bind(null, array[index], index, array, stdDelay, cumulativeTime, performance.now());
     } else {
+      if (index === 0) {
+          currentBoard.setContext({
+            isCorrect: isCorrect,
+            dateString: dateString,
+            timeString: timeString,
+            exerciseNumber: exerciseNumber,
+            name: name
+          });
+      }
       ctx.globalAlpha = 1;
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      currentBoard.draw(ctx, frame, index, frameManager);
+      currentBoard.advance(frame, index, frameManager);
+      currentBoard.draw(ctx);
 
       var nextIndex = (index + 1) % array.length;
       partial = drawFrame.bind(null, array[nextIndex], nextIndex, array, frame.postDelay, 0, performance.now());
@@ -621,15 +670,6 @@ function generateGif(frameManager, isCorrect) {
   };
 
   stopRendering();
-
-  currentBoard.setContext({
-    isCorrect: isCorrect,
-    dateString: dateString,
-    timeString: timeString,
-    exerciseNumber: exerciseNumber,
-    name: name
-  });
-
   drawFrame(frameManager.frames[0], 0, frameManager.frames);
 
   gifOutput.innerHTML = "";
