@@ -237,6 +237,15 @@ function setLineByLine(state) {
   cppdebugger.stopConditions["lineChanged"] = state;
 }
 
+function disableAll() {
+  cppdebugger.stopConditions["lineChanged"] = false;
+  cppdebugger.stopConditions["breakpoints"] = false;
+}
+
+function enableAll() {
+  cppdebugger.stopConditions["breakpoints"] = true;
+}
+
 function messageHandler(event) {
   if (event.data.type == "code") {
     var code = event.data.code;
@@ -281,6 +290,13 @@ function messageHandler(event) {
     else if (event.data.action == "stepInto") {
       setLineByLine(true);
       qualifiedContinue();
+    }
+    else if (event.data.action == "enabled") {
+      if (event.data.state) {
+        enableAll();
+      } else {
+        disableAll();
+      }
     }
   }
 }

@@ -312,6 +312,15 @@ function debugCleanup() {
   //fixOutputContent();
 }
 
+function debugUpdateEnabled() {
+  try {
+    var state = document.getElementById("debugging-enabled").checked;
+    jscpp.postMessage({type: "debugger", action: "enabled", state: state});
+  } catch (e) {
+
+  }
+}
+
 function debugContinue() {
   debugCleanup();
   try {
