@@ -68,6 +68,8 @@ function loadBoard(type, setup) {
     currentBoard.activate();
     boardField.value = currentBoard.type;
     setStatus("Loaded board", "success", false);
+    $("#gif-output").css("height", currentBoard.canvasHeight);
+    $("#gif-loading").css("height", currentBoard.canvasHeight);
   } else {
     loadBoard(boardField.value, "");
   }
@@ -229,7 +231,9 @@ function setStatus(blurb, type, isAnimated) {
 
 function showGif() {
   var gifOutput = document.getElementById("gif-output");
-  gifOutput.style.display = "inline";
+  gifOutput.innerHTML = "";
+  gifOutput.append(canvas);
+  gifOutput.style.display = "block";
 
   var gifLoading = document.getElementById("gif-loading");
   gifLoading.style.display = "none";
@@ -244,7 +248,7 @@ function resetStatus() {
   gifOutput.style.display = "none";
 
   var gifLoading = document.getElementById("gif-loading");
-  gifLoading.style.display = "inline";
+  gifLoading.style.display = "block";
 
   var gifLoadingStatus = document.getElementById("gif-loading-status");
   gifLoadingStatus.innerHTML = "Nothing to show . . .";
@@ -304,12 +308,12 @@ function fixOutputContent() {
   gifOutput.style.display = "none";
 
   var gifLoading = document.getElementById("gif-loading");
-  gifLoading.style.display = "inline";
+  gifLoading.style.display = "block";
 }
 
 function debugCleanup() {
   removeMarker();
-  //fixOutputContent();
+  fixOutputContent();
 }
 
 function debugUpdateEnabled() {
@@ -322,18 +326,18 @@ function debugUpdateEnabled() {
 }
 
 function debugContinue() {
-  debugCleanup();
   try {
     jscpp.postMessage({type: "debugger", action: "continue"});
+    debugCleanup();
   } catch (e) {
 
   }
 }
 
 function debugStepInto() {
-  debugCleanup();
   try {
     jscpp.postMessage({type: "debugger", action: "stepInto"});
+    debugCleanup();
   } catch (e) {
 
   }
@@ -384,8 +388,10 @@ function debugShowCurrentState(fm) {
 
   fm.frames.forEach(currentBoard.advance.bind(currentBoard));
 
+  canvas.height = currentBoard.canvasHeight;
+  canvas.width = currentBoard.canvasWidth;
   currentBoard.draw(canvas.getContext("2d"));
-  
+
   showGif();
 }
 
@@ -395,13 +401,13 @@ function runCode() {
   saveContext();
 
   var debugging = document.getElementById("debugging-enabled").checked;
-  
+
   if (debugging) {
     document.getElementById("run-button").innerHTML = "Debugging...";
   } else {
     document.getElementById("run-button").innerHTML = "Running...";
   }
-  
+
   if (running) {
     return;
   }
@@ -417,6 +423,7 @@ function runCode() {
     var message = JSON.parse(e.data);
     if (message.type === "frameManager") {
       jscpp.terminate();
+      jscpp = null;
       var newFrameManager = frameManagerFromJSON(message.frameManager);
       lastContent.frameManager = newFrameManager;
       lastContent.output = $("#console-output")[0].innerHTML;
@@ -465,7 +472,7 @@ typedef unsigned char byte;
     var errorObj = e.message;
     var matches = /([0-9]+):([0-9]+)/.exec(errorObj); //Match the line:column in the error message
     if (matches != null && matches.length >= 2) {
-      var line = Number(matches[1]) - (prefix.split("\n").length - 1) - 1;
+      var line = JSCPPToAce(Number(matches[1]));
       var column = Number(matches[2]) - 1;
       var aceDoc = editor.getSession().getDocument();
       var code = aceDoc.getValue();
@@ -486,7 +493,7 @@ typedef unsigned char byte;
       println("Warning: Unusual error!\n\n" + errorObj);
     }
     running = false;
-    setStatus("An error occurred!", "danger", false);
+    setStatus("An error occurred! (See Output for details.)", "danger", false);
     return true;
   };
 
@@ -502,7 +509,7 @@ function clearExercise(){
   currentExercise = {number: null, suffix: defaultSuffix};
   document.getElementById("run-button").innerHTML = "Run";
   //Don't set board... makes for easier modifications
-  
+
   $("#control-tabs a[href=\"#edit\"]")[0].classList.remove("disabled");
   $("#edit-tooltip").tooltip("disable");
 }
@@ -536,7 +543,7 @@ function loadExercise(promptForOverwrite) {
         currentExercise.frameManager = frameManagerFromJSON(this.responseText);
         currentExercise.number = exerciseNum;
         currentExercise.suffix = defaultSuffix;
-        
+
         loadDefaultBoard();
 
       } else {
@@ -563,7 +570,7 @@ function loadExercise(promptForOverwrite) {
       handleError();
     }
   };
-  
+
   xmlhttp.send();
 }
 
@@ -651,8 +658,6 @@ function stopRendering(){
 }
 
 function generateGif(frameManager, isCorrect) {
-
-  var gifOutput = document.getElementById("gif-output");
   canvas.height = currentBoard.canvasHeight;
   canvas.width = currentBoard.canvasWidth;
   var ctx = canvas.getContext("2d");
@@ -699,8 +704,6 @@ function generateGif(frameManager, isCorrect) {
   stopRendering();
   drawFrame(frameManager.frames[0], 0, frameManager.frames);
 
-  gifOutput.innerHTML = "";
-  gifOutput.append(canvas);
   showGif();
 
   if ((isCorrect === true) || (isCorrect === false)) {

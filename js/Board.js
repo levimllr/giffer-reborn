@@ -159,6 +159,7 @@ LEDBoard.prototype.draw = function(ctx) {
   var index = this.currentIndex;
   var frameManager = this.frameManager;
 
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.drawImage(this.shieldImg, 0, 0);
 
   for (var i = 2; i <= 15; i++) {
@@ -255,6 +256,7 @@ KSBoard.prototype.draw = function(ctx){
   var index = this.currentIndex;
   var frameManager = this.frameManager;
 
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.drawImage(this.shieldImg, 0, 0, 450, 255);
 
   //Draw D1
