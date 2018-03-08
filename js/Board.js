@@ -75,6 +75,9 @@ Board.prototype.addKeyframe = function(time, pin, value) {
 };
 
 Board.prototype.activate = function(){
+  $("#edit")[0].innerHTML = "";
+  this.DOMKeyframes = [];
+  
   var setup = $(`
           <table class="table" id="keyframe-table">
             <thead>

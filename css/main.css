@@ -20,6 +20,20 @@ label.btn {
     margin-left: 10px;
 }
 
+.blur {
+  -webkit-animation: blur 0.5s 1;
+  filter: blur(10px);
+}
+
+@-webkit-keyframes blur {
+  from { -webkit-filter: blur(0px); }
+  to { -webkit-filter: blur(10px); }
+}
+
+#canvas-speed:disabled::-webkit-slider-thumb {
+    background: gray;
+}
+
 .fileinput {
     width: 0.1px;
     height: 0.1px;

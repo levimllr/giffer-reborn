@@ -46,6 +46,10 @@ var nameField = document.getElementById("name");
 var exerciseField = document.getElementById("exercise-number");
 var boardField = document.getElementById("board");
 
+document.getElementById("canvas-speed").oninput = function(){
+  document.getElementById("playback-speed").innerHTML = "Playback Speed: " + this.value;
+}
+
 function getFromStorage(item, ifEmpty) {
   var i = localStorage.getItem(item);
   if(i === null || i === undefined || i === "") {
@@ -53,6 +57,14 @@ function getFromStorage(item, ifEmpty) {
   } else {
     return i;
   }
+}
+
+function showReadme() {
+  $("#readme-modal").modal('show');
+}
+
+if (!getFromStorage("prevent-readme")) {
+  showReadme();
 }
 
 function setToStorage(item, value) {
@@ -68,8 +80,8 @@ function loadBoard(type, setup) {
     currentBoard.activate();
     boardField.value = currentBoard.type;
     setStatus("Loaded board", "success", false);
-    $("#gif-output").css("height", currentBoard.canvasHeight);
-    $("#gif-loading").css("height", currentBoard.canvasHeight);
+    //$("#gif-output").css("height", currentBoard.canvasHeight);
+    //$("#gif-loading").css("height", currentBoard.canvasHeight);
   } else {
     loadBoard(boardField.value, "");
   }
@@ -169,7 +181,7 @@ function loadFile(file) {
       var obj = JSON.parse(event.target.result);
       editor.setValue(obj.code);
       var gifOutput = document.getElementById("gif-output");
-      gifOutput.innerHTML = "";
+      //gifOutput.innerHTML = "";
       if (obj.img !== null) {
         var img = document.createElement("img");
         img.src = obj.img;
@@ -192,7 +204,7 @@ function loadFile(file) {
 }
 
 var running = false;
-var canvas = document.createElement("canvas");
+var canvas = document.getElementById("canvas");
 var rendererTimeoutHandle = null;
 
 var jscpp = null;
@@ -230,26 +242,26 @@ function setStatus(blurb, type, isAnimated) {
 }
 
 function showGif() {
+  
+  setStatus("Gif", "");
+  
   var gifOutput = document.getElementById("gif-output");
-  gifOutput.innerHTML = "";
-  gifOutput.append(canvas);
   gifOutput.style.display = "block";
+  gifOutput.classList.remove("blur");
+  
+  document.getElementById("canvas-speed").disabled = false;
+}
 
-  var gifLoading = document.getElementById("gif-loading");
-  gifLoading.style.display = "none";
-
-  $("#copy-page").css("visibility", "visible");
+function hideGif() {
+  stopRendering();
+  
+  var gifOutput = document.getElementById("gif-output");
+  gifOutput.classList.add("blur");
+  
+  document.getElementById("canvas-speed").disabled = true;
 }
 
 function resetStatus() {
-  stopRendering();
-
-  var gifOutput = document.getElementById("gif-output");
-  gifOutput.style.display = "none";
-
-  var gifLoading = document.getElementById("gif-loading");
-  gifLoading.style.display = "block";
-
   var gifLoadingStatus = document.getElementById("gif-loading-status");
   gifLoadingStatus.innerHTML = "Nothing to show . . .";
 
@@ -303,17 +315,9 @@ function removeMarker() {
   }
 }
 
-function fixOutputContent() {
-  var gifOutput = document.getElementById("gif-output");
-  gifOutput.style.display = "none";
-
-  var gifLoading = document.getElementById("gif-loading");
-  gifLoading.style.display = "block";
-}
-
 function debugCleanup() {
   removeMarker();
-  fixOutputContent();
+  hideGif();
 }
 
 function debugUpdateEnabled() {
@@ -392,6 +396,8 @@ function debugShowCurrentState(fm) {
   canvas.width = currentBoard.canvasWidth;
   currentBoard.draw(canvas.getContext("2d"));
 
+  setStatus("Current State:", "")
+  
   showGif();
 }
 
@@ -400,13 +406,12 @@ var markedLine = null;
 function runCode() {
   saveContext();
 
+  hideGif();
+  
   var debugging = document.getElementById("debugging-enabled").checked;
 
-  if (debugging) {
-    document.getElementById("run-button").innerHTML = "Debugging...";
-  } else {
-    document.getElementById("run-button").innerHTML = "Running...";
-  }
+  document.getElementById("run-button").innerHTML = "Running...";
+
 
   if (running) {
     return;
@@ -500,7 +505,7 @@ typedef unsigned char byte;
   currentBoard.updateInputs();
 
   sendUpdatedBreakpoints();
-  jscpp.postMessage({type: "code", code: code, analogPins: currentBoard.analogPins, debugging: debugging});
+  jscpp.postMessage({type: "code", code: code, pinKeyframes: currentBoard.pinKeyframes, debugging: debugging});
 }
 
 var currentExercise = {number: null, suffix: defaultSuffix};
@@ -514,8 +519,16 @@ function clearExercise(){
   $("#edit-tooltip").tooltip("disable");
 }
 
+function clearExercise() {
+  exerciseField.value = "";
+  loadExercise();
+}
+
 function loadExercise(promptForOverwrite) {
   setStatus("Getting grading file . . .", "info", true);
+  
+  hideGif();
+  
   var exerciseNum = parseInt($("#exercise-number")[0].value);
   if (isNaN(exerciseNum)) {
     clearExercise();
@@ -587,7 +600,7 @@ function gradeFrameManager(studentFM) {
   var isCorrect = compareFrameManagers(studentFM, currentExercise.frameManager);
 
   generateGif(studentFM, isCorrect);
-
+  
   running = false;
 }
 
@@ -701,9 +714,12 @@ function generateGif(frameManager, isCorrect) {
     rendererTimeoutHandle = requestAnimationFrame(partial);
   };
 
+  setStatus("Gif", "");
+  
   stopRendering();
   drawFrame(frameManager.frames[0], 0, frameManager.frames);
 
+  
   showGif();
 
   if ((isCorrect === true) || (isCorrect === false)) {

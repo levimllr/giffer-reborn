@@ -77,7 +77,7 @@ var load = function(rt) {
   rt.regFunc(delay, "global", "delay", [rt.primitiveType("unsigned long")], rt.voidTypeLiteral);
 
 
-  // STRING ///////////////////////////////////////////////////////
+// STRING ///////////////////////////////////////////////////////
   //Define type
   var string_t = rt.newClass("String", [
     {
@@ -249,7 +249,7 @@ function enableAll() {
 function messageHandler(event) {
   if (event.data.type == "code") {
     var code = event.data.code;
-    analogPins = event.data.analogPins;
+    setPinKeyframes(event.data.pinKeyframes);
     var debugging = event.data.debugging;
     var config = {
       includes: {
