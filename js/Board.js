@@ -341,13 +341,17 @@ KSBoard.prototype.draw = function(ctx){
     }
     if(speedValue != 0){
       var RPM = Math.max(0, VALUE_TO_RPM_MUL * (speedValue - VALUE_TO_RPM_MIN));
-      ctx.font = "20px arial";
-      ctx.fillStyle = "red";
+      ctx.font = "20px impact,arial";
+      ctx.fillStyle = "white";
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 1;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(Math.floor(RPM), x, y - 10);
-      ctx.font = "12px arial";
+      ctx.strokeText(Math.floor(RPM), x, y - 10);
+      ctx.font = "16px impact,arial";
       ctx.fillText("RPM", x, y + 10);
+      ctx.strokeText("RPM", x, y + 10);
     }
   };
 
