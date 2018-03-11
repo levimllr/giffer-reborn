@@ -23,6 +23,7 @@ label.btn {
 .blur {
   -webkit-animation: blur 0.5s 1;
   filter: blur(10px);
+  pointer-events: none;
 }
 
 @-webkit-keyframes blur {

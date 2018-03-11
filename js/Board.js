@@ -36,6 +36,10 @@ Board.prototype.drawInfo = function(ctx, frame, index, frameManager){
   ctx.fillText(gradeText, this.shieldImg.width + 10, 175);
 };
 
+Board.prototype.drawShield = function(ctx) {
+  //Called on its own when board is loaded
+}
+
 Board.prototype.draw = function(ctx, frame, index, frameManager) {
   this.drawInfo();
 };
@@ -157,13 +161,17 @@ LEDBoard.prototype.advance = function(frame, index, frameManager) {
   this.frameManager = frameManager;
 };
 
+LEDBoard.prototype.drawShield = function(ctx) {
+  ctx.drawImage(this.shieldImg, 0, 0);
+}
+
 LEDBoard.prototype.draw = function(ctx) {
   var frame = this.currentFrame;
   var index = this.currentIndex;
   var frameManager = this.frameManager;
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.drawImage(this.shieldImg, 0, 0);
+  this.drawShield(ctx);
 
   for (var i = 2; i <= 15; i++) {
     if (frame.getPinState(i) >= 1) { //if it's on
@@ -201,6 +209,10 @@ KSBoard.prototype.type = "KS Board";
 KSBoard.prototype.canvasWidth = 450;
 KSBoard.prototype.canvasHeight = 350;
 
+
+KSBoard.prototype.drawShield = function(ctx) {
+  ctx.drawImage(this.shieldImg, 0, 0, 450, 255);
+}
 /*
   A5/D54: BTN-UP
   A6/D55: BTN-MODE
@@ -260,7 +272,7 @@ KSBoard.prototype.draw = function(ctx){
   var frameManager = this.frameManager;
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.drawImage(this.shieldImg, 0, 0, 450, 255);
+  this.drawShield(ctx);
 
   //Draw D1
   if (frame.getPinState(13) >= 1) { //if it's on
@@ -390,10 +402,17 @@ var BOARDS = {
   "LED Board": LEDBoard,
   "KS Board": KSBoard
 };
-
+var remaining = 0;
 for(var b in BOARDS){
   if(BOARDS.hasOwnProperty(b)){
+    remaining++;
     BOARDS[b].prototype.shieldImg = new Image;
+    BOARDS[b].prototype.shieldImg.onload = function(e) {
+      remaining--;
+      if(remaining === 0) {
+        currentBoard.drawShield(canvas.getContext("2d"));
+      }
+    }
     BOARDS[b].prototype.shieldImg.src = BOARDS[b].prototype.imageURL;
     console.log("Loading background image for board: " + b);
     var o = document.createElement("option");

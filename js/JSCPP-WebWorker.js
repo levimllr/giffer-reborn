@@ -128,7 +128,7 @@ var load = function(rt) {
     frameManager.addOutputText(text);
     var message = {text: text, type: "output"};
     this.postMessage(JSON.stringify(message));
-  };
+    };
 
   function get_string_for(rt, _this, thing) {
     if (rt.isStringType(thing.t)) {
@@ -289,6 +289,7 @@ function messageHandler(event) {
     }
     else if (event.data.action == "stepInto") {
       setLineByLine(true);
+      cppdebugger.stopConditions["breakpoints"] = false;
       qualifiedContinue();
     }
     else if (event.data.action == "enabled") {

@@ -62,6 +62,7 @@ function FrameManager() {
   this.frames[0] = new Frame();
   this.currentFrame = 0;
   this.elapsedTime = 0;
+  this.isGraded = false;
 }
 
 FrameManager.prototype.getPinMode = function (pinNumber, frame) {
@@ -103,4 +104,82 @@ FrameManager.prototype.addOutputText = function (text) {
   this.frames[this.currentFrame].addOutputText(text);
 };
 
+FrameManager.prototype.grade = function (currentExercise) {
+  this.isGraded = true;
+  
+  println("Now grading according to exercise " + currentExercise.number);
+  
+  this.grade = compareFrameManagers(this, currentExercise.frameManager);
 
+};
+
+function compareFrameManagers(fm1, fm2) {
+  if (fm1.frames.length !== fm2.frames.length) {
+    println("Gifs are different lengths");
+    return false;
+  }
+  var onewayFrameCompare = function (f1, f2) {
+    if (!Object.keys(f1.ledStates).every(function (element) {
+      if (!(f1.getPinState(element) === f2.getPinState(element))) {
+        println("Found difference in pin states on pin " + element);
+        return false;
+      }
+      if (!((f1.getPinState(element) === HIGH) ? (f1.getPinMode(element) === f2.getPinMode(element)) : true)) {
+        println("Found difference in pin modes on pin " + element);
+        return false;
+      }
+      return true;
+      })) {
+      return false;
+    }
+    if (!(f1.postDelay === f2.postDelay)) {
+      println("Found difference in delays");
+      return false;
+    }
+    if (f1.outputText.length !== f2.outputText.length) {
+      println("Found difference in number of Serial prints");
+      return false;
+    }
+    for (var i = 0; i < f1.outputText.length; i++) {
+      if (f1.outputText[i].trim() !== f2.outputText[i].trim()) {
+        println("Found difference in output text (\"" + f1.outputText[i].trim() + "\" vs \"" + f2.outputText[i].trim() + "\")");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  if (!fm1.frames.every(function (element, key) {
+    if (onewayFrameCompare(element, fm2.frames[key]) && onewayFrameCompare(fm2.frames[key], element)) {
+      return true;
+      } else {
+      println(" in frame " + key);
+      return false;
+    }
+    })) {
+    return false;
+  }
+  if (!fm2.frames.every(function (element, key) {
+    if (onewayFrameCompare(element, fm1.frames[key]) && onewayFrameCompare(fm1.frames[key], element)) {
+      return true;
+      } else {
+      println(" in frame " + key);
+      return false;
+    }
+    })) {
+    return false;
+  }
+  return true;
+}
+
+function makeFrameManager(data) {
+  //Modifying __proto__ is the same speed as manually copying everything
+  //See: https://jsperf.com/parse-json-into-an-object-and-assign-a-prototype
+  //(also, I couldn't get manual copying to work without hard-coding the fields like Paul was doing)
+
+  data.__proto__ = FrameManager.prototype;
+  for(var f of data.frames) {
+    f.__proto__ = Frame.prototype;
+  }
+  return data;
+}

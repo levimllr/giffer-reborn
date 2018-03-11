@@ -68,7 +68,7 @@
                             <button class="btn btn-outline-secondary" type="button" onclick="loadExercise(true)">Load Exercise</button>
                           </div>
                           <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button" onclick="clearExercise()">Clear Exercise</button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="wipeExercise()">Clear Exercise</button>
                           </div>
                         </div>
                       </div>
@@ -78,13 +78,14 @@
                       </div>
                       <div class="tab-pane fade" id="debug" role="tabpanel" aria-labelledby="edit-tab">
                           <div class="custom-control custom-checkbox">
-                              <input class="custom-control-input" type="checkbox" id="debugging-enabled" onchange="debugUpdateEnabled()" checked>
+                              <input class="custom-control-input" type="checkbox" id="debugging-enabled" onchange="debug.sendUpdateEnabled()" checked>
                               <label class="custom-control-label" for="debugging-enabled">Enable breakpoints</label>
                           </div>
                           <br>
                           <div id="debugging-buttons">
-                              <button class="btn btn-success" onclick="debugContinue()">Continue</button>
-                              <button class="btn btn-secondary" onclick="debugStepInto()">Step Into</button>
+                              <button class="btn btn-info" onclick="debug.doContinue()">Continue</button>
+                              <button class="btn btn-secondary" onclick="debug.doStep()">Step</button>
+                              <button class="btn btn-danger" onclick="debug.stopDebuggingSession()">Stop Debugging</button>
                           </div>
                           <br>
                           <br>
@@ -104,16 +105,6 @@
                           </div>
                       </div>
                       <div class="tab-pane fade" id="dev" role="tabpanel" aria-labelledby="dev-tab">
-                        <div id="file-op-buttons">
-                          <button class="btn btn-outline-secondary" onclick="saveJSON()">Export JSON</button>
-                          <input id="input-file" class="fileinput" name="input-file" type="file" multiple>
-                          &nbsp;
-                          <label for="input-file" class="btn btn-outline-secondary">Load JSON</label>
-                          &nbsp;
-                          <button class="btn btn-outline-secondary" id="next-page-button" onclick="nextJSON()" style="visibility: hidden;">Next JSON</button>
-                          &nbsp;
-                          <span id="num-remaining" class="maintext" style="visibility: hidden;"></span>
-                        </div>
                         <button class="btn btn-outline-secondary" onclick="saveExercise()">Export Exercise</button>
                         <button class="btn btn-outline-secondary" onclick="saveFrameManager()">Export FrameManager</button>
                         <hr>
@@ -174,7 +165,8 @@
             </button>
           </div>
           <div class="modal-body">
-            This window will outline the features of Giffer Reborn. To see this window again, click "Show Help" under "Tools".<br>
+            This window will outline the features of Giffer Reborn. <br>
+            <strong>To see this window again, click "Show Help" under "Tools".</strong><br>
             <br><br>
             <h4>Working with exercises</h4>
             To load an exercise, type the exercise number into the exercise field and press load.<br>
@@ -186,16 +178,13 @@
             If you click next to a line number on the left of your code, you can add a Breakpoint.<br>
             When Breakpoints are enabled, the program will halt execution when it reaches the Breakpoint.<br>
             Once the program has halted, you can view the current variables and their values.<br>
-            You can press "Step Into" to step to the next line of execution.<br>
+            You can press "Step" to step to the next line of execution, this might take you into a function.<br>
             You can press "Continue" to skip to the next Breakpoint.<br>
             At any time during debugging, you can disable Breakpoints to finish executing.<br>
             <br><br>
             <h4>Submitting</h4>
             Once you've solved an exercise, you can click "Copy Page".<br>
             Then, read the directions in the console for how to submit to NEO.<br>
-            
-            
-            
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -249,9 +238,9 @@ void loop() {
               <label for="export-exercise-suffix">Student code suffix</label>
               <textarea class="form-control" id="export-exercise-suffix">
 int main() {
-setup();
-loop();
-return 0;
+  setup();
+  loop();
+  return 0;
 }
 </textarea>
             </div>
@@ -277,6 +266,7 @@ return 0;
     <script src="js/FileSaver.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/highlight.pack.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/Debugger.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/Board.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/main.js" type="text/javascript" charset="utf-8"></script>
   </body>
