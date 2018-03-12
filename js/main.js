@@ -65,6 +65,9 @@ exerciseField.value = getFromStorage("exercise-number");
 //Canvas
 var canvas = document.getElementById("canvas");
 
+//Current Exercise
+var currentExercise = {number: null, suffix: defaultSuffix};
+
 //Canvas Speed
 var canvasSpeed = document.getElementById("canvas-speed");
 var speedText = document.getElementById("playback-speed");
@@ -307,7 +310,6 @@ function runCode() {
 }
 
 //Exercises
-var currentExercise = {number: null, suffix: defaultSuffix};
 function clearExercise(){
   setStatus("Exercise not found.  Gifs will not be graded.", "");
   currentExercise = {number: null, suffix: defaultSuffix};
