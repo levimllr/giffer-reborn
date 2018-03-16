@@ -116,6 +116,7 @@ function Debugger(editor) {
     });
   }
   this.renderState = function(frameManager) {
+    
     var date = new Date();
     var dateString = date.toDateString();
     var timeString = date.toLocaleTimeString();

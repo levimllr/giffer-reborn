@@ -155,6 +155,27 @@
       </div>
     </div>
 
+    
+    <div class="modal fade" id="overwrite-modal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modal-title">Exercise Loaded</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+	    This exercise provides starting code.  Do you want to overwrite your current code?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">No</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="overwriteCode()">Yes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div class="modal fade" id="readme-modal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -175,12 +196,12 @@
             <br><br>
             <h4>Debugging</h4>
             Under the "Debugging" tab, there is a checkbox to "Enable Breakpoints".<br>
-            If you click next to a line number on the left of your code, you can add a Breakpoint.<br>
-            When Breakpoints are enabled, the program will halt execution when it reaches the Breakpoint.<br>
+            If you click next to a line number on the left of your code, you can add a breakpoint.<br>
+            When breakpoints are enabled, the program will halt execution when it reaches the breakpoint.<br>
             Once the program has halted, you can view the current variables and their values.<br>
             You can press "Step" to step to the next line of execution, this might take you into a function.<br>
-            You can press "Continue" to skip to the next Breakpoint.<br>
-            At any time during debugging, you can disable Breakpoints to finish executing.<br>
+            You can press "Continue" to skip to the next breakpoint.<br>
+            At any time during debugging, you can disable breakpoints to finish executing.<br>
             <br><br>
             <h4>Submitting</h4>
             Once you've solved an exercise, you can click "Copy Page".<br>

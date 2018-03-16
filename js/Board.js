@@ -10,11 +10,18 @@ Board.prototype.canvasHeight = null;
 Board.prototype.context = null;
 Board.prototype.pinKeyframes = [];
 Board.prototype.DOMKeyframes = [];
-
+Board.prototype.codePrefix = `#include "Arduino.h"
+typedef unsigned char byte;
+`;
 Board.prototype.imageURL = null;
 Board.prototype.type = "Board";
 
+Board.prototype.elapsedTime = 0;
+Board.prototype.currentIndex = 0;
+
 Board.prototype.setContext = function(context){
+  this.elapsedTime = 0;
+  this.currentIndex = 0;
   this.context = context;
 };
 
@@ -36,9 +43,16 @@ Board.prototype.drawInfo = function(ctx, frame, index, frameManager){
   ctx.fillText(gradeText, this.shieldImg.width + 10, 175);
 };
 
+
+Board.prototype.advance = function(frame, index, frameManager) {
+  this.currentIndex = index;
+  this.currentFrame = frame;
+  this.frameManager = frameManager;
+};
+
 Board.prototype.drawShield = function(ctx) {
   //Called on its own when board is loaded
-}
+};
 
 Board.prototype.draw = function(ctx, frame, index, frameManager) {
   this.drawInfo();
@@ -155,12 +169,6 @@ LEDBoard.prototype.type = "LED Board";
 LEDBoard.prototype.canvasWidth = 300;
 LEDBoard.prototype.canvasHeight = 195;
 
-LEDBoard.prototype.advance = function(frame, index, frameManager) {
-  this.currentFrame = frame;
-  this.currentIndex = index;
-  this.frameManager = frameManager;
-};
-
 LEDBoard.prototype.drawShield = function(ctx) {
   ctx.drawImage(this.shieldImg, 0, 0);
 }
@@ -208,6 +216,26 @@ KSBoard.prototype.imageURL = "/img/KS-Shield.png";
 KSBoard.prototype.type = "KS Board";
 KSBoard.prototype.canvasWidth = 450;
 KSBoard.prototype.canvasHeight = 350;
+
+KSBoard.prototype.codePrefix = `#include "Arduino.h"
+typedef unsigned char byte;
+#define A0 54
+#define A1 55
+#define A2 56
+#define A3 57
+#define A4 58
+#define A5 59
+#define A6 60
+#define A7 61
+#define A8 62
+#define A9 63
+#define A10 64
+#define A11 65
+#define A12 66
+#define A13 67
+#define A14 68
+#define A15 69
+`;
 
 
 KSBoard.prototype.drawShield = function(ctx) {
@@ -259,12 +287,6 @@ KSBoard.prototype.drawInfo = function(ctx, frame, index, frameManager){
   var gradeText = (this.context.isCorrect === true) ? "Correct" : ((this.context.isCorrect === false) ? "Incorrect" : "Ungraded");
   ctx.fillText(gradeText, 200, y + 70);
 }
-
-KSBoard.prototype.advance = function(frame, index, frameManager) {
-  this.currentFrame = frame;
-  this.currentIndex = index;
-  this.frameManager = frameManager;
-};
 
 KSBoard.prototype.draw = function(ctx){
   var frame = this.currentFrame;

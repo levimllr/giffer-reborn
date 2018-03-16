@@ -13,10 +13,6 @@ function setToStorage(item, value) {
 }
 
 //Defaults
-var defaultPrefix = `#include "Arduino.h"
-typedef unsigned char byte;
-`;
-var currentPrefix = defaultPrefix; //TODO: tie to board
 var defaultCode = `void setup() {
   pinMode(3, OUTPUT);
 }
@@ -61,18 +57,33 @@ var boardField = document.getElementById("board");
 
 nameField.value = getFromStorage("name");
 exerciseField.value = getFromStorage("exercise-number");
+exerciseField.onkeyup = function(e) {
+  if(e.keyCode == 13) {
+    loadExercise(true);
+  }
+}
 
 //Canvas
 var canvas = document.getElementById("canvas");
 
-//Current Exercise
+//Currents
+var currentPrefix = "";
 var currentExercise = {number: null, suffix: defaultSuffix};
 
 //Canvas Speed
 var canvasSpeed = document.getElementById("canvas-speed");
 var speedText = document.getElementById("playback-speed");
-canvasSpeed.oninput = function(){
-  speedText.innerHTML = "Playback Speed: " + this.value;
+var speed = canvasSpeed.value;
+canvasSpeed.oninput = function() {
+  wait *= speed;
+  speed = canvasSpeed.value;
+  wait /= speed;
+
+  if (isNaN(wait)) {
+    wait = minWait;
+  }
+  
+  speedText.innerHTML = "Playback Speed: " + speed;
 }
 
 //Readme
@@ -111,7 +122,6 @@ function resetStatus() {
   }
 
   $("#copy-page").css("visibility", "hidden");
-
 }
 
 //Boards
@@ -122,6 +132,8 @@ function loadBoard(type, setup) {
     $("#edit").empty();
     currentBoard = createBoard(type, setup);
     currentBoard.activate();
+
+    currentPrefix = currentBoard.codePrefix;
     
     canvas.height = currentBoard.canvasHeight;
     canvas.width = currentBoard.canvasWidth;
@@ -188,7 +200,7 @@ new Clipboard("#copy-page", {
 var rendererTimeoutHandle = null;
 function stopRendering(){
   if (rendererTimeoutHandle !== null) {
-    cancelAnimationFrame(rendererTimeoutHandle);
+    clearTimeout(rendererTimeoutHandle);
     rendererTimeoutHandle = null;
   }
 }
@@ -230,7 +242,10 @@ function runCode() {
   setStatus("Running your code . . .", "info", true);
   
   saveContext();
+
+  stopRendering();
   hideCanvas();
+
   document.getElementById("run-button").innerHTML = "Running...";
   document.getElementById("console-output").innerHTML = "";
 
@@ -310,6 +325,9 @@ function runCode() {
 }
 
 //Exercises
+function overwriteCode(){
+  editor.setValue(currentExercise.startingCode);
+}
 function clearExercise(){
   setStatus("Exercise not found.  Gifs will not be graded.", "");
   currentExercise = {number: null, suffix: defaultSuffix};
@@ -367,8 +385,8 @@ function loadExercise(promptForOverwrite) {
 
         loadBoardFromExercise(currentExercise);
 
-        if(promptForOverwrite && confirm("Load Starting Code?  This will overwrite your existing code!!!")) {
-          editor.setValue(currentExercise.startingCode);
+        if(promptForOverwrite) {
+          $("#overwrite-modal").modal('show');
         }
       }
       //set code to exercise start code?
@@ -388,6 +406,8 @@ function wipeExercise() {
 loadExercise();
 
 //Rendering
+var wait = 0;
+var minWait = 17;
 function renderFrameManger(frameManager) {
   var date = new Date();
   var dateString = date.toDateString();
@@ -396,39 +416,54 @@ function renderFrameManger(frameManager) {
   var name = nameField.value;
   var exerciseNumber = exerciseField.value;
 
-  var drawFrame = function(frame, index, array, stdDelay, timeSinceLast, callTime, _) {
+  var currentIndex = 0;
+  wait = 0;
+
+  currentBoard.setContext({
+    dateString: dateString,
+    timeString: timeString,
+    isCorrect: frameManager.grade,
+    exerciseNumber: exerciseNumber,
+    name: name
+  });
   
+  var drawFrame = function() {
+    
     var ctx = canvas.getContext("2d");
     
     var speed = document.getElementById("canvas-speed").value;
-    var cumulativeTime = timeSinceLast + (performance.now() - callTime);
-    var desiredWait = stdDelay / speed;
-    var partial;
 
-    if (speed === 0 || cumulativeTime < desiredWait) {
-      partial = drawFrame.bind(null, array[index], index, array, stdDelay, cumulativeTime, performance.now());
+    if (speed === 0) {
+      wait = minWait;
     } else {
-      if (index === 0) {
-          currentBoard.setContext({
+      var frame = frameManager.frames[currentIndex];
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      currentBoard.advance(frame, currentIndex, frameManager);
+      currentBoard.draw(ctx);
+      
+      while(wait < minWait) {
+	if (currentIndex >= frameManager.frames.length) {
+	  currentIndex = 0;
+	  currentBoard.setContext({
             dateString: dateString,
             timeString: timeString,
             isCorrect: frameManager.grade,
             exerciseNumber: exerciseNumber,
             name: name
-          });
+	  });
+	}
+	wait += frameManager.frames[currentIndex].postDelay / speed;
+	currentIndex++;
       }
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      currentBoard.advance(frame, index, frameManager);
-      currentBoard.draw(ctx);
-
-      var nextIndex = (index + 1) % array.length;
-      partial = drawFrame.bind(null, array[nextIndex], nextIndex, array, frame.postDelay, 0, performance.now());
     }
 
-    rendererTimeoutHandle = requestAnimationFrame(partial);
+    rendererTimeoutHandle = setTimeout(drawFrame, minWait);
+
+    wait -= minWait;
+    
   };
   
   stopRendering();
