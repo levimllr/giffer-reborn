@@ -83,9 +83,9 @@ var load = function(rt) {
 
   var attachInterrupt = function (rt, _this, pin, callback, trigger) {
     //pointer, pin, trigger, previous
-    interrupts.push({callback, pin, trigger, getPinValueAtTime(frameManager.elapsedTime)});
+    interrupts.push({pointer: callback, pin: pin, trigger: trigger, previous: getPinValueAtTime(frameManager.elapsedTime)});
   }
-  rt.regFunc(attachInterrupt, "global", "attachInterrupt", [rt.unsignedintTypeLiteral, rt.functionPointerType(rt.voidTypeLiteral, []), rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
+  rt.regFunc(attachInterrupt, "global", "attachInterrupt", [rt.unsignedintTypeLiteral, rt.functionType(rt.voidTypeLiteral, []), rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
   var detachInterrupt = function (rt, _this, pin) {
     for (var i = 0; i < interrupts.length; i++) {
@@ -204,44 +204,47 @@ var interrupts = [];
     HIGH to trigger the interrupt whenever the pin is high.
 
 **/
-function fireInterrupts(time) {
+function fireInterrupts(rt, time) {
   for (var i = 0; i < interrupts.length; i++) {
     var pin = interrupts[i].pin;
     var value = 0;
     var previous = interrupts[i].previous;
     var pointer = interrupts[i].pointer;
-    if (frameManager.getMode(pin) === INPUT) {
-      value = getPinValueAtTime(pin, time);
-    } else if (frameManager.getMode(pin) === OUTPUT) {
-      value = frameManager.getState(pin);
-    }
+    value = getPinValueAtTime(pin, time);
     if (trigger === LOW) {
       if (value === LOW && previous !== LOW) {
-	callPointer(pointer);
+        callPointer(rt, pointer);
       }
     } else if (trigger === CHANGE) {
       if (value !== previous) {
-	callPointer(pointer);
+        callPointer(rt, pointer);
       }
     } else if (trigger === RISING) {
       if (value > previous) {
-	callPointer(pointer);
+        callPointer(rt, pointer);
       }
     } else if (trigger === FALLING) {
       if (value < previous) {
-	callPointer(pointer);
+        callPointer(rt, pointer);
       }
     } else if (trigger === HIGH) {
       if (value === HIGH && previous !== HIGH) {
-	callPointer(pointer);
+        callPointer(rt, pointer);
       }
     }
     interrupts[i].previous = value;
   }
 }
 
-function callPointer(pointer) {
-  //for paul to do...
+function callPointer(rt, pointer) {
+  var gen = pointer.v.target();
+  var step;
+  while (true) {
+    step = gen.next();
+    if (step.done) {
+      break;
+    }
+  }
 }
 
 
@@ -264,14 +267,18 @@ function setPinKeyframes(pkfs){
 }
 
 function getPinValueAtTime(pin, time){
-  var values = sortedPinKeyframes[pin];
-  var lastValue = 0;
-  for(var pair of values){
-    if(pair.time <= time){
-      lastValue = pair.value;
-    } else {
-      return lastValue;
+  if (frameManager.getPinMode(pin) == INPUT) {
+    var values = sortedPinKeyframes[pin];
+    var lastValue = 0;
+    for(var pair of values){
+      if(pair.time <= time){
+        lastValue = pair.value;
+      } else {
+        return lastValue;
+      }
     }
+  } else {
+    return frameManager.getPinState(pin);
   }
   return lastValue;
 }
