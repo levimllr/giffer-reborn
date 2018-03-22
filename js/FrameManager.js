@@ -6,6 +6,10 @@ var INPUT = 0x0;
 var OUTPUT = 0x1;
 var INPUT_PULLUP = 0x2;
 
+var RISING = 0x3;
+var FALLING = 0x4;
+var CHANGE = 0x5;
+
 function Frame(previousFrame) {
   if (typeof(previousFrame) === "undefined") {
     this.ledModes = {};

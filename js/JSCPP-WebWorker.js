@@ -16,7 +16,10 @@ var load = function(rt) {
 
   rt.scope[0]["INPUT"] = gen_int_obj(INPUT);
   rt.scope[0]["OUTPUT"] = gen_int_obj(OUTPUT);
-  // rt.scope[0]["INPUT_PULLUP"] = gen_int_obj(INPUT_PULLUP);
+  
+  rt.scope[0]["RISING"] = gen_int_obj(RISING);
+  rt.scope[0]["FALLING"] = gen_int_obj(FALLING);
+  rt.scope[0]["CHANGE"] = gen_int_obj(CHANGE);
 
   frameManager = new FrameManager();
 
@@ -76,7 +79,25 @@ var load = function(rt) {
   };
   rt.regFunc(delay, "global", "delay", [rt.primitiveType("unsigned long")], rt.voidTypeLiteral);
 
+  // INTERRUPT ////////////////////////////////////////////////////
 
+  var attachInterrupt = function (rt, _this, pin, callback, trigger) {
+    //pointer, pin, trigger, previous
+    interrupts.push({callback, pin, trigger, getPinValueAtTime(frameManager.elapsedTime)});
+  }
+  rt.regFunc(attachInterrupt, "global", "attachInterrupt", [rt.unsignedintTypeLiteral, rt.functionPointerType(rt.voidTypeLiteral, []), rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
+
+  var detachInterrupt = function (rt, _this, pin) {
+    for (var i = 0; i < interrupts.length; i++) {
+      if (interrupts[i].pin === pin) {
+	interrupts.remove(interrupts[i]);
+      }
+    }
+  }
+  rt.regFunc(detachInterrupt, "global", "detachInterrupt", [rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
+  
+  
+  
 // STRING ///////////////////////////////////////////////////////
   //Define type
   var string_t = rt.newClass("String", [
@@ -137,7 +158,7 @@ var load = function(rt) {
       return "" + thing.v;
     }
   }
-
+  
   var print = function (rt, _this, thing) {
     if (!_this.v.initialized) {
       rt.raiseException("Serial used before initialization.");
@@ -171,6 +192,58 @@ var load = function(rt) {
 arduino_h = {
   load: load
 };
+
+var interrupts = [];
+// {pointer, pin, trigger, previous}
+/**
+    LOW to trigger the interrupt whenever the pin is low,
+    CHANGE to trigger the interrupt whenever the pin changes value
+    RISING to trigger when the pin goes from low to high,
+    FALLING for when the pin goes from high to low.
+    The Due, Zero and MKR1000 boards allows also:
+    HIGH to trigger the interrupt whenever the pin is high.
+
+**/
+function fireInterrupts(time) {
+  for (var i = 0; i < interrupts.length; i++) {
+    var pin = interrupts[i].pin;
+    var value = 0;
+    var previous = interrupts[i].previous;
+    var pointer = interrupts[i].pointer;
+    if (frameManager.getMode(pin) === INPUT) {
+      value = getPinValueAtTime(pin, time);
+    } else if (frameManager.getMode(pin) === OUTPUT) {
+      value = frameManager.getState(pin);
+    }
+    if (trigger === LOW) {
+      if (value === LOW && previous !== LOW) {
+	callPointer(pointer);
+      }
+    } else if (trigger === CHANGE) {
+      if (value !== previous) {
+	callPointer(pointer);
+      }
+    } else if (trigger === RISING) {
+      if (value > previous) {
+	callPointer(pointer);
+      }
+    } else if (trigger === FALLING) {
+      if (value < previous) {
+	callPointer(pointer);
+      }
+    } else if (trigger === HIGH) {
+      if (value === HIGH && previous !== HIGH) {
+	callPointer(pointer);
+      }
+    }
+    interrupts[i].previous = value;
+  }
+}
+
+function callPointer(pointer) {
+  //for paul to do...
+}
+
 
 var pinKeyframes;
 var sortedPinKeyframes;

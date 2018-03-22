@@ -11,6 +11,7 @@ Board.prototype.context = null;
 Board.prototype.pinKeyframes = [];
 Board.prototype.DOMKeyframes = [];
 Board.prototype.codePrefix = `#include "Arduino.h"
+#define digitalPinToInterrupt(x) (x)
 typedef unsigned char byte;
 `;
 Board.prototype.imageURL = null;
@@ -218,6 +219,7 @@ KSBoard.prototype.canvasWidth = 450;
 KSBoard.prototype.canvasHeight = 350;
 
 KSBoard.prototype.codePrefix = `#include "Arduino.h"
+#define digitalPinToInterrupt(x) (x)
 typedef unsigned char byte;
 #define A0 54
 #define A1 55
