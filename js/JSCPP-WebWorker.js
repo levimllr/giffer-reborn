@@ -70,12 +70,7 @@ var load = function(rt) {
   // DELAY ////////////////////////////////////////////////////////
 
   var delay = function (rt, _this, ms) {
-    frameManager.nextFrame(ms.v);
-
-    setAllInputPinsToTime(frameManager, frameManager.elapsedTime);
-
-    var message = {delay: ms.v, newFrameNumber: frameManager.currentFrame, type: "newFrame"};
-    this.postMessage(JSON.stringify(message));
+    progress(rt, ms.v);
   };
   rt.regFunc(delay, "global", "delay", [rt.primitiveType("unsigned long")], rt.voidTypeLiteral);
 
@@ -83,7 +78,7 @@ var load = function(rt) {
 
   var attachInterrupt = function (rt, _this, pin, callback, trigger) {
     //pointer, pin, trigger, previous
-    interrupts.push({pointer: callback, pin: pin, trigger: trigger, previous: getPinValueAtTime(frameManager.elapsedTime)});
+    interrupts.push({pointer: callback, pin: pin.v, trigger: trigger.v, previous: getPinValueAtTime(frameManager.elapsedTime)});
   }
   rt.regFunc(attachInterrupt, "global", "attachInterrupt", [rt.unsignedintTypeLiteral, rt.functionType(rt.voidTypeLiteral, []), rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
@@ -193,6 +188,31 @@ arduino_h = {
   load: load
 };
 
+function progress(rt, amount) {
+
+  var startTime = frameManager.elapsedTime;
+  var finalTime = currentTime + amount;
+  var currentTime = startTime;
+  
+  for (var i = 0; i < pinKeyframes.length; i++) {
+    if (pinKeyframes[i].time < startTime) continue;
+    if (pinKeyframes[i].time > finalTime) break;
+
+    currentTime = pinKeyframes.time;
+    
+    
+  }
+  
+    frameManager.nextFrame(ms.v);
+
+    fireInterrupts(frameManager.elapsedTime, frameManager.elapsedTime);
+    
+    setAllInputPinsToTime(frameManager, frameManager.elapsedTime);
+
+    var message = {delay: ms.v, newFrameNumber: frameManager.currentFrame, type: "newFrame"};
+    this.postMessage(JSON.stringify(message));
+}
+
 var interrupts = [];
 // {pointer, pin, trigger, previous}
 /**
@@ -204,7 +224,8 @@ var interrupts = [];
     HIGH to trigger the interrupt whenever the pin is high.
 
 **/
-function fireInterrupts(rt, time) {
+function fireInterrupts(rt, previous, time) {
+  
   for (var i = 0; i < interrupts.length; i++) {
     var pin = interrupts[i].pin;
     var value = 0;
@@ -247,22 +268,21 @@ function callPointer(rt, pointer) {
   }
 }
 
-
 var pinKeyframes;
 var sortedPinKeyframes;
 function setPinKeyframes(pkfs){
+  pkfs.sort(function(a, b) {
+    return a.time - b.time;
+  });
+
   pinKeyframes = pkfs;
+  
   sortedPinKeyframes = {};
   for(var frame of pinKeyframes){
     if(!sortedPinKeyframes[frame.pin]){
       sortedPinKeyframes[frame.pin] = [];
     }
     sortedPinKeyframes[frame.pin].push({time: frame.time, value: frame.value});
-  }
-  for(var pin in sortedPinKeyframes){
-    sortedPinKeyframes[pin].sort(function(a, b){
-      return a.time - b.time;
-    });
   }
 }
 
