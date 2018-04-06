@@ -31,7 +31,7 @@ Board.prototype.drawInfo = function(ctx, frame, index, frameManager){
   ctx.fillStyle = "black";
   ctx.font = "15px monospace";
   ctx.fillText("Frame: " + index, this.shieldImg.width + 10, 15);
-  ctx.fillText("PostDelay: " + frame.postDelay, this.shieldImg.width + 10, 35);
+  ctx.fillText("Delay: " + frame.postDelay + " Time: " + this.elapsedTime, this.shieldImg.width + 10, 35);
   ctx.fillText("By " + this.context.name, this.shieldImg.width + 10, 55);
   ctx.fillText("Exercise " + this.context.exerciseNumber, this.shieldImg.width + 10, 75);
 
@@ -46,6 +46,7 @@ Board.prototype.drawInfo = function(ctx, frame, index, frameManager){
 
 
 Board.prototype.advance = function(frame, index, frameManager) {
+  if(this.currentIndex !== index) this.elapsedTime += frame.postDelay;
   this.currentIndex = index;
   this.currentFrame = frame;
   this.frameManager = frameManager;
@@ -75,17 +76,17 @@ Board.prototype.addKeyframe = function(time, pin, value) {
   $("#keyframe-table-tbody").append(newContent);
 
   if (time) {
-    timeField = newContent.find(".keyframe-time")[0];
+    var timeField = newContent.find(".keyframe-time")[0];
     timeField.valueAsNumber = Number(time);
   }
 
   if (pin) {
-    pinField = newContent.find(".keyframe-pin")[0];
+    var pinField = newContent.find(".keyframe-pin")[0];
     pinField.valueAsNumber = Number(pin);
   }
 
   if (value) {
-    valueField = newContent.find(".keyframe-value")[0];
+    var valueField = newContent.find(".keyframe-value")[0];
     valueField.valueAsNumber = Number(value);
   }
 
@@ -165,14 +166,14 @@ function LEDBoard(setup) {
 }
 
 LEDBoard.prototype = Object.create(Board.prototype);
-LEDBoard.prototype.imageURL = "/img/LED-Shield.gif";
+LEDBoard.prototype.imageURL = "img/LED-Shield.gif";
 LEDBoard.prototype.type = "LED Board";
 LEDBoard.prototype.canvasWidth = 300;
 LEDBoard.prototype.canvasHeight = 195;
 
 LEDBoard.prototype.drawShield = function(ctx) {
   ctx.drawImage(this.shieldImg, 0, 0);
-}
+};
 
 LEDBoard.prototype.draw = function(ctx) {
   var frame = this.currentFrame;
@@ -213,7 +214,7 @@ function KSBoard(setup) {
 
 KSBoard.prototype = Object.create(Board.prototype);
 
-KSBoard.prototype.imageURL = "/img/KS-Shield.png";
+KSBoard.prototype.imageURL = "img/KS-Shield.png";
 KSBoard.prototype.type = "KS Board";
 KSBoard.prototype.canvasWidth = 450;
 KSBoard.prototype.canvasHeight = 350;
@@ -242,7 +243,7 @@ typedef unsigned char byte;
 
 KSBoard.prototype.drawShield = function(ctx) {
   ctx.drawImage(this.shieldImg, 0, 0, 450, 255);
-}
+};
 /*
   A5/D54: BTN-UP
   A6/D55: BTN-MODE
@@ -277,7 +278,7 @@ KSBoard.prototype.drawInfo = function(ctx, frame, index, frameManager){
   ctx.font = "15px monospace";
   var y = 270;
   ctx.fillText("Frame: " + index, 10, y + 10);
-  ctx.fillText("PostDelay: " + frame.postDelay, 10, y + 30);
+  ctx.fillText("Delay: " + frame.postDelay + " Time: " + this.elapsedTime, 10, y + 30);
   ctx.fillText("By " + this.context.name, 10, y + 50);
   ctx.fillText("Exercise " + this.context.exerciseNumber, 10, y + 70);
 
@@ -288,7 +289,7 @@ KSBoard.prototype.drawInfo = function(ctx, frame, index, frameManager){
   ctx.fillStyle = ((typeof(this.context.isCorrect) === "undefined") || (this.context.isCorrect === false)) ? "red" : "green";
   var gradeText = (this.context.isCorrect === true) ? "Correct" : ((this.context.isCorrect === false) ? "Incorrect" : "Ungraded");
   ctx.fillText(gradeText, 200, y + 70);
-}
+};
 
 KSBoard.prototype.draw = function(ctx){
   var frame = this.currentFrame;
@@ -436,7 +437,7 @@ for(var b in BOARDS){
       if(remaining === 0) {
         currentBoard.drawShield(canvas.getContext("2d"));
       }
-    }
+    };
     BOARDS[b].prototype.shieldImg.src = BOARDS[b].prototype.imageURL;
     console.log("Loading background image for board: " + b);
     var o = document.createElement("option");

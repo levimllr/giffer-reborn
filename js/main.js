@@ -1,4 +1,5 @@
 "use strict";
+
 //Storage
 function getFromStorage(item, ifEmpty) {
   var i = localStorage.getItem(item);
@@ -61,7 +62,7 @@ exerciseField.onkeyup = function(e) {
   if(e.keyCode == 13) {
     loadExercise(true);
   }
-}
+};
 
 //Canvas
 var canvas = document.getElementById("canvas");
@@ -84,7 +85,7 @@ canvasSpeed.oninput = function() {
   }
   
   speedText.innerHTML = "Playback Speed: " + speed;
-}
+};
 
 //Readme
 function showReadme() {

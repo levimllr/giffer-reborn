@@ -1,4 +1,4 @@
-var bannedVars = ["Serial", "LOW", "HIGH", "INPUT", "OUTPUT",
+var bannedVars = ["Serial", "LOW", "HIGH", "INPUT", "OUTPUT", "RISING", "FALLING", "CHANGE",
                   "pinMode", "digitalWrite", "analogWrite",
                   "analogRead", "delay", "main"];
 var Range = ace.require('ace/range').Range;
@@ -17,7 +17,7 @@ function Debugger(editor) {
       this.breakpoints.push(line);
     }
     this.sendUpdatedBreakpoints();
-  }
+  };
   this.sendUpdatedBreakpoints = function() {
     try {
       var breakpointsCopy = this.breakpoints.slice();
@@ -26,31 +26,31 @@ function Debugger(editor) {
     } catch (e) {
     
     }
-  }
+  };
   
   this.stopDebuggingSession = function() {
     jscpp.postMessage({type: "debugger", action: "enabled", state: false});
     this.doContinue();
-  }
+  };
   
   //Enabled
   this.isEnabled = function() {
     return document.getElementById("debugging-enabled").checked;
-  }
+  };
   this.sendUpdateEnabled = function () {
     try {
       jscpp.postMessage({type: "debugger", action: "enabled", state: this.isEnabled()});
     } catch (e) {
       console.log(e);
     }
-  }
+  };
   this.handleMessage = function(message) {
     var line = JSCPPToAce(message.node.sLine);
     if (line < 0 || line >= editor.getSession().getLength()) {
       this.doStep();
       return;
     }
-    markedLine = editor.getSession().addMarker(
+    this.markedLine = editor.getSession().addMarker(
       new Range(line, 0, line, 1),
       "current-line",
       "fullLine",
@@ -58,7 +58,7 @@ function Debugger(editor) {
     this.showVariables(message.variables);
     var fm = makeFrameManager(message.frameManager);
     this.renderState(fm);
-  }
+  };
   
   //Marker
   this.markedLine = null;
@@ -66,7 +66,7 @@ function Debugger(editor) {
     if (markedLine !== null) {
       editor.getSession().removeMarker(markedLine);
     }
-  }
+  };
   
   //Stepping
   this.doContinue = function() {
@@ -76,7 +76,7 @@ function Debugger(editor) {
     } catch (e) {
   
     }
-  }
+  };
   this.doStep = function() {
     try {
       jscpp.postMessage({type: "debugger", action: "stepInto"});
@@ -84,11 +84,11 @@ function Debugger(editor) {
     } catch (e) {
   
     }
-  }
+  };
   this.cleanup = function() {
     this.removeMarker();
     hideGif();
-  }
+  };
   
   //Render
   this.showVariables = function(vars) {
@@ -114,7 +114,7 @@ function Debugger(editor) {
   
       tbody.append(tr);
     });
-  }
+  };
   this.renderState = function(frameManager) {
     
     var date = new Date();
@@ -141,7 +141,7 @@ function Debugger(editor) {
     setStatus("Current State:", "");
     
     showCanvas();
-  }
+  };
   
   //Editor
   editor.on("gutterclick", function(e) {

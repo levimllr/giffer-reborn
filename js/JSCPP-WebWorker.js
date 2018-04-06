@@ -16,7 +16,7 @@ var load = function(rt) {
 
   rt.scope[0]["INPUT"] = gen_int_obj(INPUT);
   rt.scope[0]["OUTPUT"] = gen_int_obj(OUTPUT);
-  
+
   rt.scope[0]["RISING"] = gen_int_obj(RISING);
   rt.scope[0]["FALLING"] = gen_int_obj(FALLING);
   rt.scope[0]["CHANGE"] = gen_int_obj(CHANGE);
@@ -44,12 +44,13 @@ var load = function(rt) {
       return;
     }
     var val;
-    if (state.v == HIGH) {
+    if (state.v === HIGH) {
       val = ANALOG_MAX;
     } else {
       val = 0;
     }
     frameManager.setPinState(pinNumber.v, val);
+    progress(rt, 0);
   };
   rt.regFunc(digitalWrite, "global", "digitalWrite", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
@@ -64,6 +65,7 @@ var load = function(rt) {
       return;
     }
     frameManager.setPinState(pinNumber.v, value.v);
+    progress(rt, 0);
   };
   rt.regFunc(analogWrite, "global", "analogWrite", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
@@ -78,21 +80,21 @@ var load = function(rt) {
 
   var attachInterrupt = function (rt, _this, pin, callback, trigger) {
     //pointer, pin, trigger, previous
-    interrupts.push({pointer: callback, pin: pin.v, trigger: trigger.v, previous: getPinValueAtTime(frameManager.elapsedTime)});
+    interrupts.push({pointer: callback, pin: pin.v, trigger: trigger.v, previous: getPinValueAtTime(pin.v, frameManager.elapsedTime)});
   }
   rt.regFunc(attachInterrupt, "global", "attachInterrupt", [rt.unsignedintTypeLiteral, rt.functionType(rt.voidTypeLiteral, []), rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
   var detachInterrupt = function (rt, _this, pin) {
     for (var i = 0; i < interrupts.length; i++) {
       if (interrupts[i].pin === pin) {
-	interrupts.remove(interrupts[i]);
+        interrupts.remove(interrupts[i]);
       }
     }
   }
   rt.regFunc(detachInterrupt, "global", "detachInterrupt", [rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
-  
-  
-  
+
+
+
 // STRING ///////////////////////////////////////////////////////
   //Define type
   var string_t = rt.newClass("String", [
@@ -144,7 +146,7 @@ var load = function(rt) {
     frameManager.addOutputText(text);
     var message = {text: text, type: "output"};
     this.postMessage(JSON.stringify(message));
-    };
+  };
 
   function get_string_for(rt, _this, thing) {
     if (rt.isStringType(thing.t)) {
@@ -153,7 +155,7 @@ var load = function(rt) {
       return "" + thing.v;
     }
   }
-  
+
   var print = function (rt, _this, thing) {
     if (!_this.v.initialized) {
       rt.raiseException("Serial used before initialization.");
@@ -191,46 +193,55 @@ arduino_h = {
 function progress(rt, amount) {
 
   var startTime = frameManager.elapsedTime;
-  var finalTime = currentTime + amount;
+  var finalTime = startTime + amount;
   var currentTime = startTime;
-  
+  var previousTime = startTime;
+
+  //frames are sorted
   for (var i = 0; i < pinKeyframes.length; i++) {
-    if (pinKeyframes[i].time < startTime) continue;
-    if (pinKeyframes[i].time > finalTime) break;
+    var pinKeyframe = pinKeyframes[i];
+    if (pinKeyframe.time <= startTime) continue;
+    if (pinKeyframe.time > finalTime) break;
 
-    currentTime = pinKeyframes.time;
-    
-    
+    currentTime = pinKeyframe.time;
+    setAllInputPinsToTime(frameManager, currentTime);
+    testInterrupts(rt, currentTime);
+    //frameManager.nextFrame(currentTime - previousTime);
+
+    //if(currentTime !== previousTime) {
+    frameManager.nextFrame(currentTime - previousTime);
+
+
+    previousTime = currentTime;
   }
-  
-    frameManager.nextFrame(ms.v);
 
-    fireInterrupts(frameManager.elapsedTime, frameManager.elapsedTime);
-    
+  if(finalTime !== currentTime) {
+    frameManager.nextFrame(finalTime - currentTime);
+    testInterrupts(frameManager.elapsedTime, frameManager.elapsedTime);
     setAllInputPinsToTime(frameManager, frameManager.elapsedTime);
+  }
 
-    var message = {delay: ms.v, newFrameNumber: frameManager.currentFrame, type: "newFrame"};
-    this.postMessage(JSON.stringify(message));
 }
 
 var interrupts = [];
 // {pointer, pin, trigger, previous}
 /**
-    LOW to trigger the interrupt whenever the pin is low,
-    CHANGE to trigger the interrupt whenever the pin changes value
-    RISING to trigger when the pin goes from low to high,
-    FALLING for when the pin goes from high to low.
-    The Due, Zero and MKR1000 boards allows also:
-    HIGH to trigger the interrupt whenever the pin is high.
+ LOW to trigger the interrupt whenever the pin is low,
+ CHANGE to trigger the interrupt whenever the pin changes value
+ RISING to trigger when the pin goes from low to high,
+ FALLING for when the pin goes from high to low.
+ The Due, Zero and MKR1000 boards allows also:
+ HIGH to trigger the interrupt whenever the pin is high.
+ **/
 
-**/
-function fireInterrupts(rt, previous, time) {
-  
+function testInterrupts(rt, time) {
+
   for (var i = 0; i < interrupts.length; i++) {
     var pin = interrupts[i].pin;
     var value = 0;
     var previous = interrupts[i].previous;
     var pointer = interrupts[i].pointer;
+    var trigger = interrupts[i].trigger;
     value = getPinValueAtTime(pin, time);
     if (trigger === LOW) {
       if (value === LOW && previous !== LOW) {
@@ -276,7 +287,7 @@ function setPinKeyframes(pkfs){
   });
 
   pinKeyframes = pkfs;
-  
+
   sortedPinKeyframes = {};
   for(var frame of pinKeyframes){
     if(!sortedPinKeyframes[frame.pin]){
@@ -320,9 +331,9 @@ function submitFrameManager() {
 
 function submitDebuggerState() {
   this.postMessage(JSON.stringify({type: "debuginfo",
-                                   variables: cppdebugger.variable(),
-                                   node: cppdebugger.nextNode(),
-                                   frameManager: frameManager}));
+    variables: cppdebugger.variable(),
+    node: cppdebugger.nextNode(),
+    frameManager: frameManager}));
 }
 
 function qualifiedContinue() {
