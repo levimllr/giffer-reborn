@@ -269,7 +269,7 @@ function testInterrupts(rt, time) {
 }
 
 function callPointer(rt, pointer) {
-  var gen = pointer.v.target();
+  var gen = pointer.v.target(rt, null);
   var step;
   while (true) {
     step = gen.next();
