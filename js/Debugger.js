@@ -1,6 +1,6 @@
 var bannedVars = ["Serial", "LOW", "HIGH", "INPUT", "OUTPUT", "RISING", "FALLING", "CHANGE",
                   "pinMode", "digitalWrite", "analogWrite",
-                  "analogRead", "delay", "main"];
+                  "analogRead", "delay", "main", "attachInterrupt", "detachInterrupt"];
 var Range = ace.require('ace/range').Range;
 
 
@@ -63,8 +63,8 @@ function Debugger(editor) {
   //Marker
   this.markedLine = null;
   this.removeMarker = function() {
-    if (markedLine !== null) {
-      editor.getSession().removeMarker(markedLine);
+    if (this.markedLine !== null) {
+      editor.getSession().removeMarker(this.markedLine);
     }
   };
   
@@ -134,7 +134,9 @@ function Debugger(editor) {
     canvas.height = currentBoard.canvasHeight;
     canvas.width = currentBoard.canvasWidth;
     
-    frameManager.frames.forEach(currentBoard.advance.bind(currentBoard));
+    for (var i = 0; i < frameManager.frames.length; i++) {
+      currentBoard.advance(frameManager.frames[i], i, frameManager);
+    }
     
     currentBoard.draw(canvas.getContext("2d"));
     

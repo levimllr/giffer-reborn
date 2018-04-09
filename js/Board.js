@@ -277,13 +277,13 @@ KSBoard.prototype.drawInfo = function(ctx, frame, index, frameManager){
   ctx.fillStyle = "black";
   ctx.font = "15px monospace";
   var y = 270;
-  ctx.fillText("Frame: " + index, 10, y + 10);
+  ctx.fillText("Frame: " + index + " of " + frameManager.frames.length, 10, y + 10);
   ctx.fillText("Delay: " + frame.postDelay + " Time: " + this.elapsedTime, 10, y + 30);
   ctx.fillText("By " + this.context.name, 10, y + 50);
   ctx.fillText("Exercise " + this.context.exerciseNumber, 10, y + 70);
 
-  ctx.fillText(this.context.dateString, 200, y + 10);
-  ctx.fillText(this.context.timeString, 200, y + 30);
+  ctx.fillText(this.context.dateString, 240, y + 10);
+  ctx.fillText(this.context.timeString, 240, y + 30);
 
   ctx.font = "bold 15px monospace";
   ctx.fillStyle = ((typeof(this.context.isCorrect) === "undefined") || (this.context.isCorrect === false)) ? "red" : "green";
