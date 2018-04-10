@@ -94,10 +94,12 @@ FrameManager.prototype.setPinState = function (pinNumber, state) {
 };
 
 FrameManager.prototype.nextFrame = function (delay) {
-  this.frames[this.currentFrame].postDelay = delay;
-  this.elapsedTime += delay;
-  this.frames.push(new Frame(this.frames[this.currentFrame]));
-  this.currentFrame++;
+  if(delay !== 0) {
+    this.frames[this.currentFrame].postDelay = delay;
+    this.elapsedTime += delay;
+    this.frames.push(new Frame(this.frames[this.currentFrame]));
+    this.currentFrame++;
+  }
 };
 
 FrameManager.prototype.getOutputText = function (frame) {

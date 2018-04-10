@@ -1,5 +1,5 @@
 var bannedVars = ["Serial", "LOW", "HIGH", "INPUT", "OUTPUT", "RISING", "FALLING", "CHANGE",
-                  "pinMode", "digitalWrite", "analogWrite",
+                  "pinMode", "digitalWrite", "analogWrite", "digitalRead", "millis",
                   "analogRead", "delay", "main", "attachInterrupt", "detachInterrupt"];
 var Range = ace.require('ace/range').Range;
 

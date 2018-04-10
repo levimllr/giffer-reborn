@@ -335,7 +335,14 @@ function clearExercise(){
   document.getElementById("run-button").innerHTML = "Run";
   //Don't set board... makes for easier modifications
 
-  $("#control-tabs a[href=\"#edit\"]")[0].classList.remove("disabled");
+  for (var i = 0; i < currentBoard.DOMKeyframes.length; i++) {
+    var keyframe = $(currentBoard.DOMKeyframes[i]);
+    keyframe.find(".keyframe-time")[0].disabled = false;
+    keyframe.find(".keyframe-pin")[0].disabled = false;
+    keyframe.find(".keyframe-value")[0].disabled = false;
+    keyframe.find(".keyframe-remove")[0].disabled = false;
+  }
+  $('#add-keyframe')[0].disabled = false;
   $("#edit-tooltip").tooltip("disable");
 }
 function loadExercise(promptForOverwrite) {
@@ -361,8 +368,6 @@ function loadExercise(promptForOverwrite) {
   xmlhttp.onabort = handleError;
   xmlhttp.ontimeout = handleError;
   xmlhttp.onload = function() {
-    $("#control-tabs a[href=\"#edit\"]")[0].classList.add("disabled");
-    $("#edit-tooltip").tooltip("enable");
     if (this.status === 200) {
       var data = JSON.parse(this.responseText);
       if(!data.board) {
@@ -385,6 +390,17 @@ function loadExercise(promptForOverwrite) {
         document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
 
         loadBoardFromExercise(currentExercise);
+
+
+        for (var i = 0; i < currentBoard.DOMKeyframes.length; i++) {
+          var keyframe = $(currentBoard.DOMKeyframes[i]);
+          keyframe.find(".keyframe-time")[0].disabled = true;
+          keyframe.find(".keyframe-pin")[0].disabled = true;
+          keyframe.find(".keyframe-value")[0].disabled = true;
+          keyframe.find(".keyframe-remove")[0].disabled = true;
+        }
+        $('#add-keyframe')[0].disabled = true;
+        $("#edit-tooltip").tooltip("enable");
 
         if(promptForOverwrite) {
           $("#overwrite-modal").modal('show');

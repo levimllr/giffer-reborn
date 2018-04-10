@@ -69,12 +69,22 @@ var load = function(rt) {
   };
   rt.regFunc(analogWrite, "global", "analogWrite", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
+  var digitalRead = function (rt, _this, pinNumber) {
+    j = frameManager.getPinState(pinNumber.v, frameManager.currentFrame);
+    return {t: rt.intTypeLiteral, v: j === ANALOG_MAX ? HIGH : LOW, left: true};
+  };
+
   // DELAY ////////////////////////////////////////////////////////
 
   var delay = function (rt, _this, ms) {
     progress(rt, ms.v);
   };
   rt.regFunc(delay, "global", "delay", [rt.primitiveType("unsigned long")], rt.voidTypeLiteral);
+
+  var millis = function(rt, _this) {
+    return {t: rt.intTypeLiteral, v: frameManager.elapsedTime, left: true};
+  };
+  rt.regFunc(millis, "global", "millis", [], rt.intTypeLiteral);
 
   // INTERRUPT ////////////////////////////////////////////////////
 
@@ -205,12 +215,12 @@ function progress(rt, amount) {
 
     currentTime = pinKeyframe.time;
     setAllInputPinsToTime(frameManager, currentTime);
+
     testInterrupts(rt, currentTime);
     //frameManager.nextFrame(currentTime - previousTime);
 
     //if(currentTime !== previousTime) {
     frameManager.nextFrame(currentTime - previousTime);
-
 
     previousTime = currentTime;
   }
@@ -235,7 +245,8 @@ var interrupts = [];
  **/
 
 function testInterrupts(rt, time) {
-
+  var lastTime = frameManager.elapsedTime;
+  frameManager.elapsedTime = time;
   for (var i = 0; i < interrupts.length; i++) {
     var pin = interrupts[i].pin;
     var value = 0;
@@ -244,7 +255,7 @@ function testInterrupts(rt, time) {
     var trigger = interrupts[i].trigger;
     value = getPinValueAtTime(pin, time);
     if (trigger === LOW) {
-      if (value === LOW && previous !== LOW) {
+      if (value === 0 && previous !== 0) {
         callPointer(rt, pointer);
       }
     } else if (trigger === CHANGE) {
@@ -260,12 +271,13 @@ function testInterrupts(rt, time) {
         callPointer(rt, pointer);
       }
     } else if (trigger === HIGH) {
-      if (value === HIGH && previous !== HIGH) {
+      if (value === ANALOG_MAX && previous !== ANALOG_MAX) {
         callPointer(rt, pointer);
       }
     }
     interrupts[i].previous = value;
   }
+  frameManager.elapsedTime = lastTime;
 }
 
 function callPointer(rt, pointer) {
