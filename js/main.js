@@ -36,10 +36,6 @@ var defaultSuffix = `int main() {
 var editor = ace.edit("editor");
 editor.getSession().setMode("ace/mode/c_cpp");
 
-editor.setOptions({
-  maxLines: Infinity,
-  minLines: 50
-});
 editor.setValue(getFromStorage("code", defaultCode), -1);
 editor.focus();
 editor.commands.addCommand({
@@ -59,7 +55,7 @@ var boardField = document.getElementById("board");
 nameField.value = getFromStorage("name");
 exerciseField.value = getFromStorage("exercise-number");
 exerciseField.onkeyup = function(e) {
-  if(e.keyCode == 13) {
+  if(e.keyCode === 13) {
     loadExercise(true);
   }
 };
@@ -148,6 +144,10 @@ function loadBoard(type, setup) {
     setStatus("Loaded board", "success", false);
     
     saveContext();
+
+    var w = window.getComputedStyle(document.getElementById("gif")).height;
+    document.getElementById("console-output").style.height = w;
+
   } else {
     loadBoard(boardField.value, "");
   }
@@ -205,13 +205,18 @@ function stopRendering(){
     rendererTimeoutHandle = null;
   }
 }
+
 function showCanvas() {  
   var gifOutput = document.getElementById("gif-output");
   gifOutput.style.display = "block";
   gifOutput.classList.remove("blur");
   
   document.getElementById("canvas-speed").disabled = false;
+
+  $("#output-tabs a[href=\"#gif\"]").tab("show");
+
 }
+
 function hideCanvas() {
   stopRendering();
   
@@ -219,6 +224,11 @@ function hideCanvas() {
   gifOutput.classList.add("blur");
   
   document.getElementById("canvas-speed").disabled = true;
+}
+
+//Output
+function showOutput() {
+  $("#output-tabs a[href=\"#output\"]").tab("show");
 }
 
 //Editor Line Mapping
@@ -249,6 +259,8 @@ function runCode() {
 
   document.getElementById("run-button").innerHTML = "Running...";
   document.getElementById("console-output").innerHTML = "";
+
+  editor.getSession().setAnnotations([]);
 
   jscpp = new Worker("js/JSCPP-WebWorker.js");
 
@@ -316,6 +328,7 @@ function runCode() {
     running = false;
     setStatus("An error occurred! (See Output for details.)", "danger", false);
     jscpp.terminate();
+    showOutput();
     return true;
   };
 
@@ -324,6 +337,7 @@ function runCode() {
   debug.sendUpdatedBreakpoints();
   jscpp.postMessage({type: "code", code: code, pinKeyframes: currentBoard.pinKeyframes, debugging: debug.isEnabled()});
 }
+
 
 //Exercises
 function overwriteCode(){
