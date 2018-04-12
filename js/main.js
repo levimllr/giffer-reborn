@@ -166,7 +166,7 @@ new Clipboard("#copy-page", {
   text: function() {
     var outputGif = $("#confirmation-gif").clone()[0];
     if (!outputGif) {
-      println("Please generate a graded gif first.");
+      println("Please generate a graded gif first.", "red");
       return undefined;
     }
     var preDom = document.createElement("pre");
@@ -192,7 +192,8 @@ new Clipboard("#copy-page", {
     $(out).css("font-family", "monospace");
     out.innerHTML = lastContent.output.split("\n").slice(0, 30).join("\n");
     divWrapper.appendChild(out);
-    println("Copied! Go to \"Prepare an answer\" on Neo, then click the \"<>\" button and paste by pressing Control + V ");
+    println("Copied! Go to \"Prepare an answer\" on Neo, then click the \"<>\" button and paste by pressing Control + V ", "green");
+    showOutput();
     return divWrapper.innerHTML;
   }
 });
@@ -287,7 +288,9 @@ function runCode() {
       renderFrameManger(newFrameManager);
       
       setStatus("Gif", "");
-      
+
+      $("#copy-page").css("visibility", "visible");
+
     } else if (message.type === "output") {
       print(message.text);
     } else if (message.type === "newFrame") {
@@ -321,9 +324,13 @@ function runCode() {
         type: "error"
       }]);
       editor.navigateTo(startOfErrorObj.row, startOfErrorObj.column);
-      println("Error: " + errorObj.slice(errorObj.indexOf(matches[0]) + matches[0].length + 1));
+      println("Error: " + errorObj.slice(errorObj.indexOf(matches[0]) + matches[0].length + 1), "red");
+    } else {
+      if (!errorObj.includes("Parsing Failure")) {
+        println("Warning: Unusual error!\n\n" + errorObj, "red");
       } else {
-      println("Warning: Unusual error!\n\n" + errorObj);
+        println(errorObj, "red");
+      }
     }
     running = false;
     setStatus("An error occurred! (See Output for details.)", "danger", false);
@@ -613,7 +620,7 @@ function print(text, color) {
   }
 }
 function println(text, color) {
-  print(text);
+  print(text, color);
   $("#console-output").append(document.createElement("br"));
 }
 
