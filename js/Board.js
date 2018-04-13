@@ -97,7 +97,7 @@ Board.prototype.addKeyframe = function(time, pin, value) {
 Board.prototype.activate = function(){
   $("#edit")[0].innerHTML = "";
   this.DOMKeyframes = [];
-  
+
   var setup = $(`
           <table class="table" id="keyframe-table">
             <thead>
@@ -168,7 +168,7 @@ function LEDBoard(setup) {
 LEDBoard.prototype = Object.create(Board.prototype);
 LEDBoard.prototype.imageURL = "img/LED-Shield.gif";
 LEDBoard.prototype.type = "LED Board";
-LEDBoard.prototype.canvasWidth = 300;
+LEDBoard.prototype.canvasWidth = 400;
 LEDBoard.prototype.canvasHeight = 195;
 
 LEDBoard.prototype.drawShield = function(ctx) {

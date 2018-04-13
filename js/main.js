@@ -79,7 +79,7 @@ canvasSpeed.oninput = function() {
   if (isNaN(wait)) {
     wait = minWait;
   }
-  
+
   speedText.innerHTML = "Playback Speed: " + speed;
 };
 
@@ -110,7 +110,7 @@ function setStatus(blurb, type, isAnimated) {
 function resetStatus() {
   var gifLoadingStatus = document.getElementById("gif-loading-status");
   gifLoadingStatus.innerHTML = "Nothing to show . . .";
-  
+
   var gifLoadingBar = document.getElementById("gif-loading-bar");
   gifLoadingBar.classList.remove("progress-bar-animated");
   gifLoadingBar.style.display = "none";
@@ -131,18 +131,18 @@ function loadBoard(type, setup) {
     currentBoard.activate();
 
     currentPrefix = currentBoard.codePrefix;
-    
+
     canvas.height = currentBoard.canvasHeight;
     canvas.width = currentBoard.canvasWidth;
     var ctx = canvas.getContext("2d");
 
     currentBoard.drawShield(ctx);
-    
+
     hideCanvas();
-    
+
     boardField.value = currentBoard.type;
     setStatus("Loaded board", "success", false);
-    
+
     saveContext();
 
     var w = window.getComputedStyle(document.getElementById("gif")).height;
@@ -207,11 +207,11 @@ function stopRendering(){
   }
 }
 
-function showCanvas() {  
+function showCanvas() {
   var gifOutput = document.getElementById("gif-output");
   gifOutput.style.display = "block";
   gifOutput.classList.remove("blur");
-  
+
   document.getElementById("canvas-speed").disabled = false;
 
   $("#output-tabs a[href=\"#gif\"]").tab("show");
@@ -220,10 +220,10 @@ function showCanvas() {
 
 function hideCanvas() {
   stopRendering();
-  
+
   var gifOutput = document.getElementById("gif-output");
   gifOutput.classList.add("blur");
-  
+
   document.getElementById("canvas-speed").disabled = true;
 }
 
@@ -252,7 +252,7 @@ function runCode() {
   }
   running = true;
   setStatus("Running your code . . .", "info", true);
-  
+
   saveContext();
 
   stopRendering();
@@ -266,7 +266,7 @@ function runCode() {
   jscpp = new Worker("js/JSCPP-WebWorker.js");
 
   var shouldGrade = currentExercise.number !== null;
-  
+
   jscpp.onmessage = function(e) {
     var message = JSON.parse(e.data);
     if (message.type === "frameManager") {
@@ -283,10 +283,10 @@ function runCode() {
       } else {
         document.getElementById("run-button").innerHTML = "Run";
       }
-      
+
       setStatus("Generating Gif . . .", "success", true);
       renderFrameManger(newFrameManager);
-      
+
       setStatus("Gif", "");
 
       $("#copy-page").css("visibility", "visible");
@@ -368,9 +368,9 @@ function clearExercise(){
 }
 function loadExercise(promptForOverwrite) {
   setStatus("Getting grading file . . .", "info", true);
-  
+
   hideCanvas();
-  
+
   var exerciseNum = parseInt($("#exercise-number")[0].value);
   if (isNaN(exerciseNum)) {
     clearExercise();
@@ -464,55 +464,77 @@ function renderFrameManger(frameManager) {
     exerciseNumber: exerciseNumber,
     name: name
   });
-  
-  var drawFrame = function() {
-    
+
+  var drawFrame = function(frame, index, array, stdDelay, timeSinceLast, callTime, _) {
+
     var ctx = canvas.getContext("2d");
-    
+
+    var now = performance.now();
     var speed = document.getElementById("canvas-speed").value;
+    var cumulativeTime = timeSinceLast + (now - callTime);
+    var desiredWait = stdDelay / speed;
+    var partial;
 
-    if (speed === 0) {
-      wait = minWait;
+    if (speed === 0 || cumulativeTime < desiredWait) {
+      partial = drawFrame.bind(null, array[index], index, array, stdDelay, cumulativeTime, now);
     } else {
-      var frame = frameManager.frames[currentIndex];
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      currentBoard.advance(frame, currentIndex, frameManager);
-      currentBoard.draw(ctx);
-      
-      while(wait < minWait) {
-	if (currentIndex >= frameManager.frames.length) {
-	  currentIndex = 0;
-	  currentBoard.setContext({
+      var currentRenderPoint = callTime - timeSinceLast + desiredWait; // Compute the time of the last frame draw
+      var lastDelay = null;
+      while (currentRenderPoint <= now) {
+        if (index === 0) {
+          currentBoard.setContext({
             dateString: dateString,
             timeString: timeString,
             isCorrect: frameManager.grade,
             exerciseNumber: exerciseNumber,
             name: name
-	  });
-	}
-	wait += frameManager.frames[currentIndex].postDelay / speed;
-	currentIndex++;
+          });
+        }
+
+        currentBoard.advance(frame, index, frameManager);
+
+        lastDelay = frame.postDelay;
+        currentRenderPoint += frame.postDelay / speed;
+        index = (index + 1) % array.length;
+        frame = array[index];
       }
+
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      currentBoard.draw(ctx);
+
+      if (lastDelay === null) {
+        console.log("Something went very very wrong.");
+      }
+
+      partial = drawFrame.bind(null, frame, index, array, lastDelay, 0, now);
     }
 
-    rendererTimeoutHandle = setTimeout(drawFrame, minWait);
-
-    wait -= minWait;
-    
+    rendererTimeoutHandle = requestAnimationFrame(partial);
   };
-  
+
   stopRendering();
-  drawFrame(frameManager.frames[0], 0, frameManager.frames);
+  if (frameManager.elapsedTime === 0) {
+    currentBoard.setContext({
+      dateString: dateString,
+      timeString: timeString,
+      isCorrect: frameManager.grade,
+      exerciseNumber: exerciseNumber,
+      name: name
+    });
+    currentBoard.advance(frameManager.frames[0], 0, frameManager);
+    currentBoard.draw(canvas.getContext("2d"));
+  } else {
+    drawFrame(frameManager.frames[0], 0, frameManager.frames, 0, 0, performance.now());
+  }
 
   showCanvas();
 
   if ((frameManager.grade === true) || (frameManager.grade === false)) {
     generateConfirmationGif(frameManager.grade);
   }
-  
+
   running = false;
 }
 
