@@ -5,9 +5,9 @@ var Range = ace.require('ace/range').Range;
 
 
 function Debugger(editor) {
-  
+
   //Breakpoints
-  this.breakpoints = []; 
+  this.breakpoints = [];
   this.toggleBreakpoint = function(line) {
     if (this.breakpoints.includes(line)) {
       editor.session.clearBreakpoint(line);
@@ -24,15 +24,15 @@ function Debugger(editor) {
       var fixedBreakpoints = breakpointsCopy.map((x) => aceToJSCPP(x));
       jscpp.postMessage({type: "breakpoints", breakpoints: fixedBreakpoints});
     } catch (e) {
-    
+
     }
   };
-  
+
   this.stopDebuggingSession = function() {
     jscpp.postMessage({type: "debugger", action: "enabled", state: false});
     this.doContinue();
   };
-  
+
   //Enabled
   this.isEnabled = function() {
     return document.getElementById("debugging-enabled").checked;
@@ -59,7 +59,7 @@ function Debugger(editor) {
     var fm = makeFrameManager(message.frameManager);
     this.renderState(fm);
   };
-  
+
   //Marker
   this.markedLine = null;
   this.removeMarker = function() {
@@ -67,14 +67,14 @@ function Debugger(editor) {
       editor.getSession().removeMarker(this.markedLine);
     }
   };
-  
+
   //Stepping
   this.doContinue = function() {
     try {
       jscpp.postMessage({type: "debugger", action: "continue"});
       this.cleanup();
     } catch (e) {
-  
+
     }
   };
   this.doStep = function() {
@@ -82,14 +82,14 @@ function Debugger(editor) {
       jscpp.postMessage({type: "debugger", action: "stepInto"});
       this.cleanup();
     } catch (e) {
-  
+
     }
   };
   this.cleanup = function() {
     this.removeMarker();
     hideGif();
   };
-  
+
   //Render
   this.showVariables = function(vars) {
     $("#control-tabs a[href=\"#debug\"]").tab("show");
@@ -103,24 +103,24 @@ function Debugger(editor) {
       var type = $("<td>");
       var name = $("<td>");
       var value = $("<td>");
-  
+
       type.text(v.type);
       name.text(v.name);
       value.text(v.value);
-  
+
       tr.append(type);
       tr.append(name);
       tr.append(value);
-  
+
       tbody.append(tr);
     });
   };
   this.renderState = function(frameManager) {
-    
+
     var date = new Date();
     var dateString = date.toDateString();
     var timeString = date.toLocaleTimeString();
-    
+
     var name = nameField.value;
     var exerciseNumber = exerciseField.value;
     currentBoard.setContext({
@@ -130,21 +130,21 @@ function Debugger(editor) {
       exerciseNumber: exerciseNumber,
       name: name
     });
-    
+
     canvas.height = currentBoard.canvasHeight;
     canvas.width = currentBoard.canvasWidth;
-    
+
     for (var i = 0; i < frameManager.frames.length; i++) {
       currentBoard.advance(frameManager.frames[i], i, frameManager);
     }
-    
+
     currentBoard.draw(canvas.getContext("2d"));
-    
+
     setStatus("Current State:", "");
-    
-    showCanvas();
+
+    showCanvas(true);
   };
-  
+
   //Editor
   editor.on("gutterclick", function(e) {
     debug.toggleBreakpoint(e.getDocumentPosition().row);

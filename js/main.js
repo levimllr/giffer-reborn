@@ -207,15 +207,16 @@ function stopRendering(){
   }
 }
 
-function showCanvas() {
+function showCanvas(dontShow) {
   var gifOutput = document.getElementById("gif-output");
   gifOutput.style.display = "block";
   gifOutput.classList.remove("blur");
 
   document.getElementById("canvas-speed").disabled = false;
 
-  $("#output-tabs a[href=\"#gif\"]").tab("show");
-
+  if (!dontShow) {
+    $("#output-tabs a[href=\"#gif\"]").tab("show");
+  }
 }
 
 function hideCanvas() {
