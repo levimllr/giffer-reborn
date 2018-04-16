@@ -202,7 +202,7 @@ new Clipboard("#copy-page", {
 var rendererTimeoutHandle = null;
 function stopRendering(){
   if (rendererTimeoutHandle !== null) {
-    clearTimeout(rendererTimeoutHandle);
+    cancelAnimationFrame(rendererTimeoutHandle);
     rendererTimeoutHandle = null;
   }
 }
