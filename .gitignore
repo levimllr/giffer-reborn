@@ -3,3 +3,4 @@
 .DS*
 *.ini
 update-gh-pages.sh
+.idea/

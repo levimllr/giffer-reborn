@@ -60,6 +60,11 @@ exerciseField.onkeyup = function(e) {
   }
 };
 
+//Buttons
+var runButton = document.getElementById("run-button");
+var copyPage = document.getElementById("copy-page");
+var finishDebug = document.getElementById("finish-debug");
+
 //Canvas
 var canvas = document.getElementById("canvas");
 
@@ -117,8 +122,6 @@ function resetStatus() {
   for(var status of STATUS_TYPES) {
     gifLoadingBar.classList.remove("bg-" + status);
   }
-
-  $("#copy-page").css("visibility", "hidden");
 }
 
 //Boards
@@ -242,6 +245,13 @@ function JSCPPToAce(line) {
   var offset = -(currentPrefix.split("\n").length - 1 + 1);
   return offset + line;
 }
+//Navbar Buttons
+function setButtons(runText, runEnabled, copyVisible, finishVisible) {
+  runButton.innerHTML = runText;
+  runButton.disabled = !runEnabled;
+  copyPage.style.display = copyVisible ? "block" : "none";
+  finishDebug.style.display = finishVisible ? "block" : "none";
+}
 
 //Run
 var running = false;
@@ -259,7 +269,11 @@ function runCode() {
   stopRendering();
   hideCanvas();
 
-  document.getElementById("run-button").innerHTML = "Running...";
+  if(debug.isEnabled()) {
+    setButtons("Debugging...", false, false, true);
+  } else {
+    setButtons("Running...", false, false, false);
+  }
   document.getElementById("console-output").innerHTML = "";
 
   editor.getSession().setAnnotations([]);
@@ -278,19 +292,17 @@ function runCode() {
       lastContent.output = $("#console-output")[0].innerHTML;
 
       if(shouldGrade) {
-        document.getElementById("run-button").innerHTML = "Run and Grade";
+        setButtons("Run and Grade", true, true, false);
         setStatus("Grading . . .", "success", true);
         newFrameManager.grade(currentExercise);
       } else {
-        document.getElementById("run-button").innerHTML = "Run";
+        setButtons("Run", true, false, false);
       }
 
       setStatus("Generating Gif . . .", "success", true);
       renderFrameManger(newFrameManager);
 
       setStatus("Gif", "");
-
-      $("#copy-page").css("visibility", "visible");
 
     } else if (message.type === "output") {
       print(message.text);
@@ -354,8 +366,7 @@ function overwriteCode(){
 function clearExercise(){
   setStatus("Exercise not found.  Gifs will not be graded.", "");
   currentExercise = {number: null, suffix: defaultSuffix};
-  document.getElementById("run-button").innerHTML = "Run";
-  //Don't set board... makes for easier modifications
+  setButtons("Run", true, false, false);
 
   for (var i = 0; i < currentBoard.DOMKeyframes.length; i++) {
     var keyframe = $(currentBoard.DOMKeyframes[i]);
@@ -430,7 +441,9 @@ function loadExercise(promptForOverwrite) {
       }
       //set code to exercise start code?
       setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
-      document.getElementById("run-button").innerHTML = "Run and Grade";
+
+      setButtons("Run and Grade", true, false, false);
+
     } else {
       handleError();
     }

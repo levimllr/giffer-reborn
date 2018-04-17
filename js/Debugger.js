@@ -35,7 +35,7 @@ function Debugger(editor) {
 
   //Enabled
   this.isEnabled = function() {
-    return document.getElementById("debugging-enabled").checked;
+    return document.getElementById("debugging-enabled").checked && this.breakpoints.length !== 0;
   };
   this.sendUpdateEnabled = function () {
     try {
@@ -77,9 +77,17 @@ function Debugger(editor) {
 
     }
   };
-  this.doStep = function() {
+  this.doStepLine = function() {
     try {
-      jscpp.postMessage({type: "debugger", action: "stepInto"});
+      jscpp.postMessage({type: "debugger", action: "stepLine"});
+      this.cleanup();
+    } catch (e) {
+
+    }
+  };
+  this.doStepExpression = function() {
+    try {
+      jscpp.postMessage({type: "debugger", action: "stepExpression"});
       this.cleanup();
     } catch (e) {
 
@@ -87,7 +95,7 @@ function Debugger(editor) {
   };
   this.cleanup = function() {
     this.removeMarker();
-    hideGif();
+    hideCanvas();
   };
 
   //Render

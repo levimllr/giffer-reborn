@@ -51,8 +51,8 @@ label.btn {
     border-radius: 10px;
 }
 
-#copy-page {
-    visibility: hidden;
+#copy-page, #finish-debug {
+    display: none;
 }
 
 .tab-content, .nav-tabs {
