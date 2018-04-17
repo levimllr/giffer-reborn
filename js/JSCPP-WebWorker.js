@@ -356,6 +356,14 @@ function qualifiedContinue() {
   }
 }
 
+function qualifiedNext() {
+  if (cppdebugger.next() === false) {
+    submitDebuggerState();
+  } else {
+    submitFrameManager();
+  }
+}
+
 function setLineByLine(state) {
   cppdebugger.stopConditions["lineChanged"] = state;
 }
@@ -410,10 +418,13 @@ function messageHandler(event) {
       setLineByLine(false);
       qualifiedContinue();
     }
-    else if (event.data.action === "stepInto") {
+    else if (event.data.action === "stepLine") {
       setLineByLine(true);
       cppdebugger.stopConditions["breakpoints"] = false;
       qualifiedContinue();
+    }
+    else if (event.data.action === "stepExpression") {
+      qualifiedNext();
     }
     else if (event.data.action === "enabled") {
       if (event.data.state) {

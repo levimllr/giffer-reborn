@@ -44,16 +44,22 @@ function Debugger(editor) {
       console.log(e);
     }
   };
+
+  this.isLineValid = function(line) {
+    return !(line < 0 || line >= editor.getSession().getLength());
+  }
+
   this.handleMessage = function(message) {
-    var line = JSCPPToAce(message.node.sLine);
-    if (line < 0 || line >= editor.getSession().getLength()) {
-      this.doStep();
+    var sLine = JSCPPToAce(message.node.sLine);
+    var eLine = JSCPPToAce(message.node.eLine);
+    if (!this.isLineValid(sLine) || !this.isLineValid(eLine)) {
+      this.doStepLine();
       return;
     }
+    console.log(message.node);
     this.markedLine = editor.getSession().addMarker(
-      new Range(line, 0, line, 1),
+      new Range(sLine, message.node.sColumn - 1, eLine, message.node.eColumn - 1),
       "current-line",
-      "fullLine",
       false);
     this.showVariables(message.variables);
     var fm = makeFrameManager(message.frameManager);
@@ -162,5 +168,3 @@ function Debugger(editor) {
     e.stop();
   });
 }
-
-//return Array.from(editor.session.getBreakpoints().keys()).filter((x) => editor.session.getBreakpoints().hasOwnProperty(x));
