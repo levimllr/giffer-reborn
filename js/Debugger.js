@@ -76,11 +76,15 @@ function Debugger(editor) {
 
   //Stepping
   this.doContinue = function() {
-    try {
-      jscpp.postMessage({type: "debugger", action: "continue"});
-      this.cleanup();
-    } catch (e) {
+    if(running) {
+      try {
+        jscpp.postMessage({type: "debugger", action: "continue"});
+        this.cleanup();
+      } catch (e) {
 
+      }
+    } else {
+      runCode();
     }
   };
   this.doStepLine = function() {
