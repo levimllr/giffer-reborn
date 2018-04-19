@@ -70,9 +70,11 @@ var load = function(rt) {
   rt.regFunc(analogWrite, "global", "analogWrite", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
   var digitalRead = function (rt, _this, pinNumber) {
-    j = frameManager.getPinState(pinNumber.v, frameManager.currentFrame);
+    var j = frameManager.getPinState(pinNumber.v, frameManager.currentFrame);
     return {t: rt.intTypeLiteral, v: j === ANALOG_MAX ? HIGH : LOW, left: true};
   };
+  rt.regFunc(analogRead, "global", "digitalRead", [rt.unsignedintTypeLiteral], rt.intTypeLiteral);
+
 
   // DELAY ////////////////////////////////////////////////////////
 
@@ -91,7 +93,7 @@ var load = function(rt) {
   var attachInterrupt = function (rt, _this, pin, callback, trigger) {
     //pointer, pin, trigger, previous
     interrupts.push({pointer: callback, pin: pin.v, trigger: trigger.v, previous: getPinValueAtTime(pin.v, frameManager.elapsedTime)});
-  }
+  };
   rt.regFunc(attachInterrupt, "global", "attachInterrupt", [rt.unsignedintTypeLiteral, rt.functionType(rt.voidTypeLiteral, []), rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
   var detachInterrupt = function (rt, _this, pin) {
@@ -100,12 +102,10 @@ var load = function(rt) {
         interrupts.remove(interrupts[i]);
       }
     }
-  }
+  };
   rt.regFunc(detachInterrupt, "global", "detachInterrupt", [rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
-
-
-// STRING ///////////////////////////////////////////////////////
+  // STRING ///////////////////////////////////////////////////////
   //Define type
   var string_t = rt.newClass("String", [
     {
@@ -310,7 +310,7 @@ function setPinKeyframes(pkfs){
 }
 
 function getPinValueAtTime(pin, time){
-  if (frameManager.getPinMode(pin) == INPUT) {
+  if (frameManager.getPinMode(pin) === INPUT) {
     var values = sortedPinKeyframes[pin];
     var lastValue = 0;
     for(var pair of values){
@@ -370,7 +370,7 @@ function enableAll() {
 }
 
 function messageHandler(event) {
-  if (event.data.type == "code") {
+  if (event.data.type === "code") {
     var code = event.data.code;
     setPinKeyframes(event.data.pinKeyframes);
     var debugging = event.data.debugging;
@@ -400,22 +400,22 @@ function messageHandler(event) {
     } else {
       submitFrameManager();
     }
-  } else if (event.data.type == "breakpoints") {
+  } else if (event.data.type === "breakpoints") {
     breakpoints = event.data.breakpoints;
-  } else if (event.data.type == "debugger") {
+  } else if (event.data.type === "debugger") {
     if (cppdebugger === null || cppdebugger.done) {
       return;
     }
-    if (event.data.action == "continue") {
+    if (event.data.action === "continue") {
       setLineByLine(false);
       qualifiedContinue();
     }
-    else if (event.data.action == "stepInto") {
+    else if (event.data.action === "stepInto") {
       setLineByLine(true);
       cppdebugger.stopConditions["breakpoints"] = false;
       qualifiedContinue();
     }
-    else if (event.data.action == "enabled") {
+    else if (event.data.action === "enabled") {
       if (event.data.state) {
         enableAll();
       } else {

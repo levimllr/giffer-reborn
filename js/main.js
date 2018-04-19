@@ -150,6 +150,7 @@ function loadBoard(type, setup) {
 
     var w = window.getComputedStyle(document.getElementById("gif")).height;
     document.getElementById("console-output").style.height = w;
+    document.getElementById("directions-content").style.height = w;
 
   } else {
     loadBoard(boardField.value, "");
@@ -255,13 +256,29 @@ function setButtons(runText, runEnabled, copyVisible, finishVisible) {
 
 //Run
 var running = false;
+function setRunning(v) {
+  running = v;
+  if(running) {
+    if(debug.isEnabled()) {
+      setButtons("Debugging...", false, false, true);
+    } else {
+      setButtons("Running...", false, false, false);
+    }
+  } else {
+    if(currentExercise.number !== null) {
+      setButtons("Run and Grade", true, true, false);
+    } else {
+      setButtons("Run", true, false, false);
+    }
+  }
+}
 var jscpp = null;
 var lastContent = {frameManager: null, output: null};
 function runCode() {
   if (running) {
     return;
   }
-  running = true;
+  setRunning(true);
   setStatus("Running your code . . .", "info", true);
 
   saveContext();
@@ -269,11 +286,6 @@ function runCode() {
   stopRendering();
   hideCanvas();
 
-  if(debug.isEnabled()) {
-    setButtons("Debugging...", false, false, true);
-  } else {
-    setButtons("Running...", false, false, false);
-  }
   document.getElementById("console-output").innerHTML = "";
 
   editor.getSession().setAnnotations([]);
@@ -291,12 +303,11 @@ function runCode() {
       lastContent.frameManager = newFrameManager;
       lastContent.output = $("#console-output")[0].innerHTML;
 
+      setRunning(false);
+
       if(shouldGrade) {
-        setButtons("Run and Grade", true, true, false);
         setStatus("Grading . . .", "success", true);
         newFrameManager.grade(currentExercise);
-      } else {
-        setButtons("Run", true, false, false);
       }
 
       setStatus("Generating Gif . . .", "success", true);
@@ -345,7 +356,7 @@ function runCode() {
         println(errorObj, "red");
       }
     }
-    running = false;
+    setRunning(false);
     setStatus("An error occurred! (See Output for details.)", "danger", false);
     jscpp.terminate();
     showOutput();
@@ -394,7 +405,6 @@ function loadExercise(promptForOverwrite) {
 
   var handleError = function() {
     clearExercise();
-    //setStatus("Error fetching grading file . . .", "danger", false);
   };
 
   xmlhttp.onerror = handleError;
@@ -417,13 +427,21 @@ function loadExercise(promptForOverwrite) {
         currentExercise.startingCode = data.startingCode;
         currentExercise.suffix = data.suffix;
         currentExercise.frameManager = makeFrameManager(data.frameManager);
+        currentExercise.directions = data.directions;
 
         document.getElementById("export-exercise-number").value = currentExercise.number;
         document.getElementById("export-exercise-starting").value = currentExercise.startingCode;
         document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
+        document.getElementById("export-exercise-directions").value = currentExercise.directions;
+
+        if(currentExercise.directions) {
+          document.getElementById("directions-content").innerText = currentExercise.directions + "";
+          $("#output-tabs a[href=\"#directions\"]").tab("show");
+        } else {
+          document.getElementById("directions-content").innerText = "No directions provided for this Exercise";
+        }
 
         loadBoardFromExercise(currentExercise);
-
 
         for (var i = 0; i < currentBoard.DOMKeyframes.length; i++) {
           var keyframe = $(currentBoard.DOMKeyframes[i]);
@@ -549,7 +567,7 @@ function renderFrameManger(frameManager) {
     generateConfirmationGif(frameManager.grade);
   }
 
-  running = false;
+  setRunning(false);
 }
 
 //Confirmation Gif
@@ -624,6 +642,7 @@ function exportExercise() {
   exercise.suffix = document.getElementById("export-exercise-suffix").value;
   exercise.board = {type: currentBoard.type, setup: currentBoard.getSetup()};
   exercise.frameManager = lastContent.frameManager;
+  exercise.directions = document.getElementById("export-exercise-directions").value;
 
   saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + exercise.number + ".FrameManager");
 
