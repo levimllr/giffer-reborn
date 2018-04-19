@@ -47,7 +47,7 @@ function Debugger(editor) {
 
   this.isLineValid = function(line) {
     return !(line < 0 || line >= editor.getSession().getLength());
-  }
+  };
 
   this.handleMessage = function(message) {
     var sLine = JSCPPToAce(message.node.sLine);
