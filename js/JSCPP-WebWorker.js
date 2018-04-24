@@ -1,7 +1,53 @@
 importScripts("FrameManager.js");
+importScripts("ArduinoClasses.js");
 
 var breakpoints = [];
 var frameManager;
+
+
+function pinMode(rt, pin, mode) {
+  if (mode > 2) {
+    rt.raiseException("Unknown mode " + mode.toString());
+    return;
+  }
+  frameManager.setPinMode(pin, mode);
+}
+function digitalWrite(rt, pin, state) {
+  if (frameManager.getPinMode(pin) !== OUTPUT) {
+    rt.raiseException("Attempted to write to an input pin in digitalWrite.");
+    return;
+  }
+  if (state > 1) {
+    rt.raiseException("Unknown state " + state.toString() + " passed to digitalWrite.");
+    return;
+  }
+  var val;
+  if (state === HIGH) {
+    val = ANALOG_MAX;
+  } else {
+    val = 0;
+  }
+  frameManager.setPinState(pin, val);
+  progress(rt, 0);
+}
+function analogWrite(rt, pin, value) {
+  if (frameManager.getPinMode(pin) !== OUTPUT) {
+    rt.raiseException("Attempted to write to an input pin in analogWrite.");
+    return;
+  }
+  frameManager.setPinState(pin, value);
+  progress(rt, 0);
+}
+function digitalRead(rt, pin) {
+  var j = frameManager.getPinState(pin, frameManager.currentFrame);
+  return {t: rt.intTypeLiteral, v: j === ANALOG_MAX ? HIGH : LOW, left: true};
+}
+function analogRead(rt, pin) {
+  return {t: rt.intTypeLiteral, v: frameManager.getPinState(pin, frameManager.currentFrame), left: true};
+}
+function delay(rt, time) {
+  progress(rt, time);
+}
 
 var load = function(rt) {
 
@@ -25,63 +71,38 @@ var load = function(rt) {
 
   setAllInputPinsToTime(frameManager, 0);
 
-  var pinMode = function (rt, _this, pinNumber, mode) {
-    if (mode > 2) {
-      rt.raiseException("Unknown mode " + mode.toString());
-      return;
-    }
-    frameManager.setPinMode(pinNumber.v, mode.v);
+  var pinMode_f = function (rt, _this, pinNumber, mode) {
+    pinMode(rt, pinNumber.v, mode.v);
   };
-  rt.regFunc(pinMode, "global", "pinMode", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
+  rt.regFunc(pinMode_f, "global", "pinMode", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
-  var digitalWrite = function (rt, _this, pinNumber, state) {
-    if (frameManager.getPinMode(pinNumber.v) !== OUTPUT) {
-      rt.raiseException("Attempted to write to an input pin in digitalWrite.");
-      return;
-    }
-    if (state.v > 1) {
-      rt.raiseException("Unknown state " + state.v.toString() + " passed to digitalWrite.");
-      return;
-    }
-    var val;
-    if (state.v === HIGH) {
-      val = ANALOG_MAX;
-    } else {
-      val = 0;
-    }
-    frameManager.setPinState(pinNumber.v, val);
-    progress(rt, 0);
+  var digitalWrite_f = function (rt, _this, pinNumber, state) {
+    digitalWrite(rt, pinNumber.v, state.v);
   };
-  rt.regFunc(digitalWrite, "global", "digitalWrite", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
+  rt.regFunc(digitalWrite_f, "global", "digitalWrite", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
-  var analogRead = function (rt, _this, pinNumber) {
-    return {t: rt.intTypeLiteral, v: frameManager.getPinState(pinNumber.v, frameManager.currentFrame), left: true};
+  var analogRead_f = function (rt, _this, pinNumber) {
+    return analogRead(rt, pinNumber.v);
   };
-  rt.regFunc(analogRead, "global", "analogRead", [rt.unsignedintTypeLiteral], rt.intTypeLiteral);
+  rt.regFunc(analogRead_f, "global", "analogRead", [rt.unsignedintTypeLiteral], rt.intTypeLiteral);
 
-  var analogWrite = function (rt, _this, pinNumber, value) {
-    if (frameManager.getPinMode(pinNumber.v) !== OUTPUT) {
-      rt.raiseException("Attempted to write to an input pin in analogWrite.");
-      return;
-    }
-    frameManager.setPinState(pinNumber.v, value.v);
-    progress(rt, 0);
+  var analogWrite_f = function (rt, _this, pinNumber, value) {
+    analogWrite(rt, pinNumber.v, value.v);
   };
-  rt.regFunc(analogWrite, "global", "analogWrite", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
+  rt.regFunc(analogWrite_f, "global", "analogWrite", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
-  var digitalRead = function (rt, _this, pinNumber) {
-    var j = frameManager.getPinState(pinNumber.v, frameManager.currentFrame);
-    return {t: rt.intTypeLiteral, v: j === ANALOG_MAX ? HIGH : LOW, left: true};
+  var digitalRead_f = function (rt, _this, pinNumber) {
+    return digitalRead(pinNumber.v);
   };
-  rt.regFunc(analogRead, "global", "digitalRead", [rt.unsignedintTypeLiteral], rt.intTypeLiteral);
+  rt.regFunc(digitalRead_f, "global", "digitalRead", [rt.unsignedintTypeLiteral], rt.intTypeLiteral);
 
 
   // DELAY ////////////////////////////////////////////////////////
 
-  var delay = function (rt, _this, ms) {
-    progress(rt, ms.v);
+  var delay_f = function (rt, _this, ms) {
+    delay(rt, ms.v);
   };
-  rt.regFunc(delay, "global", "delay", [rt.primitiveType("unsigned long")], rt.voidTypeLiteral);
+  rt.regFunc(delay_f, "global", "delay", [rt.primitiveType("unsigned long")], rt.voidTypeLiteral);
 
   var millis = function(rt, _this) {
     return {t: rt.intTypeLiteral, v: frameManager.elapsedTime, left: true};
@@ -388,6 +409,9 @@ function messageHandler(event) {
       },
       debug: debugging
     };
+
+    addIncludes(config);
+
     cppdebugger = JSCPP.run(code, "", config);
 
     if (config.debug) {
