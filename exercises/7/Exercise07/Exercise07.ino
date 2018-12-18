@@ -1,7 +1,7 @@
 // ***************ACTIVITIES TO CHECK WHILE GRADING BEGIN*******************
 //
-// 1.	LED2 THROUGH LED15 should blink on and off rapidly with a 100ms delay between 
-// 2.	Should pause 5 seconds with all LEDS OFF and then repeat the sequence again 
+// 1.	LED2 THROUGH LED15 should blink on and off rapidly with a 100ms delay between
+// 2.	Should pause 5 seconds with all LEDS OFF and then repeat the sequence again
 //
 // ***************ACTIVITIES TO CHECK WHILE GRADING END*********************
 
@@ -29,78 +29,77 @@ void loop()
   int waitTime; // creates an integer waitTime
 
   waitTime = 100; // puts the value 100 in the Arduinos waitTime memory location
- 
-    digitalWrite(2, HIGH); // Tells Arduino to send enough power to turn ON LED 2
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(2, LOW); // Tells Arduino to turn OFF LED 2
-    delay(waitTime);
 
-    digitalWrite(3, HIGH); // Tells Arduino to send enough power to turn ON LED 3
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(3, LOW); // Tells Arduino to turn OFF LED 3
-    delay(waitTime);
-    
-    digitalWrite(4, HIGH); // Tells Arduino to send enough power to turn ON LED 4
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(4, LOW); // Tells Arduino to turn OFF LED 4
-    delay(waitTime);
+  digitalWrite(2, HIGH); // Tells Arduino to send enough power to turn ON LED 2
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(2, LOW); // Tells Arduino to turn OFF LED 2
+  delay(waitTime);
 
-    digitalWrite(5, HIGH); // Tells Arduino to send enough power to turn ON LED 5
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(5, LOW); // Tells Arduino to turn OFF LED 5
-    delay(waitTime);
+  digitalWrite(3, HIGH); // Tells Arduino to send enough power to turn ON LED 3
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(3, LOW); // Tells Arduino to turn OFF LED 3
+  delay(waitTime);
 
-    digitalWrite(6, HIGH); // Tells Arduino to send enough power to turn ON LED 6
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(6, LOW); // Tells Arduino to turn OFF LED 6
-    delay(waitTime);
+  digitalWrite(4, HIGH); // Tells Arduino to send enough power to turn ON LED 4
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(4, LOW); // Tells Arduino to turn OFF LED 4
+  delay(waitTime);
 
-    digitalWrite(7, HIGH); // Tells Arduino to send enough power to turn ON LED 3
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(7, LOW); // Tells Arduino to turn OFF LED 7
-    delay(waitTime);
-    
-    digitalWrite(8, HIGH); // Tells Arduino to send enough power to turn ON LED 8
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(8, LOW); // Tells Arduino to turn OFF LED 8
-    delay(waitTime);
+  digitalWrite(5, HIGH); // Tells Arduino to send enough power to turn ON LED 5
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(5, LOW); // Tells Arduino to turn OFF LED 5
+  delay(waitTime);
 
-    digitalWrite(9, HIGH); // Tells Arduino to send enough power to turn ON LED 9
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(9, LOW); // Tells Arduino to turn OFF LED 9
-   delay(waitTime);
+  digitalWrite(6, HIGH); // Tells Arduino to send enough power to turn ON LED 6
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(6, LOW); // Tells Arduino to turn OFF LED 6
+  delay(waitTime);
 
-    digitalWrite(10, HIGH); // Tells Arduino to send enough power to turn ON LED 10
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(10, LOW); // Tells Arduino to turn OFF LED 10
-    delay(waitTime);
+  digitalWrite(7, HIGH); // Tells Arduino to send enough power to turn ON LED 3
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(7, LOW); // Tells Arduino to turn OFF LED 7
+  delay(waitTime);
 
-    digitalWrite(11, HIGH); // Tells Arduino to send enough power to turn ON LED 11
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(11, LOW); // Tells Arduino to turn OFF LED 11
-    delay(waitTime);
-    
-    digitalWrite(12, HIGH); // Tells Arduino to send enough power to turn ON LED 12
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(12, LOW); // Tells Arduino to turn OFF LED 12
-    delay(waitTime);
+  digitalWrite(8, HIGH); // Tells Arduino to send enough power to turn ON LED 8
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(8, LOW); // Tells Arduino to turn OFF LED 8
+  delay(waitTime);
 
-    digitalWrite(13, HIGH); // Tells Arduino to send enough power to turn ON LED 13
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(13, LOW); // Tells Arduino to turn OFF LED 13
-    delay(waitTime);
+  digitalWrite(9, HIGH); // Tells Arduino to send enough power to turn ON LED 9
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(9, LOW); // Tells Arduino to turn OFF LED 9
+  delay(waitTime);
 
-    digitalWrite(14, HIGH); // Tells Arduino to send enough power to turn ON LED 14
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(14, LOW); // Tells Arduino to turn OFF LED 14
-    delay(waitTime);
+  digitalWrite(10, HIGH); // Tells Arduino to send enough power to turn ON LED 10
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(10, LOW); // Tells Arduino to turn OFF LED 10
+  delay(waitTime);
 
-    digitalWrite(15, HIGH); // Tells Arduino to send enough power to turn ON LED 15
-    delay(waitTime); // wait waitTime before going to the next line
-    digitalWrite(15, LOW); // Tells Arduino to turn OFF LED 15
-    delay(waitTime);
+  digitalWrite(11, HIGH); // Tells Arduino to send enough power to turn ON LED 11
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(11, LOW); // Tells Arduino to turn OFF LED 11
+  delay(waitTime);
 
-  
-   delay(waitTime*49);  // wait 4900ms or 4.9 seconds before going to the next line
+  digitalWrite(12, HIGH); // Tells Arduino to send enough power to turn ON LED 12
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(12, LOW); // Tells Arduino to turn OFF LED 12
+  delay(waitTime);
+
+  digitalWrite(13, HIGH); // Tells Arduino to send enough power to turn ON LED 13
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(13, LOW); // Tells Arduino to turn OFF LED 13
+  delay(waitTime);
+
+  digitalWrite(14, HIGH); // Tells Arduino to send enough power to turn ON LED 14
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(14, LOW); // Tells Arduino to turn OFF LED 14
+  delay(waitTime);
+
+  digitalWrite(15, HIGH); // Tells Arduino to send enough power to turn ON LED 15
+  delay(waitTime); // wait waitTime before going to the next line
+  digitalWrite(15, LOW); // Tells Arduino to turn OFF LED 15
+  delay(waitTime);
+
+  delay(waitTime * 49); // wait 4900ms or 4.9 seconds before going to the next line
 }
 
