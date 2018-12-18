@@ -4,3 +4,5 @@
 *.ini
 update-gh-pages.sh
 .idea/
+
+*.db
