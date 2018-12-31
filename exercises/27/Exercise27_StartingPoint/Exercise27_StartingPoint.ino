@@ -1,4 +1,4 @@
-void setup({
+void setup(){
   int ledNumber;
   for (ledNumber = 2; ledNumber <= 15; ledNumber ++) {
     pinMode(ledNumber, OUTPUT);
