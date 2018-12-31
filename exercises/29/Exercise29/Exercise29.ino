@@ -43,6 +43,3 @@ void loop()
   }
   delay(delayTime*40);
 }
-
-
-

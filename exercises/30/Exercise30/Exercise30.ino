@@ -68,4 +68,3 @@ void loop()
   }
   delay(waitTime*40);  // Wait 4 seconds with all LED's off before repeating loop()
 }
-
