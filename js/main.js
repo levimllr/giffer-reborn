@@ -67,6 +67,7 @@ var finishDebug = document.getElementById("finish-debug");
 
 //Canvas
 var canvas = document.getElementById("canvas");
+var correctCanvas = document.getElementById("correct-canvas");
 
 //Currents
 var currentPrefix = "";
@@ -126,6 +127,7 @@ function resetStatus() {
 
 //Boards
 var currentBoard;
+var correctBoard;
 function loadBoard(type, setup) {
   if(type){
     setStatus("Loading board", "info", true);
@@ -133,13 +135,20 @@ function loadBoard(type, setup) {
     currentBoard = createBoard(type, setup);
     currentBoard.activate();
 
+    correctBoard = createBoard(type, setup);
+
     currentPrefix = currentBoard.codePrefix;
 
     canvas.height = currentBoard.canvasHeight;
     canvas.width = currentBoard.canvasWidth;
+    correctCanvas.height = currentBoard.canvasHeight;
+    correctCanvas.width = currentBoard.canvasWidth;
+
     var ctx = canvas.getContext("2d");
+    var correctCtx = correctCanvas.getContext("2d");
 
     currentBoard.drawShield(ctx);
+    correctBoard.drawShield(correctCtx);
 
     hideCanvas();
 
@@ -379,6 +388,8 @@ function clearExercise(){
   currentExercise = {number: null, suffix: defaultSuffix};
   setButtons("Run", true, false, false);
 
+  document.getElementById("correct-section").style.display = "none";
+
   for (var i = 0; i < currentBoard.DOMKeyframes.length; i++) {
     var keyframe = $(currentBoard.DOMKeyframes[i]);
     keyframe.find(".keyframe-time")[0].disabled = false;
@@ -413,6 +424,7 @@ function loadExercise(promptForOverwrite) {
   xmlhttp.onload = function() {
     if (this.status === 200) {
       var data = JSON.parse(this.responseText);
+      document.getElementById("correct-section").style.display = "block";
       if(!data.board) {
         //This is a FrameManager--not an exercise.
         currentExercise.frameManager = makeFrameManager(JSON.parse(this.responseText));
@@ -489,6 +501,7 @@ function renderFrameManger(frameManager) {
   var currentIndex = 0;
   wait = 0;
 
+  currentBoard.initFrameManager(frameManager);
   currentBoard.setContext({
     dateString: dateString,
     timeString: timeString,
@@ -496,71 +509,41 @@ function renderFrameManger(frameManager) {
     exerciseNumber: exerciseNumber,
     name: name
   });
+  var currentCtx = canvas.getContext("2d");
 
-  var drawFrame = function(frame, index, array, stdDelay, timeSinceLast, callTime, _) {
+  var drawCorrect = currentExercise.number !== null;
 
-    var ctx = canvas.getContext("2d");
+  if (drawCorrect) {
+    correctBoard.initFrameManager(currentExercise.frameManager);
+    correctBoard.setContext({
+      dateString: dateString,
+      timeString: timeString,
+      isCorrect: true,
+      exerciseNumber: exerciseNumber,
+      name: "Instructor"
+    });
+    var correctCtx = correctCanvas.getContext("2d");
+  }
 
-    var now = performance.now();
+  var drawFrame = function(prev, now) {
+
     var speed = document.getElementById("canvas-speed").value;
-    var cumulativeTime = timeSinceLast + (now - callTime);
-    var desiredWait = stdDelay / speed;
-    var partial;
+    var dt = (now - prev) * speed;
+    var partial = drawFrame.bind(null, now);
 
-    if (speed === 0 || cumulativeTime < desiredWait) {
-      partial = drawFrame.bind(null, array[index], index, array, stdDelay, cumulativeTime, now);
-    } else {
-      var currentRenderPoint = callTime - timeSinceLast + desiredWait; // Compute the time of the last frame draw
-      var lastDelay = null;
-      while (currentRenderPoint <= now) {
-        if (index === 0) {
-          currentBoard.setContext({
-            dateString: dateString,
-            timeString: timeString,
-            isCorrect: frameManager.grade,
-            exerciseNumber: exerciseNumber,
-            name: name
-          });
-        }
-
-        currentBoard.advance(frame, index, frameManager);
-
-        lastDelay = frame.postDelay;
-        currentRenderPoint += frame.postDelay / speed;
-        index = (index + 1) % array.length;
-        frame = array[index];
+    if (dt > 0) {
+      currentBoard.render(currentCtx, dt);
+      if (drawCorrect) {
+        correctBoard.render(correctCtx, dt);
       }
-
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      currentBoard.draw(ctx);
-
-      if (lastDelay === null) {
-        console.log("Something went very very wrong.");
-      }
-
-      partial = drawFrame.bind(null, frame, index, array, lastDelay, 0, now);
     }
 
     rendererTimeoutHandle = requestAnimationFrame(partial);
   };
 
   stopRendering();
-  if (frameManager.elapsedTime === 0) {
-    currentBoard.setContext({
-      dateString: dateString,
-      timeString: timeString,
-      isCorrect: frameManager.grade,
-      exerciseNumber: exerciseNumber,
-      name: name
-    });
-    currentBoard.advance(frameManager.frames[0], 0, frameManager);
-    currentBoard.draw(canvas.getContext("2d"));
-  } else {
-    drawFrame(frameManager.frames[0], 0, frameManager.frames, 0, 0, performance.now());
-  }
-
+  var time = performance.now();
+  rendererTimeoutHandle = requestAnimationFrame(drawFrame.bind(time));
   showCanvas();
 
   if ((frameManager.grade === true) || (frameManager.grade === false)) {
