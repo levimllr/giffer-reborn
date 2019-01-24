@@ -78,7 +78,7 @@ Board.prototype.advance = function() {
 
 Board.prototype.render = function(ctx, dt) {
   this.fractionalTime += dt;
-  while (this.elapsedTime <= this.fractionalTime) {
+  while (this.elapsedTime + this.currentFrame.postDelay <= this.fractionalTime) {
     if (this.advance()) {
       break;
     }
@@ -93,7 +93,11 @@ Board.prototype.render = function(ctx, dt) {
 Board.prototype.drawShield = function(ctx) {
   //Called on its own when board is loaded
   if (this.shieldImg.complete && this.shieldImg.naturalWidth !== 0) {
-    ctx.drawImage(this.shieldImg, 0, 0, this.imageWidth, this.imageHeight);
+    if (typeof this.imageWidth === "undefined" || typeof this.imageHeight === "undefined") {
+      ctx.drawImage(this.shieldImg, 0, 0);
+    } else {
+      ctx.drawImage(this.shieldImg, 0, 0, this.imageWidth, this.imageHeight);
+    }
   } else {
     imageLoadCallbacks.push({board: this, ctx: ctx});
   }
