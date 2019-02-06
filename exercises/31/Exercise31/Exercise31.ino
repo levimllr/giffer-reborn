@@ -1,3 +1,10 @@
+//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//
+// 1. Make sure that function has been renamed from blink() to blink2Once()
+//
+//**************ACTIVITES TO CHECK WHILE GRADING**********END*********
+
+
 void setup()
 { 
   pinMode(2, OUTPUT);
