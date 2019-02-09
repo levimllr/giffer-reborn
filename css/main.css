@@ -72,6 +72,10 @@ label.btn {
     height: 100%;
 }
 
+.scrollable {
+    overflow-y: scroll;
+}
+
 #main-div {
     height: calc(100% - 80px);
 }

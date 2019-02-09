@@ -21,9 +21,15 @@ Board.prototype.elapsedTime = 0;
 Board.prototype.currentIndex = 0;
 
 Board.prototype.setContext = function(context){
+  this.reset();
+  this.context = context;
+};
+
+Board.prototype.reset = function(){
+  this.fractionalTime = 0;
   this.elapsedTime = 0;
   this.currentIndex = 0;
-  this.context = context;
+  this.currentFrame = this.frameManager.frames[this.currentIndex];
 };
 
 Board.prototype.drawInfo = function(ctx, frame, index, frameManager){
@@ -44,16 +50,57 @@ Board.prototype.drawInfo = function(ctx, frame, index, frameManager){
   ctx.fillText(gradeText, this.shieldImg.width + 10, 175);
 };
 
-
-Board.prototype.advance = function(frame, index, frameManager) {
-  if(this.currentIndex !== index) this.elapsedTime += frame.postDelay;
-  this.currentIndex = index;
-  this.currentFrame = frame;
+Board.prototype.initFrameManager = function(frameManager) {
   this.frameManager = frameManager;
+  this.reset();
+};
+
+Board.prototype.gotoFrame = function(index) {
+  this.currentIndex = index;
+  this.currentFrame = this.frameManager.frames[this.currentIndex];
+  this.elapsedTime = 0;
+  for (var i = 0; i < this.currentIndex; i++) {
+    this.elapsedTime += this.frameManager.frames[i].postDelay;
+  }
+};
+
+Board.prototype.advance = function() {
+  if (this.currentIndex + 1 >= this.frameManager.frames.length) {
+    this.reset();
+    return true;
+  } else {
+    this.currentIndex += 1;
+    this.currentFrame = this.frameManager.frames[this.currentIndex];
+    this.elapsedTime += this.currentFrame.postDelay;
+    return false;
+  }
+};
+
+Board.prototype.render = function(ctx, dt) {
+  this.fractionalTime += dt;
+  while (this.elapsedTime + this.currentFrame.postDelay <= this.fractionalTime) {
+    if (this.advance()) {
+      break;
+    }
+  }
+
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  this.draw(ctx);
 };
 
 Board.prototype.drawShield = function(ctx) {
   //Called on its own when board is loaded
+  if (this.shieldImg.complete && this.shieldImg.naturalWidth !== 0) {
+    if (typeof this.imageWidth === "undefined" || typeof this.imageHeight === "undefined") {
+      ctx.drawImage(this.shieldImg, 0, 0);
+    } else {
+      ctx.drawImage(this.shieldImg, 0, 0, this.imageWidth, this.imageHeight);
+    }
+  } else {
+    imageLoadCallbacks.push({board: this, ctx: ctx});
+  }
 };
 
 Board.prototype.draw = function(ctx, frame, index, frameManager) {
@@ -114,6 +161,7 @@ Board.prototype.activate = function(){
 
   $("#edit").append(setup);
 
+
   for (var i = 0; i < this.pinKeyframes.length; i++) {
     var keyframe = this.pinKeyframes[i];
     this.addKeyframe(keyframe.time, keyframe.pin, keyframe.value);
@@ -141,6 +189,7 @@ Board.prototype.updateInputs = function(){
   Light Sculpture Board
 **/
 function LEDBoard(setup) {
+  Board.call(this, setup);
   this.ledLookup = {
     2: {x: 87, y: 165, color: "red"},
     3: {x: 87, y: 140, color: "green"},
@@ -158,11 +207,6 @@ function LEDBoard(setup) {
     14: {x: 5, y: 35, color: "yellow"},
     15: {x: 5, y: 7, color: "yellow"}
   };
-
-  if(setup && setup.pinKeyframes){
-    this.pinKeyframes = setup.pinKeyframes;
-  }
-
 }
 
 LEDBoard.prototype = Object.create(Board.prototype);
@@ -170,10 +214,8 @@ LEDBoard.prototype.imageURL = "img/LED-Shield.gif";
 LEDBoard.prototype.type = "LED Board";
 LEDBoard.prototype.canvasWidth = 400;
 LEDBoard.prototype.canvasHeight = 195;
-
-LEDBoard.prototype.drawShield = function(ctx) {
-  ctx.drawImage(this.shieldImg, 0, 0);
-};
+LEDBoard.prototype.imageWidth = undefined;
+LEDBoard.prototype.imageHeight = undefined;
 
 LEDBoard.prototype.draw = function(ctx) {
   var frame = this.currentFrame;
@@ -207,9 +249,7 @@ LEDBoard.prototype.draw = function(ctx) {
   Kinetic Sculpture Board
 **/
 function KSBoard(setup) {
-  if(setup && setup.pinKeyframes){
-    this.pinKeyframes = setup.pinKeyframes;
-  }
+  Board.call(this, setup);
 }
 
 KSBoard.prototype = Object.create(Board.prototype);
@@ -218,6 +258,8 @@ KSBoard.prototype.imageURL = "img/KS-Shield.png";
 KSBoard.prototype.type = "KS Board";
 KSBoard.prototype.canvasWidth = 450;
 KSBoard.prototype.canvasHeight = 350;
+KSBoard.prototype.imageWidth = 450;
+KSBoard.prototype.imageHeight = 255;
 
 KSBoard.prototype.codePrefix = `#include "Arduino.h"
 #define digitalPinToInterrupt(x) (x)
@@ -240,10 +282,6 @@ typedef unsigned char byte;
 #define A15 69
 `;
 
-
-KSBoard.prototype.drawShield = function(ctx) {
-  ctx.drawImage(this.shieldImg, 0, 0, 450, 255);
-};
 /*
   A5/D54: BTN-UP
   A6/D55: BTN-MODE
@@ -427,6 +465,7 @@ var BOARDS = {
   "LED Board": LEDBoard,
   "KS Board": KSBoard
 };
+var imageLoadCallbacks = [];
 var remaining = 0;
 for(var b in BOARDS){
   if(BOARDS.hasOwnProperty(b)){
@@ -435,7 +474,11 @@ for(var b in BOARDS){
     BOARDS[b].prototype.shieldImg.onload = function(e) {
       remaining--;
       if(remaining === 0) {
-        currentBoard.drawShield(canvas.getContext("2d"));
+        for (var i = 0; i < imageLoadCallbacks.length; i++) {
+          var parts = imageLoadCallbacks[i];
+          parts.board.drawShield(parts.ctx);
+        }
+        imageLoadCallbacks = null;
       }
     };
     BOARDS[b].prototype.shieldImg.src = BOARDS[b].prototype.imageURL;
