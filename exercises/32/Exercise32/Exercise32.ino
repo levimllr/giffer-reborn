@@ -10,10 +10,8 @@
 
 void setup()
 { 
-  pinMode(9, OUTPUT);
-  pinMode(15, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(14, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
 }
 
 
@@ -24,6 +22,7 @@ void loop()
   for(x = 1; x <= 5; x++)
   { 
     blinkTwoOnce(200);
+    blinkThreeOnce(200);
   }
 
   delay(4000);
@@ -32,14 +31,17 @@ void loop()
 
 void blinkTwoOnce(int t)
 { 
-  digitalWrite(9, HIGH);
+  digitalWrite(2, HIGH);
   delay(t);
-  digitalWrite(15, HIGH);
-  delay(t);
-  digitalWrite(10, HIGH);
-  delay(t);
-  digitalWrite(14, HIGH);
+  digitalWrite(2, LOW);
   delay(t);
 }
 
+void blinkThreeOnce(int t)
+{ 
+  digitalWrite(3, HIGH);
+  delay(t);
+  digitalWrite(3, LOW);
+  delay(t);
+}
 
