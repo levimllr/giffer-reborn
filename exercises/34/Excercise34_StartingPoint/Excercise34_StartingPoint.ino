@@ -16,7 +16,6 @@ void loop()
     blinkOnce(100, 3);
     blinkOnce(100, 4);
   }
-
   delay(4000);
 }
 

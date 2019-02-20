@@ -1,4 +1,4 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 //1.	Verify that LEDs will blink for any number
 //2.	Should run through the three functions and then delay for 4 seconds
@@ -28,7 +28,6 @@ void loop()
     blinkTwice(100, 3);
     blinkInPairs(100, 4);
   }
-
   delay(4000);
 }
 
@@ -52,6 +51,7 @@ void blinkTwice(int blinkTime, int ledNumber)
   delay(blinkTime);
   }
 }
+
 void blinkInPairs(int blinkTime, int ledNumber)
 {
   digitalWrite(ledNumber, HIGH);
@@ -61,6 +61,3 @@ void blinkInPairs(int blinkTime, int ledNumber)
   digitalWrite(ledNumber + 7, LOW);
   delay(blinkTime);
 }
-
-
-
