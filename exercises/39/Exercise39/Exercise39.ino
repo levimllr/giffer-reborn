@@ -1,4 +1,4 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 // 1.	Ensure that the function is named sequenceLEDsRedsThenGreens and it is using ONE for loop, with the variable count
 // 2.	Verify that LEDs blink Reds (2,4,6,8) then Greens (3,5,7)
@@ -47,4 +47,3 @@ void sequenceLEDsRedsThenGreens(int onTime, int offTime, int repeatCount)// Exer
     delay(offTime);
   }
 }
-
