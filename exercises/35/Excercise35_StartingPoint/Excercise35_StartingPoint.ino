@@ -8,7 +8,6 @@ void setup()
   }
 }
 
-
 void loop()
 {
   sequenceLEDsFromRightToLeft(300, 1);
@@ -17,7 +16,6 @@ void loop()
     
   delay(3000);
 }
-
 
 void sequenceLEDsFromRightToLeft(int onTime, int repeatCount)
 { 
@@ -34,4 +32,3 @@ void sequenceLEDsFromRightToLeft(int onTime, int repeatCount)
     }
   }
 }
-
