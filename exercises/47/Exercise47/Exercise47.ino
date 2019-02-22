@@ -1,4 +1,4 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 // 1.	Make sure that an array named LEDsInAZigZagGoingDown has been created and used
 // 2.	Ensure that a function has been created named ArraysSequenceLEDsInAZigZagGoingUp
@@ -25,7 +25,7 @@ void loop()
 void ArraysSequenceLEDsInAZigZagGoingDown(int onTime,int offTime, int repeatCount)
 {
   int LEDsInAZigZagGoingDown[14] = {
-    15,8,14,7,13,6,12,5,11,4,18,3,9,2    };
+    15,8,14,7,13,6,12,5,11,4,10,3,9,2    };
   int index;
   int count;
 
