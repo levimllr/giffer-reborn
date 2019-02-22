@@ -1,4 +1,4 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 //1.	Verify that odd LEDs blink off in the order 3, 5, 7, 9, 11, 13, 15
 //
