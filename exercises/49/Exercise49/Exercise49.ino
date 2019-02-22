@@ -1,8 +1,8 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
-// 1.	Make sure that an array named LEDsClockwiseStartAt8 has been created and used
-// 2.	Ensure that a function has been created named ArraysSequenceLEDsClockwiseStartAt8
-// 3.	The order of the LED’s should be 8,7,6,5,4,3,2,9,10,11,12,13,14,15
+// 1.	Make sure that an array named LEDsCounterClockwiseStartAt15 has been created and used
+// 2.	Ensure that a function has been created named ArraysSequenceLEDsCounterClockwiseStartAt15
+// 3.	The order of the LED’s should be 15,14,13,12,11,10,9,2,3,4,5,6,7,8
 // 4.	Make sure that function uses three parameters (example – but not required - ledOnTime, ledOffTime, and repeatCount)
 //
 // ***************ACTIVITIES TO CHECK WHILE GRADING END*********************
