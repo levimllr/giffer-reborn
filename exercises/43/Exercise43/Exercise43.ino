@@ -1,6 +1,7 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
-//1.	Verify that LEDs blink in the order 2,4,6,8,10,12,14,3,5,7,9,11,13,15
+//1.	Verify that LEDs blink in the order 2,3,4,5,6,7,8,9,10,11,12,13,14,15
+//2.    Verify that an Array is used to accomplish the LEDs blinking
 //
 // ***************ACTIVITIES TO CHECK WHILE GRADING END*********************
 
@@ -20,7 +21,7 @@ void setup()
 void loop()
 {
   int myFirstArray[14] = {
-    2,4,6,8,10,12,14,3,5,7,9,11,13,15  }; // creates an array of 14 integers / elements and initializes / assigns values to those integers  
+    2,3,4,5,6,7,8,9,10,11,12,13,14,15  }; // creates an array of 14 integers / elements and initializes / assigns values to those integers
   int index;
   // Blinks LED's in the order defined by the array
   for(index = 0; index <= 13; index++)
