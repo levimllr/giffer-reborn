@@ -1,7 +1,7 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 // 1.	Make sure that an array named LEDsYellowRedOrangeGreenBlue has been created and used
-// 2.	Ensure that a function has been created named ArraysSequenceShowAlltheColors
+// 2.	Ensure that a function has been created named ArraysSequenceShowAllTheColors
 // 3.	The order of the LED’s should be (15,14) , (15, 14) , (15, 14), (2,4,6,8), (2,4,6,8), (11,10,9), (11,10,9), (11,10,9) (3,5,7), (3,5,7), (3,5,7), (12,13), (12,13), (12,13)
 // 4.	Make sure that function uses three parameters (example – but not required - ledOnTime, ledOffTime, and repeatCount)
 //
@@ -109,7 +109,3 @@ void ArraysSequenceShowAllTheColors (int LedOnTime, int LedOffTime, int RepeatCo
     } // end of Index loop
   } // end of RepeatCount loop
 }
-
-
-
-
