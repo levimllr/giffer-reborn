@@ -1,4 +1,4 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 // 1.	Ensure that the function is named sequenceAllLEDsForwardBlinkingOff and it is using FOUR for loops
 // 2.	Verify that LEDs blink in the order 2 and 15 off / on 
