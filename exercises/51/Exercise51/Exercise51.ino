@@ -25,7 +25,7 @@ void loop()
   int ledNumber;
   int delayTime = 200;
   Serial.println("Begin turning LED's 2-15 on / off"); // Send to Serial port for debug
-      for (ledNumber = 2; ledNumber <= 15; ledNumber++) // Blink LED 2 - 15 ON / OFF
+  for (ledNumber = 2; ledNumber <= 15; ledNumber++) // Blink LED 2 - 15 ON / OFF
   {
     Serial.print("Turn  on  ledNumber "); // Send to Serial port for debug
     Serial.println(ledNumber); // print the variable & finish printing the line
@@ -36,7 +36,7 @@ void loop()
     digitalWrite(ledNumber, LOW);
   }
   Serial.println("Done turning LED's 2-15 on / off"); // Send to Serial port for debug
-  Serial.println("delay 5 seconds)"); // Send to Serial port for debug
+  Serial.println("delay 5 seconds"); // Send to Serial port for debug
   delay(5000);
   Serial.println("Finished loop()"); // Send to Serial port for debug
 }
@@ -79,5 +79,5 @@ Turn off ledNumber 14
 Turn on ledNumber 15
 Turn off ledNumber 15
 Done turning LED's 2-15 on / off
-delay 5 seconds)
+delay 5 seconds
 Finished loop()*/
