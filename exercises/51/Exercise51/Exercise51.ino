@@ -27,7 +27,7 @@ void loop()
   Serial.println("Begin turning LED's 2-15 on / off"); // Send to Serial port for debug
   for (ledNumber = 2; ledNumber <= 15; ledNumber++) // Blink LED 2 - 15 ON / OFF
   {
-    Serial.print("Turn  on  ledNumber "); // Send to Serial port for debug
+    Serial.print("Turn on ledNumber "); // Send to Serial port for debug
     Serial.println(ledNumber); // print the variable & finish printing the line
     digitalWrite(ledNumber, HIGH);
     delay(delayTime);

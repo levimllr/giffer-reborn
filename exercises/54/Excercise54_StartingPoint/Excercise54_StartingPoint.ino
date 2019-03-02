@@ -12,16 +12,17 @@ void loop()
   Serial.println("");
   int pin18 = 0;     // variable to store the read value
   int potentiometerValueA5;
-//  pin18 = digitalRead(18); // read the input pin either HIGH or LOW
-//  potentiometerValueA5 = analogRead(5); // read the input pin between 0 and 1023
+  pin18 = digitalRead(18); // read the input pin either HIGH or LOW
+  potentiometerValueA5 = analogRead(5); // read the input pin between 0 and 1023
   // Light Up LED's corresponding to analog values.
   // If we divide 1024 into 2 areas
 
   int i = 1;
-while(i<=20000)
+while(i<=100)
 {
+    pin18 = digitalRead(18);
     if (pin18==0)
-    {
+   {
         Serial.println("Pin 18 is equal to zero");
     }
     if (pin18==1)
