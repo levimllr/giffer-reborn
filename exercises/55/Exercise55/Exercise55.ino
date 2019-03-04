@@ -28,16 +28,14 @@ void loop()
       Serial.print(potentiometerValueA5); // Send the value read from Pin 5: 0 to 1023
       Serial.print("         Blink LED 2 and 3");
       Serial.println("");
-      for ( int count = 0; count <= 3; count ++)
-      {
-        digitalWrite(2, HIGH);
-        digitalWrite(3, HIGH);
-        delay(100);
-        digitalWrite(2, LOW);
-        digitalWrite(3, LOW);
-        delay(100);
+      digitalWrite(2, HIGH);
+    digitalWrite(3, HIGH);
+    delay(50);
+    digitalWrite(2, LOW);
+    digitalWrite(3, LOW);
+    delay(50);
       }
-    }
+
 
     // 512 - 1023  => LED3 ON
     if ( potentiometerValueA5 >= 512 && potentiometerValueA5 <= 1023 )
@@ -47,15 +45,13 @@ void loop()
       Serial.print(potentiometerValueA5); // Send the value read from Pin 5: 0 to 1023
       Serial.print("         Blink LED 14 and 15");
       Serial.println("");
-      for ( int count = 0; count <= 3; count ++)
-      {
-        digitalWrite(14, HIGH);
+       digitalWrite(14, HIGH);
         digitalWrite(15, HIGH);
-        delay(100);
+        delay(50);
         digitalWrite(14, LOW);
         digitalWrite(15, LOW);
-        delay(100);
-      }
+        delay(50);
+
     }
     i = i + 1;
     delay(10);

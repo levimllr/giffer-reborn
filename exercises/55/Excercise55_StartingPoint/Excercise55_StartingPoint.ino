@@ -1,5 +1,3 @@
-//Example of using Serial Print to send potentiometer values to the computer screen
-
 void setup()
 {
   Serial.begin(9600); // Open serial monitor at 9600 baud to see potentiometer values
@@ -23,7 +21,7 @@ void loop()
     // If we divide 1024 into 2 areas
 
     // 000 - 511
-    if ( potentiometerValueA5 >= 1 && potentiometerValueA5 <= 511 )
+    if ( potentiometerValueA5 >= 0 && potentiometerValueA5 <= 511 )
     {
       // Send status to Serial Monitor
       Serial.print("Onboard POTENTIOMETER -  Pin A5 (0-1023): ");
