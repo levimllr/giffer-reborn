@@ -42,8 +42,7 @@ void loop()
 }
 
 
-/*
-Serial Output
+/*Serial Output
 Begin setup()
 Make pins 2-15 outputs
 Pins 2-15 are outputs
@@ -80,4 +79,5 @@ Turn on ledNumber 15
 Turn off ledNumber 15
 Done turning LED's 2-15 on / off
 delay 5 seconds
-Finished loop()*/
+Finished loop()
+*/

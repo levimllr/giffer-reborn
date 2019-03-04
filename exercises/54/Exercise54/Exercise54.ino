@@ -46,5 +46,5 @@ void loop()
     i = i + 1;
   }
   Serial.println("Good Bye World");
-  delay(500);
+  delay(10);
 }
