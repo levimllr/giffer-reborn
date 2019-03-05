@@ -1,3 +1,10 @@
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
+//
+// 1.  Giffer checks all aspects of this exercise.
+// 2.   If Giffer says CORRECT it is good to go
+//
+// ***************ACTIVITIES TO CHECK WHILE GRADING END*********************
+
 void setup()
 {
   Serial.begin(9600); // Open serial monitor at 9600 baud to see potentiometer values
@@ -29,12 +36,12 @@ void loop()
       Serial.print("         Blink LED 2 and 3");
       Serial.println("");
       digitalWrite(2, HIGH);
-    digitalWrite(3, HIGH);
-    delay(50);
-    digitalWrite(2, LOW);
-    digitalWrite(3, LOW);
-    delay(50);
-      }
+      digitalWrite(3, HIGH);
+      delay(50);
+      digitalWrite(2, LOW);
+      digitalWrite(3, LOW);
+      delay(50);
+    }
 
 
     // 512 - 1023  => LED3 ON
@@ -45,12 +52,12 @@ void loop()
       Serial.print(potentiometerValueA5); // Send the value read from Pin 5: 0 to 1023
       Serial.print("         Blink LED 14 and 15");
       Serial.println("");
-       digitalWrite(14, HIGH);
-        digitalWrite(15, HIGH);
-        delay(50);
-        digitalWrite(14, LOW);
-        digitalWrite(15, LOW);
-        delay(50);
+      digitalWrite(14, HIGH);
+      digitalWrite(15, HIGH);
+      delay(50);
+      digitalWrite(14, LOW);
+      digitalWrite(15, LOW);
+      delay(50);
 
     }
     i = i + 1;
