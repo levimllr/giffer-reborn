@@ -31,9 +31,9 @@ void loop()
     if ( potentiometerValueA5 >= 0 && potentiometerValueA5 <= 511 )
     {
       // Send status to Serial Monitor
-      Serial.print("Onboard POTENTIOMETER -  Pin 5 (0-1023): ");
-      Serial.print(potentiometerValueA5); // Send the value read from Pin 5: 0 to 1023
-      Serial.print("         Blink LED 2 and 3");
+      Serial.print("Onboard POTENTIOMETER -  Pin A5 (0-1023): ");
+      Serial.print(potentiometerValueA5); // Send the value read from Pin A5: 0 to 1023
+      Serial.print("Blink LED 2 and 3");
       Serial.println("");
       digitalWrite(2, HIGH);
       digitalWrite(3, HIGH);
@@ -48,9 +48,9 @@ void loop()
     if ( potentiometerValueA5 >= 512 && potentiometerValueA5 <= 1023 )
     {
       // Send status to Serial Monitor
-      Serial.print("Onboard POTENTIOMETER -  Pin 5 (0-1023): ");
-      Serial.print(potentiometerValueA5); // Send the value read from Pin 5: 0 to 1023
-      Serial.print("         Blink LED 14 and 15");
+      Serial.print("Onboard POTENTIOMETER -  Pin A5 (0-1023): ");
+      Serial.print(potentiometerValueA5); // Send the value read from Pin A5: 0 to 1023
+      Serial.print("Blink LED 14 and 15");
       Serial.println("");
       digitalWrite(14, HIGH);
       digitalWrite(15, HIGH);
@@ -58,7 +58,6 @@ void loop()
       digitalWrite(14, LOW);
       digitalWrite(15, LOW);
       delay(50);
-
     }
     i = i + 1;
     delay(10);
