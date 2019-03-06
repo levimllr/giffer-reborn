@@ -32,8 +32,9 @@ var defaultSuffix = `int main() {
 }
 `;
 
-//Editor
+//Editor => This web app uses the ace.js embedded editor. The following line sets the HTML ID of the ace editor to "editor".
 var editor = ace.edit("editor");
+// The following line sets the programming language mode to C++.
 editor.getSession().setMode("ace/mode/c_cpp");
 
 editor.setValue(getFromStorage("code", defaultCode), -1);
@@ -288,6 +289,7 @@ function runCode() {
     return;
   }
   setRunning(true);
+  // This line changes the HTML paragraph above the Output GIF.
   setStatus("Running your code . . .", "info", true);
 
   saveContext();
@@ -295,13 +297,18 @@ function runCode() {
   stopRendering();
   hideCanvas();
 
+  // Set the content of the output console to nada.
   document.getElementById("console-output").innerHTML = "";
 
+  // Paul, what does this do? What annotations are set?
   editor.getSession().setAnnotations([]);
 
+  // Creates a dedicated web worker that executes the script. Essential creates a new thread.
   jscpp = new Worker("js/JSCPP-WebWorker.js");
 
+  // Paul, why are there two sets of equal signs? Is this some kind of ternary operator?
   var shouldGrade = currentExercise.number !== null;
+
 
   jscpp.onmessage = function(e) {
     var message = JSON.parse(e.data);
@@ -401,6 +408,7 @@ function clearExercise(){
   $("#edit-tooltip").tooltip("disable");
 }
 function loadExercise(promptForOverwrite) {
+
   setStatus("Getting grading file . . .", "info", true);
 
   hideCanvas();
@@ -411,6 +419,9 @@ function loadExercise(promptForOverwrite) {
     return;
   }
 
+  console.log("Loading Exercise " + exerciseNum + "...");
+
+  // This bad boy is only looking for a .FrameManager file!
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
 
@@ -433,7 +444,10 @@ function loadExercise(promptForOverwrite) {
 
         loadDefaultBoard();
 
+        console.log("Just a humble FrameManager.")
+
       } else {
+        console.log("Full package.")
         currentExercise.number = exerciseNum;
         currentExercise.board = data.board;
         currentExercise.startingCode = data.startingCode;
