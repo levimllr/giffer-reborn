@@ -1,10 +1,10 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 // 1. Make sure that function uses the parameters LEDOnTime, LEDOffTime, and repeatCount
 // 2. Ensure that the function is named LEDsInAZigZagMovingUp and it is using two for loops
 // 3. Make sure that the for loop includes the math some sort of math like otherLEDNum = ledNumber +7
 //
-//**************ACTIVITES TO CHECK WHILE GRADING**********END*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********END*********
 
 void setup()
 { 
@@ -15,7 +15,6 @@ void setup()
     pinMode(pinNumber, OUTPUT);
   }
 }
-
 
 void loop ()
 {
@@ -29,7 +28,6 @@ void loop ()
 }
 
 void LEDsInAZigZagMovingUp (int LEDOnTime, int LEDOffTime, int RepeatCount)
-
 {
   int count;
   int ledNumber;
@@ -51,6 +49,3 @@ void LEDsInAZigZagMovingUp (int LEDOnTime, int LEDOffTime, int RepeatCount)
     }
   }
 }
-
-
-

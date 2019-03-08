@@ -1,11 +1,11 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 // 1. Verify that there are only three function calls in loop()
 // a)	sequenceLEDsFromRightToLeft(200, 2);
 // b)	  sequenceLEDsFromLeftToRight(200, 4);
 // c)	  sequenceLEDsFromRightToLeft(500, 1);
 //
-//**************ACTIVITES TO CHECK WHILE GRADING**********END*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********END*********
 
 void setup()
 { 
@@ -17,7 +17,6 @@ void setup()
   }
 }
 
-
 void loop()
 {
   sequenceLEDsFromRightToLeft(200, 2);
@@ -28,7 +27,6 @@ void loop()
   
   delay(3000);
 }
-
 
 void sequenceLEDsFromRightToLeft(int onTime, int repeatCount)
 { 
@@ -46,7 +44,6 @@ void sequenceLEDsFromRightToLeft(int onTime, int repeatCount)
   }
 }
 
-
 void sequenceLEDsFromLeftToRight(int onTime, int repeatCount)
 { int count;
   int pinNumber;
@@ -61,5 +58,3 @@ void sequenceLEDsFromLeftToRight(int onTime, int repeatCount)
     }
   }
 }
-
-

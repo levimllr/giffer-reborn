@@ -1,4 +1,4 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 // 1.	Make sure that an array named LEDsCounterClockwise has been created and used
 // 2.	Ensure that a function has been created named ArraysSequenceLEDsCounterClockwiseStartAt2

@@ -8,15 +8,11 @@ void setup()
   }
 }
 
-
 void loop()
 {
-  
   sequenceLEDs2Through8(300, 300, 5);
-  
   delay(3000);
 }
-
 
 void sequenceLEDs2Through8(int onTime, int offTime, int repeatCount)
 { 
@@ -35,8 +31,6 @@ void sequenceLEDs2Through8(int onTime, int offTime, int repeatCount)
   }
 }
 
-
-
 void sequenceLEDsFromLeftToRight(int onTime, int repeatCount)
 { int count;
   int pinNumber;
@@ -51,4 +45,3 @@ void sequenceLEDsFromLeftToRight(int onTime, int repeatCount)
     }
   }
 }
-

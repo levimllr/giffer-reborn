@@ -1,4 +1,4 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 //1.	Verify that LEDs blink in the order 2, 3, 4, 5, 6, 7, 8, 15, 14, 13, 12, 11, 10, 9
 //2.	Check to make sure sequenceLEDsCounterClockwise repeats RepeatCount amount of times.
@@ -22,6 +22,7 @@ void loop ()
 	sequenceLEDsCounterClockwise(150, 150, 3);
 	delay(5000);
 }
+
 void sequenceLEDsCounterClockwise(int LEDOnTime, int LEDOffTime, int RepeatCount)
 { 
   int count;
@@ -45,5 +46,3 @@ void sequenceLEDsCounterClockwise(int LEDOnTime, int LEDOffTime, int RepeatCount
     }
   }
 }
-
-

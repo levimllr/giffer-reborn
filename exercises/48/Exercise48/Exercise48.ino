@@ -1,4 +1,4 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 // 1.	Make sure that an array named LEDsClockwiseStartAt8 has been created and used
 // 2.	Ensure that a function has been created named ArraysSequenceLEDsClockwiseStartAt8
@@ -31,7 +31,7 @@ void ArraysSequenceLEDsClockwiseStartAt8(int onTime, int offTime, int repeatCoun
 
   for (count = 1; count <= repeatCount; count++)
   {
-    for (index = 0; index <= 14; index++)
+    for (index = 0; index <= 13; index++)
     {
       digitalWrite(LEDsClockwiseStartAt8[index], HIGH);
       delay(onTime);

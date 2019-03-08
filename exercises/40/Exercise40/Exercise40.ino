@@ -1,4 +1,4 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 // 1.	Ensure that the function is named sequenceLEDsShowingAllColors and it is using ONE for loop, with the variable count
 // 2.	Verify that LEDs blink in the order 14 and 15, then 2, 4, 6, 8 then 9, 10, 11 then 3, 5, 7 then 12 and 13

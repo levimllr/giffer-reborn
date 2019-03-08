@@ -1,7 +1,7 @@
-//**************ACTIVITES TO CHECK WHILE GRADING**********BEGIN*********
+//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
 //
 //1.	Verify that the LEDs blink in this order: 4, 2, 3
-//2.	Verify that the paramteres have been modified in the function calls to turn on LEDs 4, 2, 3
+//2.	Verify that the parameters have been modified in the function calls to turn on LEDs 4, 2, 3
 //3.	Should repeat 5 times and then pause for 4 seconds
 //4.	Verify that parameters are used instead of typing out the numbers
 //

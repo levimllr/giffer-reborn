@@ -40,7 +40,9 @@ function analogWrite(rt, pin, value) {
 }
 function digitalRead(rt, pin) {
   var j = frameManager.getPinState(pin, frameManager.currentFrame);
-  return {t: rt.intTypeLiteral, v: j === ANALOG_MAX ? HIGH : LOW, left: true};
+  // Cutoff for HIGH is approx. 3/5ths of the max:
+  // https://www.arduino.cc/reference/en/language/variables/constants/constants/
+  return {t: rt.intTypeLiteral, v: j >= (3.0 * ANALOG_MAX / 5.0) ? HIGH : LOW, left: true};
 }
 function analogRead(rt, pin) {
   return {t: rt.intTypeLiteral, v: frameManager.getPinState(pin, frameManager.currentFrame), left: true};
@@ -92,7 +94,7 @@ var load = function(rt) {
   rt.regFunc(analogWrite_f, "global", "analogWrite", [rt.unsignedintTypeLiteral, rt.unsignedintTypeLiteral], rt.voidTypeLiteral);
 
   var digitalRead_f = function (rt, _this, pinNumber) {
-    return digitalRead(pinNumber.v);
+    return digitalRead(rt, pinNumber.v);
   };
   rt.regFunc(digitalRead_f, "global", "digitalRead", [rt.unsignedintTypeLiteral], rt.intTypeLiteral);
 
