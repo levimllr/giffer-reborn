@@ -105,9 +105,9 @@
                     </div>
                   </div>
                   <div class="tab-pane fade" id="dev" role="tabpanel" aria-labelledby="dev-tab">
-                    <!-- <button class="btn btn-outline-secondary" onclick="saveExercise()">Export Exercise</button> -->
+<!--                    <button class="btn btn-outline-secondary" onclick="saveExercise()">Export Exercise</button> -->
                     <button class="btn btn-outline-secondary" onclick="saveFrameManager()">Export FrameManager</button>
-                    <button class="btn btn-outline-secondary" onclick="">Generate Exercise</button>
+                    <button class="btn btn-outline-secondary" onclick="saveExercise()">Generate Exercise</button>
                     <hr>
                     <button class="btn btn-info" onclick="showReadme()">Show Help</button>
                   </div>
@@ -225,6 +225,77 @@
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
+        <h5 class="modal-title" id="modal-title">Generate Exercise</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="export-exercise-number">Exercise Number</label>
+              <input type="number" class="form-control" min="1" id="export-exercise-number">
+            </div>
+
+            <p>
+              <strong>Board Type</strong> currently selected board
+            </p>
+            <p>
+              <strong>Board Configuration</strong> current configuration (keyframes, etc)
+            </p>
+            <p>
+              <strong>Correct FrameManager</strong> current FrameManager (as shown by gif)
+            </p>
+
+            <div class="form-group">
+              <label for="export-exercise-directions">Exercise Directions</label>
+              <textarea class="form-control" id="export-exercise-directions">
+              Directions go here
+              </textarea>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="export-exercise-starting">Student starting code</label>
+              <textarea class="form-control" id="export-exercise-starting">
+                void setup() {
+                  pinMode(3, OUTPUT);
+                }
+
+                void loop() {
+                  digitalWrite(3, HIGH);
+                  delay(500);
+                  digitalWrite(3, LOW);
+                  delay(500);
+                }
+              </textarea>
+            </div>
+            <div class="form-group">
+              <label for="export-exercise-suffix">Student code suffix</label>
+              <textarea class="form-control" id="export-exercise-suffix">
+                int main() {
+                  setup();
+                  loop();
+                  return 0;
+                }
+              </textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="exportExercise()">Create Exercise</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="modal fade" id="exercise-modal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
         <h5 class="modal-title" id="modal-title">Export Exercise</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -286,7 +357,7 @@ int main() {
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
 <div id="confirmation-gif-container" style="display: none;"></div>
 

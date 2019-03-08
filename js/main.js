@@ -632,6 +632,7 @@ function saveContext() {
 function saveExercise() {
   $("#exercise-modal").modal('show');
 }
+
 function exportExercise() {
   var exercise = {};
   exercise.number = document.getElementById("export-exercise-number").value;
