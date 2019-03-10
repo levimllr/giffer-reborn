@@ -410,6 +410,21 @@ function clearExercise(){
 }
 
 /* The following function parses files in an intentionally organized local directory and fills forms with their info. */
+
+function fetchReplace(exercisenumber, url, id) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", url);
+  xhr.onload = function() {
+    if (this.status === 200) {
+      currentExercise.number = exercisenumber;
+      document.getElementById(id).value = this.responseText;
+    } else {
+      handleError();
+    }
+  };
+  xhr.send();
+}
+
 function fetchExercise(promptForOverwrite) {
 
   console.log("Click!")
@@ -430,71 +445,15 @@ function fetchExercise(promptForOverwrite) {
   // A little console indicator.
   console.log("Fetching Exercise " + exerciseNum + "...");
 
-  // This bad boy is only looking for a .FrameManager file! Hence, do not need anymore!
-  // var xmlhttp = new XMLHttpRequest();
-  // xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
+  var htmlAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + ".html"
+  var inoStartingAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "_StartingPoint/Exercise" + exerciseNum + "_StartingPoint.ino"
+  var inoCompleteAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "/Exercise" + exerciseNum + ".ino"
 
   // Fetch the Exercise Directions!
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise" + exerciseNum + ".html");
-    // console.log(xmlhttp.status);
-    // if (xmlhttp.status === 0) {
-    //   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise0" + exerciseNum + ".html");
-    // }
+  fetchReplace(exerciseNum, htmlAddress, "genex-directions")
+  fetchReplace(exerciseNum, inoStartingAddress, "genex-starting")
+  fetchReplace(exerciseNum, inoCompleteAddress, "genex-complete")
 
-    console.log(xmlhttp)
-
-  xmlhttp.onload = function() {
-    if (this.status === 200) {
-      currentExercise.number = exerciseNum;
-
-      loadDefaultBoard();
-
-      currentExercise.number = exerciseNum;
-
-      // document.getElementById("export-exercise-number").value = currentExercise.number;
-      document.getElementById("genex-directions").value = this.responseText;
-      // document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
-      // document.getElementById("export-exercise-directions").value = currentExercise.directions;
-
-      // if(currentExercise.directions) {
-      //   document.getElementById("directions-content").innerText = currentExercise.directions + "";
-      //   $("#output-tabs a[href=\"#directions\"]").tab("show");
-      // } else {
-      //   document.getElementById("directions-content").innerText = "No directions provided for this Exercise";
-      // }
-
-      // loadBoardFromExercise(currentExercise);
-
-      // if(promptForOverwrite) {
-      //   $("#overwrite-modal").modal('show');
-      // }
-      
-      // //set code to exercise start code?
-      // setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
-
-      // setButtons("Run and Grade", true, false, false);
-
-    } else {
-      handleError();
-    }
-  };
-
-  xmlhttp.send();
-
-  
-  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "_StartingPoint/Exercise" + exerciseNum + "_StartingPoint.ino");
-
-  console.log(xmlhttp)
-
-  xmlhttp.onload = function() {
-    if (this.status === 200) {
-      currentExercise.number = exerciseNum;
-      document.getElementById("genex-starting").value = this.responseText;
-    }
-  };
-
-  xmlhttp.send();
 }
 fetchExercise();
 
