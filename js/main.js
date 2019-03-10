@@ -233,6 +233,7 @@ function showCanvas(dontShow) {
   }
 }
 
+
 function hideCanvas() {
   stopRendering();
 
@@ -407,6 +408,109 @@ function clearExercise(){
   $('#add-keyframe')[0].disabled = false;
   $("#edit-tooltip").tooltip("disable");
 }
+
+/* The following function parses files in an intentionally organized local directory and fills forms with their info. */
+function infoExercise(promptForOverwrite) {
+
+  // Don't need this guy as we do not need to indicate the load status of the FM GIF.
+  // setStatus("Getting grading file . . .", "info", true);
+
+  // Neither do we need this guy, related to the reason mentioned above.
+  // hideCanvas();
+
+  // Check to see that the exercise number entered is indeed a number
+  var exerciseNum = parseInt($("#exercise-number")[0].value);
+  if (isNaN(exerciseNum)) {
+    clearExercise();
+    return;
+  }
+
+  // A little console indicator.
+  console.log("Fetching Exercise " + exerciseNum + "...");
+
+  // This bad boy is only looking for a .FrameManager file! Hence, do not need anymore!
+  // var xmlhttp = new XMLHttpRequest();
+  // xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
+
+  // Fetch the Exercise Directions!
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise" + exerciseNum + ".html");
+
+  console.log("Stuff" + JSON.parse(this.responseText));
+
+  // We don't need to clearExercise if we're just fetching info.
+  // var handleError = function() {
+  //   clearExercise();
+  // };
+
+  xmlhttp.onerror = handleError;
+  xmlhttp.onabort = handleError;
+  xmlhttp.ontimeout = handleError;
+  xmlhttp.onload = function() {
+    if (this.status === 200) {
+      var data = JSON.parse(this.responseText);
+      document.getElementById("correct-section").style.display = "block";
+      if(!data.board) {
+        //This is a FrameManager--not an exercise.
+        currentExercise.frameManager = makeFrameManager(JSON.parse(this.responseText));
+        currentExercise.number = exerciseNum;
+        currentExercise.suffix = defaultSuffix;
+
+        loadDefaultBoard();
+
+        console.log("Just a humble FrameManager.")
+
+      } else {
+        console.log("Full package.")
+        currentExercise.number = exerciseNum;
+        currentExercise.board = data.board;
+        currentExercise.startingCode = data.startingCode;
+        currentExercise.suffix = data.suffix;
+        currentExercise.frameManager = makeFrameManager(data.frameManager);
+        currentExercise.directions = data.directions;
+
+        document.getElementById("export-exercise-number").value = currentExercise.number;
+        document.getElementById("export-exercise-starting").value = currentExercise.startingCode;
+        document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
+        document.getElementById("export-exercise-directions").value = currentExercise.directions;
+
+        if(currentExercise.directions) {
+          document.getElementById("directions-content").innerText = currentExercise.directions + "";
+          $("#output-tabs a[href=\"#directions\"]").tab("show");
+        } else {
+          document.getElementById("directions-content").innerText = "No directions provided for this Exercise";
+        }
+
+        loadBoardFromExercise(currentExercise);
+
+        for (var i = 0; i < currentBoard.DOMKeyframes.length; i++) {
+          var keyframe = $(currentBoard.DOMKeyframes[i]);
+          keyframe.find(".keyframe-time")[0].disabled = true;
+          keyframe.find(".keyframe-pin")[0].disabled = true;
+          keyframe.find(".keyframe-value")[0].disabled = true;
+          keyframe.find(".keyframe-remove")[0].disabled = true;
+        }
+        $('#add-keyframe')[0].disabled = true;
+        $("#edit-tooltip").tooltip("enable");
+
+        if(promptForOverwrite) {
+          $("#overwrite-modal").modal('show');
+        }
+      }
+      //set code to exercise start code?
+      setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
+
+      setButtons("Run and Grade", true, false, false);
+
+    } else {
+      handleError();
+    }
+  };
+
+  xmlhttp.send();
+}
+
+// The following function grabs local files in a carefully-organized directory and chunks them into forms in the Giffer Reborn site proper.
 function loadExercise(promptForOverwrite) {
 
   setStatus("Getting grading file . . .", "info", true);
