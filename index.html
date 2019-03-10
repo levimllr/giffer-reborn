@@ -105,9 +105,9 @@
                     </div>
                   </div>
                   <div class="tab-pane fade" id="dev" role="tabpanel" aria-labelledby="dev-tab">
-<!--                    <button class="btn btn-outline-secondary" onclick="saveExercise()">Export Exercise</button> -->
+                   <button class="btn btn-outline-secondary" onclick="saveExercise()">Export Exercise</button>
                     <button class="btn btn-outline-secondary" onclick="saveFrameManager()">Export FrameManager</button>
-                    <button class="btn btn-outline-secondary" onclick="saveExercise()">Generate Exercise</button>
+                    <button class="btn btn-outline-secondary" onclick="genExercise()">Generate Exercise</button>
                     <hr>
                     <button class="btn btn-info" onclick="showReadme()">Show Help</button>
                   </div>
@@ -221,7 +221,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="exercise-modal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+<div class="modal fade" id="gen-modal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -237,9 +237,9 @@
               <div class="input-group-prepend">
                 <span class="input-group-text">Exercise </span>
               </div>
-              <input type="number" required min="1" class="form-control" aria-label="Exercise number" id="exercise-number"/>
+              <input type="number" required min="1" class="form-control" aria-label="Exercise number" id="genex-number"/>
                <div class="input-group-append">
-                <button type="button" class="btn btn-warning" onclick="console.log("Click!")">Fetch</button>
+                <button type="button" class="btn btn-warning" onclick="fetchExercise(true)">Fetch</button>
               </div>
             </div>
 
@@ -252,16 +252,16 @@
 
 
             <div class="form-group">
-              <label for="export-exercise-directions">Exercise Directions</label>
-              <textarea class="form-control" id="export-exercise-directions" rows="10">
+              <label for="genex-directions">Exercise Directions</label>
+              <textarea class="form-control" id="genex-directions" rows="10">
               Directions go here
               </textarea>
             </div>
           </div>
           <div class="col-sm-6">
             <div class="form-group">
-              <label for="export-exercise-starting">Student starting code</label>
-              <textarea class="form-control" id="export-exercise-starting"  rows="11">
+              <label for="genex-starting">Student starting code</label>
+              <textarea class="form-control" id="genex-starting"  rows="11">
                 void setup() {
                   pinMode(3, OUTPUT);
                 }
@@ -275,8 +275,8 @@
               </textarea>
             </div>
             <div class="form-group">
-              <label for="export-exercise-suffix">Student code suffix</label>
-              <textarea class="form-control" id="export-exercise-suffix" rows="5">
+              <label for="genex-suffix">Student code suffix</label>
+              <textarea class="form-control" id="genex-suffix" rows="5">
                 int main() {
                   setup();
                   loop();

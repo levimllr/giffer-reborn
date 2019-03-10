@@ -410,7 +410,9 @@ function clearExercise(){
 }
 
 /* The following function parses files in an intentionally organized local directory and fills forms with their info. */
-function infoExercise(promptForOverwrite) {
+function fetchExercise(promptForOverwrite) {
+
+  console.log("Click!")
 
   // Don't need this guy as we do not need to indicate the load status of the FM GIF.
   // setStatus("Getting grading file . . .", "info", true);
@@ -419,7 +421,7 @@ function infoExercise(promptForOverwrite) {
   // hideCanvas();
 
   // Check to see that the exercise number entered is indeed a number
-  var exerciseNum = parseInt($("#exercise-number")[0].value);
+  var exerciseNum = parseInt($("#genex-number")[0].value);
   if (isNaN(exerciseNum)) {
     clearExercise();
     return;
@@ -435,72 +437,43 @@ function infoExercise(promptForOverwrite) {
   // Fetch the Exercise Directions!
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise" + exerciseNum + ".html");
+    // console.log(xmlhttp.status);
+    // if (xmlhttp.status === 0) {
+    //   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise0" + exerciseNum + ".html");
+    // }
 
-  console.log("Stuff" + JSON.parse(this.responseText));
+    console.log(xmlhttp)
 
-  // We don't need to clearExercise if we're just fetching info.
-  // var handleError = function() {
-  //   clearExercise();
-  // };
-
-  xmlhttp.onerror = handleError;
-  xmlhttp.onabort = handleError;
-  xmlhttp.ontimeout = handleError;
   xmlhttp.onload = function() {
     if (this.status === 200) {
-      var data = JSON.parse(this.responseText);
-      document.getElementById("correct-section").style.display = "block";
-      if(!data.board) {
-        //This is a FrameManager--not an exercise.
-        currentExercise.frameManager = makeFrameManager(JSON.parse(this.responseText));
-        currentExercise.number = exerciseNum;
-        currentExercise.suffix = defaultSuffix;
+      currentExercise.number = exerciseNum;
 
-        loadDefaultBoard();
+      loadDefaultBoard();
 
-        console.log("Just a humble FrameManager.")
+      currentExercise.number = exerciseNum;
 
-      } else {
-        console.log("Full package.")
-        currentExercise.number = exerciseNum;
-        currentExercise.board = data.board;
-        currentExercise.startingCode = data.startingCode;
-        currentExercise.suffix = data.suffix;
-        currentExercise.frameManager = makeFrameManager(data.frameManager);
-        currentExercise.directions = data.directions;
+      // document.getElementById("export-exercise-number").value = currentExercise.number;
+      document.getElementById("genex-directions").value = this.responseText;
+      // document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
+      // document.getElementById("export-exercise-directions").value = currentExercise.directions;
 
-        document.getElementById("export-exercise-number").value = currentExercise.number;
-        document.getElementById("export-exercise-starting").value = currentExercise.startingCode;
-        document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
-        document.getElementById("export-exercise-directions").value = currentExercise.directions;
+      // if(currentExercise.directions) {
+      //   document.getElementById("directions-content").innerText = currentExercise.directions + "";
+      //   $("#output-tabs a[href=\"#directions\"]").tab("show");
+      // } else {
+      //   document.getElementById("directions-content").innerText = "No directions provided for this Exercise";
+      // }
 
-        if(currentExercise.directions) {
-          document.getElementById("directions-content").innerText = currentExercise.directions + "";
-          $("#output-tabs a[href=\"#directions\"]").tab("show");
-        } else {
-          document.getElementById("directions-content").innerText = "No directions provided for this Exercise";
-        }
+      // loadBoardFromExercise(currentExercise);
 
-        loadBoardFromExercise(currentExercise);
+      // if(promptForOverwrite) {
+      //   $("#overwrite-modal").modal('show');
+      // }
+      
+      // //set code to exercise start code?
+      // setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
 
-        for (var i = 0; i < currentBoard.DOMKeyframes.length; i++) {
-          var keyframe = $(currentBoard.DOMKeyframes[i]);
-          keyframe.find(".keyframe-time")[0].disabled = true;
-          keyframe.find(".keyframe-pin")[0].disabled = true;
-          keyframe.find(".keyframe-value")[0].disabled = true;
-          keyframe.find(".keyframe-remove")[0].disabled = true;
-        }
-        $('#add-keyframe')[0].disabled = true;
-        $("#edit-tooltip").tooltip("enable");
-
-        if(promptForOverwrite) {
-          $("#overwrite-modal").modal('show');
-        }
-      }
-      //set code to exercise start code?
-      setStatus("Exercise " + exerciseNum + " loaded! Press Run and Grade to test your code.", "success", false);
-
-      setButtons("Run and Grade", true, false, false);
+      // setButtons("Run and Grade", true, false, false);
 
     } else {
       handleError();
@@ -508,7 +481,22 @@ function infoExercise(promptForOverwrite) {
   };
 
   xmlhttp.send();
+
+  
+  xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "_StartingPoint/Exercise" + exerciseNum + "_StartingPoint.ino");
+
+  console.log(xmlhttp)
+
+  xmlhttp.onload = function() {
+    if (this.status === 200) {
+      currentExercise.number = exerciseNum;
+      document.getElementById("genex-starting").value = this.responseText;
+    }
+  };
+
+  xmlhttp.send();
 }
+fetchExercise();
 
 // The following function grabs local files in a carefully-organized directory and chunks them into forms in the Giffer Reborn site proper.
 function loadExercise(promptForOverwrite) {
@@ -733,8 +721,15 @@ function saveContext() {
   setToStorage("code", editor.getValue());
   setToStorage("exercise-number", currentExercise.number === null ? "" : currentExercise.number);
 }
+
 function saveExercise() {
   $("#exercise-modal").modal('show');
+  console.log("Opening the saveExercise modal!");
+}
+
+function genExercise() {
+  $("#gen-modal").modal('show');
+  console.log("Opening the genExercise modal!");
 }
 
 function exportExercise() {
