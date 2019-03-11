@@ -285,7 +285,7 @@ function setRunning(v) {
 }
 var jscpp = null;
 var lastContent = {frameManager: null, output: null};
-function runCode() {
+function runCode(callback) {
   if (running) {
     return;
   }
@@ -328,6 +328,10 @@ function runCode() {
       renderFrameManger(newFrameManager);
 
       setStatus("Gif", "");
+
+      if (typeof callback !== "undefined") {
+        callback(lastContent);
+      }
 
     } else if (message.type === "output") {
       print(message.text);
@@ -413,7 +417,7 @@ function fetchReplace(exercisenumber, url, id) {
   xhr.open("GET", url);
   xhr.onload = function() {
     if (this.status === 200) {
-      currentExercise.number = exercisenumber;
+      // currentExercise.number = exercisenumber;
       document.getElementById(id).value = this.responseText;
     } else {
       handleError();
@@ -435,17 +439,17 @@ function fetchExercise(promptForOverwrite) {
   // A little console indicator.
   console.log("Fetching Exercise " + exerciseNum + "...");
 
-  var htmlAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + ".html"
-  var inoStartingAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "_StartingPoint/Exercise" + exerciseNum + "_StartingPoint.ino"
-  var inoCompleteAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "/Exercise" + exerciseNum + ".ino"
+  var htmlAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + ".html";
+  var inoStartingAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "_StartingPoint/Exercise" + exerciseNum + "_StartingPoint.ino";
+  var inoCompleteAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "/Exercise" + exerciseNum + ".ino";
 
   // Fetch the Exercise Directions!
-  fetchReplace(exerciseNum, htmlAddress, "genex-directions")
-  fetchReplace(exerciseNum, inoStartingAddress, "genex-starting")
-  fetchReplace(exerciseNum, inoCompleteAddress, "genex-complete")
+  fetchReplace(exerciseNum, htmlAddress, "genex-directions");
+  fetchReplace(exerciseNum, inoStartingAddress, "genex-starting");
+  fetchReplace(exerciseNum, inoCompleteAddress, "genex-complete");
 
 }
-fetchExercise();
+// fetchExercise();
 
 // The following function grabs local files in a carefully-organized directory and chunks them into forms in the Giffer Reborn site proper.
 function loadExercise(promptForOverwrite) {
@@ -463,7 +467,7 @@ function loadExercise(promptForOverwrite) {
   console.log("Loading Exercise " + exerciseNum + "...");
 
   // This bad boy is only looking for a .FrameManager file!
-  var xmlhttp = new XMLHttpRequest();
+  var xmlhttp = new XMLHttpRequesLHttpRequest();
   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
 
   var handleError = function() {
@@ -489,6 +493,7 @@ function loadExercise(promptForOverwrite) {
 
       } else {
         console.log("Full package.")
+        console.log(currentExercise);
         currentExercise.number = exerciseNum;
         currentExercise.board = data.board;
         currentExercise.startingCode = data.startingCode;
@@ -502,7 +507,7 @@ function loadExercise(promptForOverwrite) {
         document.getElementById("export-exercise-directions").value = currentExercise.directions;
 
         if(currentExercise.directions) {
-          document.getElementById("directions-content").innerText = currentExercise.directions + "";
+          document.getElementById("directions-content").innerHTML = currentExercise.directions + "";
           $("#output-tabs a[href=\"#directions\"]").tab("show");
         } else {
           document.getElementById("directions-content").innerText = "No directions provided for this Exercise";
@@ -685,7 +690,7 @@ function genExercise() {
 function generateExercise() {
   var exercise = {};
   exercise.number = document.getElementById("genex-number").value;
-  currentExercise.number = exercise.number;
+  // currentExercise.number = exercise.number;
   document.getElementById("exercise-number").value = exercise.number;
   
   exercise.directions = document.getElementById("genex-directions").value;
@@ -693,18 +698,20 @@ function generateExercise() {
 
   editor.setValue("");
   editor.setValue(document.getElementById("genex-complete").value);
-  0
 
-  runCode();
-
-  exercise.startingCode = document.getElementById("genex-starting").value;
-  exercise.suffix = defaultSuffix;
-
-  exercise.board = {type: currentBoard.type, setup: currentBoard.getSetup()};
-
-  exercise.frameManager = lastContent.frameManager;
+  var onFinish = function (res) {
+    exercise.startingCode = document.getElementById("genex-starting").value;
+    exercise.suffix = defaultSuffix;
   
-  saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + exercise.number + ".FrameManager");
+    exercise.board = {type: currentBoard.type, setup: currentBoard.getSetup()};
+  
+    exercise.frameManager = res.frameManager;
+    
+    saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + exercise.number + ".FrameManager");
+  }
+
+  // asynchronous
+  runCode(onFinish);
 }
 
 function exportExercise() {
