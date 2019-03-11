@@ -301,15 +301,12 @@ function runCode() {
   // Set the content of the output console to nada.
   document.getElementById("console-output").innerHTML = "";
 
-  // Paul, what does this do? What annotations are set?
   editor.getSession().setAnnotations([]);
 
-  // Creates a dedicated web worker that executes the script. Essential creates a new thread.
+  // Creates a dedicated web worker that executes the script. Essentially creates a new thread.
   jscpp = new Worker("js/JSCPP-WebWorker.js");
 
-  // Paul, why are there two sets of equal signs? Is this some kind of ternary operator?
   var shouldGrade = currentExercise.number !== null;
-
 
   jscpp.onmessage = function(e) {
     var message = JSON.parse(e.data);
@@ -409,8 +406,8 @@ function clearExercise(){
   $("#edit-tooltip").tooltip("disable");
 }
 
-/* The following function parses files in an intentionally organized local directory and fills forms with their info. */
 
+/* The following function fetches the responseText (or contents) of files requests through XMLHttpRequest. */
 function fetchReplace(exercisenumber, url, id) {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", url);
@@ -425,15 +422,8 @@ function fetchReplace(exercisenumber, url, id) {
   xhr.send();
 }
 
+/* The following function parses files in an intentionally organized local directory and fills forms with their info. */
 function fetchExercise(promptForOverwrite) {
-
-  console.log("Click!")
-
-  // Don't need this guy as we do not need to indicate the load status of the FM GIF.
-  // setStatus("Getting grading file . . .", "info", true);
-
-  // Neither do we need this guy, related to the reason mentioned above.
-  // hideCanvas();
 
   // Check to see that the exercise number entered is indeed a number
   var exerciseNum = parseInt($("#genex-number")[0].value);
@@ -672,6 +662,7 @@ function saveFrameManager() {
     saveAs(new Blob([JSON.stringify(lastContent.frameManager)], {type: "application/json;charset=utf-8"}), "Exercise_" + $("#exercise-number")[0].value + ".FrameManager");
   }
 }
+
 function saveContext() {
   setToStorage("name", document.getElementById("name").value);
   setToStorage("board-type", document.getElementById("board").value);
@@ -691,6 +682,31 @@ function genExercise() {
   console.log("Opening the genExercise modal!");
 }
 
+function generateExercise() {
+  var exercise = {};
+  exercise.number = document.getElementById("genex-number").value;
+  currentExercise.number = exercise.number;
+  document.getElementById("exercise-number").value = exercise.number;
+  
+  exercise.directions = document.getElementById("genex-directions").value;
+  document.getElementById("directions-content").innerHTML = exercise.directions;
+
+  editor.setValue("");
+  editor.setValue(document.getElementById("genex-complete").value);
+  0
+
+  runCode();
+
+  exercise.startingCode = document.getElementById("genex-starting").value;
+  exercise.suffix = defaultSuffix;
+
+  exercise.board = {type: currentBoard.type, setup: currentBoard.getSetup()};
+
+  exercise.frameManager = lastContent.frameManager;
+  
+  saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + exercise.number + ".FrameManager");
+}
+
 function exportExercise() {
   var exercise = {};
   exercise.number = document.getElementById("export-exercise-number").value;
@@ -701,8 +717,8 @@ function exportExercise() {
   exercise.directions = document.getElementById("export-exercise-directions").value;
 
   saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + exercise.number + ".FrameManager");
-
 }
+
 function updateSuffix() {
   currentExercise.suffix = document.getElementById("export-exercise-suffix").value;
 }
