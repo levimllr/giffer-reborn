@@ -467,7 +467,7 @@ function loadExercise(promptForOverwrite) {
   console.log("Loading Exercise " + exerciseNum + "...");
 
   // This bad boy is only looking for a .FrameManager file!
-  var xmlhttp = new XMLHttpRequesLHttpRequest();
+  var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
 
   var handleError = function() {

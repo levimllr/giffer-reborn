@@ -235,20 +235,41 @@
           <div class="col-sm-6">
             <div class="input-group mb-3 has-warning has-feedback">
               <div class="input-group-prepend">
-                <span class="input-group-text">Exercise </span>
+                <span class="input-group-text"><strong>Exercise</strong></span>
               </div>
               <input type="number" required min="1" class="form-control" aria-label="Exercise number" id="genex-number"/>
                <div class="input-group-append">
                 <button type="button" class="btn btn-warning" onclick="fetchExercise(true)">Fetch</button>
               </div>
             </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><strong>Board Type</strong></span>
+              </div>
+              <select class="form-control">
+                <option>Currently Selected Board</option>
+                <option>LED Board</option>
+                <option>Kinetic Sculpture Board</option>
+              </select>
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><strong>Configuration</strong></span>
+              </div>
+              <select class="form-control">
+                <option>Default Configuration</option>
+                <option>???</option>
+                <option>!!!</option>
+              </select>
+            </div>
+            
+            <!-- <p>
+              <strong>Board Configuration</strong> default configuration 
+            </p> -->
 
-            <p>
-              <strong>Board Type</strong> currently selected board
-            </p>
-            <p>
+            <!-- <p>
               <strong>Board Configuration</strong> current configuration (keyframes, etc)
-            </p>
+            </p> -->
 
 
             <div class="form-group">
