@@ -426,6 +426,38 @@ function fetchReplace(exercisenumber, url, id) {
         
         document.getElementById(id).value = completeCode.slice(startCompleteCode,endCompleteCode);
 
+        var startBoardTypeString = "###\"board\": {\"type\":\"";
+        var startBoardType = completeCode.indexOf(startBoardTypeString);
+        startBoardType += startBoardTypeString.length;
+        var endBoardType = completeCode.lastIndexOf(", \"setup\"");
+        var startBoardConfigString = "\"setup\":{";
+        var startBoardConfig = completeCode.lastIndexOf(startBoardConfigString);
+        startBoardConfig += startBoardConfigString.length;
+        var endBoardConfig = completeCode.lastIndexOf("}}###")
+        var boardType = completeCode.slice(startBoardType, endBoardType - 1);
+        var boardConfig = completeCode.slice(startBoardConfig, endBoardConfig - 1);
+
+        console.log(boardType)
+        console.log("Hello World!")
+        // Fetch the current Board! And fill in drop-down menu (select-option menu in HTML).
+        // var board = {type: currentBoard.type, setup: currentBoard.getSetup()};
+        var board;
+        var boardSelect = document.getElementById("genex-board");
+        removeOptions(boardSelect);
+        var option1 = document.createElement("option");
+        var option2 = document.createElement("option");
+        option1.text = boardType + " (on file)";
+        option1.value = boardType;
+        boardSelect.add(option1);
+        if (boardType == "LED Board") {
+          option2.text = "KS Board";
+          option2.value = "KS Board";
+        } else if (boardType == "KS Board") {
+          option2.text = "LED Board";
+          option2.value = "LED Board";
+        }
+        boardSelect.add(option2);
+
       } else {
         // currentExercise.number = exercisenumber;
         document.getElementById(id).value = this.responseText;
@@ -467,24 +499,6 @@ function fetchExercise(promptForOverwrite) {
   fetchReplace(exerciseNum, htmlAddress, "genex-directions");
   fetchReplace(exerciseNum, inoStartingAddress, "genex-starting");
   fetchReplace(exerciseNum, inoCompleteAddress, "genex-complete");
-
-  // Fetch the current Board! And fill in drop-down menu (select-option menu in HTML).
-  var board = {type: currentBoard.type, setup: currentBoard.getSetup()};
-  var boardSelect = document.getElementById("genex-board");
-  removeOptions(boardSelect);
-  var option1 = document.createElement("option");
-  var option2 = document.createElement("option");
-  option1.text = board.type + " (current)";
-  option1.value = board.type;
-  boardSelect.add(option1);
-  if (board.type == "LED Board") {
-    option2.text = "KS Board";
-    option2.value = "KS Board";
-  } else if (board.type == "KS Board") {
-    option2.text = "LED Board";
-    option2.value = "LED Board";
-  }
-  boardSelect.add(option2);
 
 }
 // fetchExercise();
