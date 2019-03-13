@@ -389,10 +389,11 @@ function runCode(callback) {
 
 
 //Exercises
-function overwriteCode(){
+function overwriteCode() {
   editor.setValue(currentExercise.startingCode);
 }
-function clearExercise(){
+
+function clearExercise() {
   setStatus("Exercise not found.  Gifs will not be graded.", "");
   currentExercise = {number: null, suffix: defaultSuffix};
   setButtons("Run", true, false, false);
@@ -417,13 +418,32 @@ function fetchReplace(exercisenumber, url, id) {
   xhr.open("GET", url);
   xhr.onload = function() {
     if (this.status === 200) {
-      // currentExercise.number = exercisenumber;
-      document.getElementById(id).value = this.responseText;
+      if (id == "genex-complete") {
+
+        var completeCode = this.responseText;
+        var startCompleteCode = completeCode.indexOf("void setup()");
+        var endCompleteCode = completeCode.lastIndexOf("// ************************************************BOARD");
+        
+        document.getElementById(id).value = completeCode.slice(startCompleteCode,endCompleteCode);
+
+      } else {
+        // currentExercise.number = exercisenumber;
+        document.getElementById(id).value = this.responseText;
+      } 
     } else {
       handleError();
     }
   };
   xhr.send();
+}
+
+/* Remove options from dropdown menu. */
+function removeOptions(selectForm) {
+  var i;
+  for(i = selectForm.options.length - 1 ; i >= 0 ; i--)
+  {
+      selectForm.remove(i);
+  }  
 }
 
 /* The following function parses files in an intentionally organized local directory and fills forms with their info. */
@@ -443,10 +463,28 @@ function fetchExercise(promptForOverwrite) {
   var inoStartingAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "_StartingPoint/Exercise" + exerciseNum + "_StartingPoint.ino";
   var inoCompleteAddress = "exercises/" + exerciseNum + "/Exercise" + exerciseNum + "/Exercise" + exerciseNum + ".ino";
 
-  // Fetch the Exercise Directions!
+  // Fetch the Exercise Directions (and Replace stock text)!
   fetchReplace(exerciseNum, htmlAddress, "genex-directions");
   fetchReplace(exerciseNum, inoStartingAddress, "genex-starting");
   fetchReplace(exerciseNum, inoCompleteAddress, "genex-complete");
+
+  // Fetch the current Board! And fill in drop-down menu (select-option menu in HTML).
+  var board = {type: currentBoard.type, setup: currentBoard.getSetup()};
+  var boardSelect = document.getElementById("genex-board");
+  removeOptions(boardSelect);
+  var option1 = document.createElement("option");
+  var option2 = document.createElement("option");
+  option1.text = board.type + " (current)";
+  option1.value = board.type;
+  boardSelect.add(option1);
+  if (board.type == "LED Board") {
+    option2.text = "KS Board";
+    option2.value = "KS Board";
+  } else if (board.type == "KS Board") {
+    option2.text = "LED Board";
+    option2.value = "LED Board";
+  }
+  boardSelect.add(option2);
 
 }
 // fetchExercise();
@@ -682,7 +720,7 @@ function saveExercise() {
   console.log("Opening the saveExercise modal!");
 }
 
-function genExercise() {
+function generateExerciseModal() {
   $("#gen-modal").modal('show');
   console.log("Opening the genExercise modal!");
 }
@@ -690,11 +728,14 @@ function genExercise() {
 function generateExercise() {
   var exercise = {};
   exercise.number = document.getElementById("genex-number").value;
+  // Nonono!! Don't uncomment what lies below. It's here to remind me of my mistakes.
   // currentExercise.number = exercise.number;
   document.getElementById("exercise-number").value = exercise.number;
   
   exercise.directions = document.getElementById("genex-directions").value;
   document.getElementById("directions-content").innerHTML = exercise.directions;
+
+  var board 
 
   editor.setValue("");
   editor.setValue(document.getElementById("genex-complete").value);

@@ -107,7 +107,7 @@
                   <div class="tab-pane fade" id="dev" role="tabpanel" aria-labelledby="dev-tab">
                    <button class="btn btn-outline-secondary" onclick="saveExercise()">Export Exercise</button>
                     <button class="btn btn-outline-secondary" onclick="saveFrameManager()">Export FrameManager</button>
-                    <button class="btn btn-outline-secondary" onclick="genExercise()">Generate Exercise</button>
+                    <button class="btn btn-outline-secondary" onclick="generateExerciseModal()">Generate Exercise</button>
                     <hr>
                     <button class="btn btn-info" onclick="showReadme()">Show Help</button>
                   </div>
@@ -246,13 +246,25 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><strong>Board Type</strong></span>
               </div>
-              <select class="form-control">
-                <option>Currently Selected Board</option>
-                <option>LED Board</option>
-                <option>Kinetic Sculpture Board</option>
+              <select class="form-control" id="genex-board">
               </select>
             </div>
-            <div class="input-group mb-3">
+            <div>
+              <table class="table" id="keyframe-table">
+                <thead>
+                  <tr>
+                    <th>At time (ms)</th>
+                    <th>Change pin</th>
+                    <th>To value</th>
+                    <th>+/-</th>
+                  </tr>
+                  
+                </thead>
+                <tbody id="keyframe-table-tbody"></tbody>
+              </table>
+            </div>
+
+            <!-- <div class="input-group mb-3">
               <div class="input-group-prepend">
                 <span class="input-group-text"><strong>Configuration</strong></span>
               </div>
@@ -261,7 +273,7 @@
                 <option>???</option>
                 <option>!!!</option>
               </select>
-            </div>
+            </div> -->
             
             <!-- <p>
               <strong>Board Configuration</strong> default configuration 
