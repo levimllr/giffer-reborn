@@ -169,12 +169,14 @@ Board.prototype.activate = function(idSelected){
 
   $(idSelected).append(setup);
 
+  this.addKeyframe(500, 5, 360);
+  this.updateInputs();
 
-  for (var i = 0; i < this.pinKeyframes.length; i++) {
-    var keyframe = this.pinKeyframes[i];
-    console.log(keyframe);
-    this.addKeyframe(keyframe.time, keyframe.pin, keyframe.value);
-  }
+  // for (var i = 0; i < this.pinKeyframes.length; i++) {
+  //   var keyframe = this.pinKeyframes[i];
+  //   console.log(keyframe);
+  //   this.addKeyframe(keyframe.time, keyframe.pin, keyframe.value);
+  // }
 };
 
 Board.prototype.getSetup = function(){

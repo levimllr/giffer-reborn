@@ -426,8 +426,10 @@ function fetchReplace(exercisenumber, url, id) {
         
         document.getElementById(id).value = completeCode.slice(startCompleteCode,endCompleteCode);
 
-        var startBoard = completeCode.indexOf("#%!\"board\": ") + "#%!\"board\": ".length;
-        var endBoard = completeCode.lastIndexOf("#%!");
+        var startMarker = "#%!\"board\": ";
+        var marker = "#%!";
+        var startBoard = completeCode.indexOf(startMarker) + startMarker.length;
+        var endBoard = completeCode.lastIndexOf(marker);
         var board = JSON.parse(completeCode.slice(startBoard, endBoard));
 
         // Fetch the current Board! And fill in drop-down menu (select-option menu in HTML).
@@ -449,9 +451,22 @@ function fetchReplace(exercisenumber, url, id) {
         }
         boardSelect.add(option2);
 
+        // currentBoard = board;
+        // currentBoard = createBoard(type, setup);
         currentBoard.pinKeyframes = board.setup.pinKeyframes;
-        console.log(currentBoard.pinKeyframes);
         currentBoard.activate("#genex-edit");
+
+        console.log("DOM: " + currentBoard.DOMKeyframes);
+
+        // for (var i = 0; i < currentBoard.DOMKeyframes.length; i++) {
+        //   var keyframe = $(currentBoard.DOMKeyframes[i]);
+        //   keyframe.find(".keyframe-time")[0].disabled = true;
+        //   keyframe.find(".keyframe-pin")[0].disabled = true;
+        //   keyframe.find(".keyframe-value")[0].disabled = true;
+        //   keyframe.find(".keyframe-remove")[0].disabled = true;
+        // }
+        // $('#add-keyframe')[0].disabled = true;
+        // $("#edit-tooltip").tooltip("enable");
 
       } else {
         // currentExercise.number = exercisenumber;
@@ -480,8 +495,6 @@ function my_callback() {
 /* The following function parses files in an intentionally organized local directory and fills forms with their info. */
 function fetchExercise(promptForOverwrite) {
 
-
-
   // Check to see that the exercise number entered is indeed a number
   var exerciseNum = parseInt($("#genex-number")[0].value);
   if (isNaN(exerciseNum)) {
@@ -502,7 +515,6 @@ function fetchExercise(promptForOverwrite) {
   fetchReplace(exerciseNum, inoCompleteAddress, "genex-complete");
 
 }
-// fetchExercise();
 
 // The following function grabs local files in a carefully-organized directory and chunks them into forms in the Giffer Reborn site proper.
 function loadExercise(promptForOverwrite) {
