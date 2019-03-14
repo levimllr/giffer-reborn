@@ -134,7 +134,7 @@ function loadBoard(type, setup) {
     setStatus("Loading board", "info", true);
     $("#edit").empty();
     currentBoard = createBoard(type, setup);
-    currentBoard.activate();
+    currentBoard.activate("#edit");
 
     correctBoard = createBoard(type, setup);
 
@@ -426,37 +426,32 @@ function fetchReplace(exercisenumber, url, id) {
         
         document.getElementById(id).value = completeCode.slice(startCompleteCode,endCompleteCode);
 
-        var startBoardTypeString = "###\"board\": {\"type\":\"";
-        var startBoardType = completeCode.indexOf(startBoardTypeString);
-        startBoardType += startBoardTypeString.length;
-        var endBoardType = completeCode.lastIndexOf(", \"setup\"");
-        var startBoardConfigString = "\"setup\":{";
-        var startBoardConfig = completeCode.lastIndexOf(startBoardConfigString);
-        startBoardConfig += startBoardConfigString.length;
-        var endBoardConfig = completeCode.lastIndexOf("}}###")
-        var boardType = completeCode.slice(startBoardType, endBoardType - 1);
-        var boardConfig = completeCode.slice(startBoardConfig, endBoardConfig - 1);
+        var startBoard = completeCode.indexOf("#%!\"board\": ") + "#%!\"board\": ".length;
+        var endBoard = completeCode.lastIndexOf("#%!");
+        var board = JSON.parse(completeCode.slice(startBoard, endBoard));
 
-        console.log(boardType)
-        console.log("Hello World!")
         // Fetch the current Board! And fill in drop-down menu (select-option menu in HTML).
-        // var board = {type: currentBoard.type, setup: currentBoard.getSetup()};
-        var board;
+
+        // var board;
         var boardSelect = document.getElementById("genex-board");
         removeOptions(boardSelect);
         var option1 = document.createElement("option");
         var option2 = document.createElement("option");
-        option1.text = boardType + " (on file)";
-        option1.value = boardType;
+        option1.text = board.type + " (on file)";
+        option1.value = board.type;
         boardSelect.add(option1);
-        if (boardType == "LED Board") {
+        if (board.type == "LED Board") {
           option2.text = "KS Board";
           option2.value = "KS Board";
-        } else if (boardType == "KS Board") {
+        } else if (board.type == "KS Board") {
           option2.text = "LED Board";
           option2.value = "LED Board";
         }
         boardSelect.add(option2);
+
+        currentBoard.pinKeyframes = board.setup.pinKeyframes;
+        console.log(currentBoard.pinKeyframes);
+        currentBoard.activate("#genex-edit");
 
       } else {
         // currentExercise.number = exercisenumber;
@@ -478,8 +473,14 @@ function removeOptions(selectForm) {
   }  
 }
 
+function my_callback() {
+  console.log("blah");
+}
+
 /* The following function parses files in an intentionally organized local directory and fills forms with their info. */
 function fetchExercise(promptForOverwrite) {
+
+
 
   // Check to see that the exercise number entered is indeed a number
   var exerciseNum = parseInt($("#genex-number")[0].value);

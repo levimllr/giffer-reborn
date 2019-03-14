@@ -49,12 +49,13 @@ for(count = 1; count <= 5; count++) // this repeats the sequence five times
 // ************************************************BOARD+CONFIGURATION FOOTER BEGIN****************************************************
 //
 // Please do not modify the content of the footer, except for what comes between the triple hashtags (###...###). Thank you!
+// If you're curious, the #%! is to help parse the text for the board and configuration information.
 // In the following line of commented code, please ensure that the board type is correct (either "LED Board" or "KS Board").
-// Additionally, if you want digital or analog inputs in the exercise, please enter them with the following format:
+// If you would like additional digital or analog inputs in the exercise, please enter them with the following format:
 // (Keep in mind that the time is in units of milliseconds and the value can range from 0 to 1023.)
 // EXAMPLE: "board": {"type":"LED Board", "setup":{"pinKeyframes":[{"time":0,"pin":5,"value":0},{"time":2750,"pin":5,"value":260}]}}
 //
-// ACTUAL:###"board": {"type":"LED Board", "setup":{"pinKeyframes":[{"time":0,"pin":5,"value":0},{"time":2750,"pin":5,"value":260}]}}###
+// ACTUAL:#%!"board": {"type":"LED Board", "setup":{"pinKeyframes":[{"time":0,"pin":5,"value":0},{"time":2750,"pin":5,"value":260}]}}#%!
 //
 // *************************************************BOARD+CONFIGURATION FOOTER END*****************************************************
 

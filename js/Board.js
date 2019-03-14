@@ -122,9 +122,14 @@ Board.prototype.addKeyframe = function(time, pin, value) {
   </tr>`);
   $("#keyframe-table-tbody").append(newContent);
 
+  // console.log(newContent);
+  // console.log(time + ", " + pin + ", " + value);
+
   if (time) {
+    console.log(time);
     var timeField = newContent.find(".keyframe-time")[0];
     timeField.valueAsNumber = Number(time);
+    console.log(timeField);
   }
 
   if (pin) {
@@ -137,12 +142,15 @@ Board.prototype.addKeyframe = function(time, pin, value) {
     valueField.valueAsNumber = Number(value);
   }
 
+  console.log(newContent[0]);
+
   this.DOMKeyframes.push(newContent[0]);
 
 };
 
-Board.prototype.activate = function(){
-  $("#edit")[0].innerHTML = "";
+Board.prototype.activate = function(idSelected){
+  // idSelected must be of the form #id, as jQuery dictates.
+  $(idSelected)[0].innerHTML = "";
   this.DOMKeyframes = [];
 
   var setup = $(`
@@ -159,11 +167,12 @@ Board.prototype.activate = function(){
           </table>
           <button class="btn btn-success" id="add-keyframe" onclick="currentBoard.addKeyframe(); saveContext()">Add</button>`);
 
-  $("#edit").append(setup);
+  $(idSelected).append(setup);
 
 
   for (var i = 0; i < this.pinKeyframes.length; i++) {
     var keyframe = this.pinKeyframes[i];
+    console.log(keyframe);
     this.addKeyframe(keyframe.time, keyframe.pin, keyframe.value);
   }
 };
