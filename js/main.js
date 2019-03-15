@@ -3,7 +3,7 @@
 //Storage
 function getFromStorage(item, ifEmpty) {
   var i = localStorage.getItem(item);
-  if(!i) {
+  if (!i) {
     return (ifEmpty) ? ifEmpty : "";
   } else {
     return i;
@@ -41,7 +41,7 @@ editor.setValue(getFromStorage("code", defaultCode), -1);
 editor.focus();
 editor.commands.addCommand({
   name: "run",
-  bindKey: {win: "Ctrl-Enter", mac: "Ctrl-Enter"},
+  bindKey: { win: "Ctrl-Enter", mac: "Ctrl-Enter" },
   exec: runCode
 });
 
@@ -55,8 +55,8 @@ var boardField = document.getElementById("board");
 
 nameField.value = getFromStorage("name");
 exerciseField.value = getFromStorage("exercise-number");
-exerciseField.onkeyup = function(e) {
-  if(e.keyCode === 13) {
+exerciseField.onkeyup = function (e) {
+  if (e.keyCode === 13) {
     loadExercise(true);
   }
 };
@@ -72,13 +72,13 @@ var correctCanvas = document.getElementById("correct-canvas");
 
 //Currents
 var currentPrefix = "";
-var currentExercise = {number: null, suffix: defaultSuffix};
+var currentExercise = { number: null, suffix: defaultSuffix };
 
 //Canvas Speed
 var canvasSpeed = document.getElementById("canvas-speed");
 var speedText = document.getElementById("playback-speed");
 var speed = canvasSpeed.value;
-canvasSpeed.oninput = function() {
+canvasSpeed.oninput = function () {
   wait *= speed;
   speed = canvasSpeed.value;
   wait /= speed;
@@ -105,11 +105,11 @@ function setStatus(blurb, type, isAnimated) {
 
   var gifLoadingStatus = document.getElementById("gif-loading-status");
   gifLoadingStatus.innerHTML = blurb;
-  if(type !== "") {
+  if (type !== "") {
     var gifLoadingBar = document.getElementById("gif-loading-bar");
     gifLoadingBar.classList.add("bg-" + type);
     gifLoadingBar.style.display = "flex";
-    if(isAnimated) {
+    if (isAnimated) {
       gifLoadingBar.classList.add("progress-bar-animated");
     }
   }
@@ -121,7 +121,7 @@ function resetStatus() {
   var gifLoadingBar = document.getElementById("gif-loading-bar");
   gifLoadingBar.classList.remove("progress-bar-animated");
   gifLoadingBar.style.display = "none";
-  for(var status of STATUS_TYPES) {
+  for (var status of STATUS_TYPES) {
     gifLoadingBar.classList.remove("bg-" + status);
   }
 }
@@ -130,11 +130,11 @@ function resetStatus() {
 var currentBoard;
 var correctBoard;
 function loadBoard(type, setup) {
-  if(type){
+  if (type) {
     setStatus("Loading board", "info", true);
     $("#edit").empty();
     currentBoard = createBoard(type, setup);
-    currentBoard.activate("#edit");
+    currentBoard.activate("#edit", "keyframe-table-tbody");
 
     correctBoard = createBoard(type, setup);
 
@@ -177,7 +177,7 @@ loadBoard(getFromStorage("board-type"), getFromStorage("board-setup"));
 
 //Clipboard
 new Clipboard("#copy-page", {
-  text: function() {
+  text: function () {
     var outputGif = $("#confirmation-gif").clone()[0];
     if (!outputGif) {
       println("Please generate a graded gif first.", "red");
@@ -214,7 +214,7 @@ new Clipboard("#copy-page", {
 
 //Gif Visibility and Rendering
 var rendererTimeoutHandle = null;
-function stopRendering(){
+function stopRendering() {
   if (rendererTimeoutHandle !== null) {
     cancelAnimationFrame(rendererTimeoutHandle);
     rendererTimeoutHandle = null;
@@ -269,14 +269,14 @@ function setButtons(runText, runEnabled, copyVisible, finishVisible) {
 var running = false;
 function setRunning(v) {
   running = v;
-  if(running) {
-    if(debug.isEnabled()) {
+  if (running) {
+    if (debug.isEnabled()) {
       setButtons("Debugging...", false, false, true);
     } else {
       setButtons("Running...", false, false, false);
     }
   } else {
-    if(currentExercise.number !== null) {
+    if (currentExercise.number !== null) {
       setButtons("Run and Grade", true, true, false);
     } else {
       setButtons("Run", true, false, false);
@@ -284,7 +284,7 @@ function setRunning(v) {
   }
 }
 var jscpp = null;
-var lastContent = {frameManager: null, output: null};
+var lastContent = { frameManager: null, output: null };
 function runCode(callback) {
   if (running) {
     return;
@@ -308,7 +308,7 @@ function runCode(callback) {
 
   var shouldGrade = currentExercise.number !== null;
 
-  jscpp.onmessage = function(e) {
+  jscpp.onmessage = function (e) {
     var message = JSON.parse(e.data);
     if (message.type === "frameManager") {
       jscpp.terminate();
@@ -319,7 +319,7 @@ function runCode(callback) {
 
       setRunning(false);
 
-      if(shouldGrade) {
+      if (shouldGrade) {
         setStatus("Grading . . .", "success", true);
         newFrameManager.grade(currentExercise);
       }
@@ -346,7 +346,7 @@ function runCode(callback) {
   var suffix = currentExercise.suffix;
   var code = currentPrefix + editor.getValue() + suffix;
 
-  jscpp.onerror = function(e) {
+  jscpp.onerror = function (e) {
     var errorObj = e.message;
     var matches = /([0-9]+):([0-9]+)/.exec(errorObj); //Match the line:column in the error message
     if (matches != null && matches.length >= 2) {
@@ -354,10 +354,10 @@ function runCode(callback) {
       var column = Number(matches[2]) - 1;
       var aceDoc = editor.getSession().getDocument();
       var code = aceDoc.getValue();
-      var startOfErrorObj = {row: line, column: column};
+      var startOfErrorObj = { row: line, column: column };
       var selectionRange = new ace.require("ace/range").Range.fromPoints(startOfErrorObj.row, startOfErrorObj.column, line, 0);
       selectionRange.start = startOfErrorObj;
-      selectionRange.end = {row: line, column: 0};
+      selectionRange.end = { row: line, column: 0 };
       editor.getSession().getSelection().setSelectionRange(selectionRange);
       editor.getSession().setAnnotations([{
         row: startOfErrorObj.row,
@@ -384,7 +384,7 @@ function runCode(callback) {
   currentBoard.updateInputs();
 
   debug.sendUpdatedBreakpoints();
-  jscpp.postMessage({type: "code", code: code, pinKeyframes: currentBoard.pinKeyframes, debugging: debug.isEnabled()});
+  jscpp.postMessage({ type: "code", code: code, pinKeyframes: currentBoard.pinKeyframes, debugging: debug.isEnabled() });
 }
 
 
@@ -395,7 +395,7 @@ function overwriteCode() {
 
 function clearExercise() {
   setStatus("Exercise not found.  Gifs will not be graded.", "");
-  currentExercise = {number: null, suffix: defaultSuffix};
+  currentExercise = { number: null, suffix: defaultSuffix };
   setButtons("Run", true, false, false);
 
   document.getElementById("correct-section").style.display = "none";
@@ -416,15 +416,15 @@ function clearExercise() {
 function fetchReplace(exercisenumber, url, id) {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", url);
-  xhr.onload = function() {
+  xhr.onload = function () {
     if (this.status === 200) {
       if (id == "genex-complete") {
 
         var completeCode = this.responseText;
         var startCompleteCode = completeCode.indexOf("void setup()");
         var endCompleteCode = completeCode.lastIndexOf("// ************************************************BOARD");
-        
-        document.getElementById(id).value = completeCode.slice(startCompleteCode,endCompleteCode);
+
+        document.getElementById(id).value = completeCode.slice(startCompleteCode, endCompleteCode);
 
         var startMarker = "#%!\"board\": ";
         var marker = "#%!";
@@ -451,27 +451,14 @@ function fetchReplace(exercisenumber, url, id) {
         }
         boardSelect.add(option2);
 
-        // currentBoard = board;
-        // currentBoard = createBoard(type, setup);
         currentBoard.pinKeyframes = board.setup.pinKeyframes;
-        currentBoard.activate("#genex-edit");
-
-        console.log("DOM: " + currentBoard.DOMKeyframes);
-
-        // for (var i = 0; i < currentBoard.DOMKeyframes.length; i++) {
-        //   var keyframe = $(currentBoard.DOMKeyframes[i]);
-        //   keyframe.find(".keyframe-time")[0].disabled = true;
-        //   keyframe.find(".keyframe-pin")[0].disabled = true;
-        //   keyframe.find(".keyframe-value")[0].disabled = true;
-        //   keyframe.find(".keyframe-remove")[0].disabled = true;
-        // }
-        // $('#add-keyframe')[0].disabled = true;
-        // $("#edit-tooltip").tooltip("enable");
+        currentBoard.activate("#genex-edit", "generate-keyframe-table-tbody");
+        currentBoard.activate("#edit", "keyframe-table-tbody");
 
       } else {
         // currentExercise.number = exercisenumber;
         document.getElementById(id).value = this.responseText;
-      } 
+      }
     } else {
       handleError();
     }
@@ -482,18 +469,41 @@ function fetchReplace(exercisenumber, url, id) {
 /* Remove options from dropdown menu. */
 function removeOptions(selectForm) {
   var i;
-  for(i = selectForm.options.length - 1 ; i >= 0 ; i--)
-  {
-      selectForm.remove(i);
-  }  
+  for (i = selectForm.options.length - 1; i >= 0; i--) {
+    selectForm.remove(i);
+  }
 }
 
 function my_callback() {
   console.log("blah");
 }
 
+/* The following function changes the style of the fetch button in the Generate Exercise modal depending on the success of the fetch. */
+function fetchButtonStatus () {
+  console.log("button status");
+  if (document.getElementById("genex-board").value && document.getElementById("genex-directions").value && document.getElementById("genex-starting").value && document.getElementById("genex-complete").value) {
+    document.getElementById("fetchButton").className = "btn btn-success";
+    document.getElementById("fetchButton").innerHTML = "Success!";
+    print(document.getElementById("genex-directions").value);
+  } else {
+    document.getElementById("fetchButton").className = "btn btn-danger";
+    document.getElementById("fetchButton").innerHTML = "Failure!";
+  }
+}
+
+/* The following function clears the values of any form items passed its way! Multiple form items should be passed in as an array */
+function clearValues(idArray) {
+  for (var j = 0; j < idArray.length; j++) {
+    console.log(idArray[j]);
+    document.getElementById(idArray[j]).value = " ";
+  }
+}
+
 /* The following function parses files in an intentionally organized local directory and fills forms with their info. */
-function fetchExercise(promptForOverwrite) {
+function fetchExercise(promptForOverwrite, fetchButtonStatus) {
+
+  var idArray = ["genex-board", "genex-edit", "genex-directions", "genex-starting", "genex-complete"];
+  clearValues(idArray);
 
   // Check to see that the exercise number entered is indeed a number
   var exerciseNum = parseInt($("#genex-number")[0].value);
@@ -513,7 +523,6 @@ function fetchExercise(promptForOverwrite) {
   fetchReplace(exerciseNum, htmlAddress, "genex-directions");
   fetchReplace(exerciseNum, inoStartingAddress, "genex-starting");
   fetchReplace(exerciseNum, inoCompleteAddress, "genex-complete");
-
 }
 
 // The following function grabs local files in a carefully-organized directory and chunks them into forms in the Giffer Reborn site proper.
@@ -535,18 +544,18 @@ function loadExercise(promptForOverwrite) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", "exercises/" + exerciseNum + "/Exercise_" + exerciseNum + ".FrameManager");
 
-  var handleError = function() {
+  var handleError = function () {
     clearExercise();
   };
 
   xmlhttp.onerror = handleError;
   xmlhttp.onabort = handleError;
   xmlhttp.ontimeout = handleError;
-  xmlhttp.onload = function() {
+  xmlhttp.onload = function () {
     if (this.status === 200) {
       var data = JSON.parse(this.responseText);
       document.getElementById("correct-section").style.display = "block";
-      if(!data.board) {
+      if (!data.board) {
         //This is a FrameManager--not an exercise.
         currentExercise.frameManager = makeFrameManager(JSON.parse(this.responseText));
         currentExercise.number = exerciseNum;
@@ -571,7 +580,7 @@ function loadExercise(promptForOverwrite) {
         document.getElementById("export-exercise-suffix").value = currentExercise.suffix;
         document.getElementById("export-exercise-directions").value = currentExercise.directions;
 
-        if(currentExercise.directions) {
+        if (currentExercise.directions) {
           document.getElementById("directions-content").innerHTML = currentExercise.directions + "";
           $("#output-tabs a[href=\"#directions\"]").tab("show");
         } else {
@@ -590,7 +599,7 @@ function loadExercise(promptForOverwrite) {
         $('#add-keyframe')[0].disabled = true;
         $("#edit-tooltip").tooltip("enable");
 
-        if(promptForOverwrite) {
+        if (promptForOverwrite) {
           $("#overwrite-modal").modal('show');
         }
       }
@@ -650,7 +659,7 @@ function renderFrameManger(frameManager) {
     var correctCtx = correctCanvas.getContext("2d");
   }
 
-  var drawFrame = function(prev, now) {
+  var drawFrame = function (prev, now) {
 
     var speed = document.getElementById("canvas-speed").value;
     var dt = (now - prev) * speed;
@@ -687,7 +696,7 @@ function generateConfirmationGif(isCorrect) {
   canvas.height = 110;
   canvas.width = 300;
 
-  var gif = new GIF({workers: 4, quality: 10, workerScript: "js/gif/gif.worker.js", transparent: 0xFFFFFF, width: canvas.width, height: canvas.height});
+  var gif = new GIF({ workers: 4, quality: 10, workerScript: "js/gif/gif.worker.js", transparent: 0xFFFFFF, width: canvas.width, height: canvas.height });
   var ctx = canvas.getContext("2d");
 
   ctx.globalAlpha = 1;
@@ -701,16 +710,16 @@ function generateConfirmationGif(isCorrect) {
   ctx.fillText("Exercise: " + exercise, 5, 45);
   ctx.fillText("Confirmation Hash: " + (name + exercise).hashCode(), 5, 65);
 
-  gif.addFrame(ctx, {copy: true, delay: 500});
+  gif.addFrame(ctx, { copy: true, delay: 500 });
 
   ctx.font = "bold 15px monospace";
-  ctx.fillStyle = ((typeof(isCorrect) === "undefined") || (isCorrect === false)) ? "red" : "green";
+  ctx.fillStyle = ((typeof (isCorrect) === "undefined") || (isCorrect === false)) ? "red" : "green";
   var gradeText = (isCorrect === true) ? "Correct" : "Incorrect";
   ctx.fillText(gradeText, 5, 85);
 
-  gif.addFrame(ctx, {copy: true, delay: 500});
+  gif.addFrame(ctx, { copy: true, delay: 500 });
 
-  gif.on("finished", function(gif, e) {
+  gif.on("finished", function (gif, e) {
     var container = $("#confirmation-gif-container")[0];
     container.innerHTML = "";
     var img = document.createElement("img");
@@ -729,7 +738,7 @@ function generateConfirmationGif(isCorrect) {
 //Exports and Saves
 function saveFrameManager() {
   if (lastContent !== null && $("#exercise-number")[0].valueAsNumber !== NaN) {
-    saveAs(new Blob([JSON.stringify(lastContent.frameManager)], {type: "application/json;charset=utf-8"}), "Exercise_" + $("#exercise-number")[0].value + ".FrameManager");
+    saveAs(new Blob([JSON.stringify(lastContent.frameManager)], { type: "application/json;charset=utf-8" }), "Exercise_" + $("#exercise-number")[0].value + ".FrameManager");
   }
 }
 
@@ -758,11 +767,11 @@ function generateExercise() {
   // Nonono!! Don't uncomment what lies below. It's here to remind me of my mistakes.
   // currentExercise.number = exercise.number;
   document.getElementById("exercise-number").value = exercise.number;
-  
+
   exercise.directions = document.getElementById("genex-directions").value;
   document.getElementById("directions-content").innerHTML = exercise.directions;
 
-  var board 
+  var board
 
   editor.setValue("");
   editor.setValue(document.getElementById("genex-complete").value);
@@ -770,12 +779,12 @@ function generateExercise() {
   var onFinish = function (res) {
     exercise.startingCode = document.getElementById("genex-starting").value;
     exercise.suffix = defaultSuffix;
-  
-    exercise.board = {type: currentBoard.type, setup: currentBoard.getSetup()};
-  
+
+    exercise.board = { type: currentBoard.type, setup: currentBoard.getSetup() };
+
     exercise.frameManager = res.frameManager;
-    
-    saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + exercise.number + ".FrameManager");
+
+    saveAs(new Blob([JSON.stringify(exercise)], { type: "application/json;charset=utf-8" }), "Exercise_" + exercise.number + ".FrameManager");
   }
 
   // asynchronous
@@ -787,11 +796,11 @@ function exportExercise() {
   exercise.number = document.getElementById("export-exercise-number").value;
   exercise.startingCode = document.getElementById("export-exercise-starting").value;
   exercise.suffix = document.getElementById("export-exercise-suffix").value;
-  exercise.board = {type: currentBoard.type, setup: currentBoard.getSetup()};
+  exercise.board = { type: currentBoard.type, setup: currentBoard.getSetup() };
   exercise.frameManager = lastContent.frameManager;
   exercise.directions = document.getElementById("export-exercise-directions").value;
 
-  saveAs(new Blob([JSON.stringify(exercise)], {type: "application/json;charset=utf-8"}), "Exercise_" + exercise.number + ".FrameManager");
+  saveAs(new Blob([JSON.stringify(exercise)], { type: "application/json;charset=utf-8" }), "Exercise_" + exercise.number + ".FrameManager");
 }
 
 function updateSuffix() {
@@ -805,7 +814,7 @@ function print(text, color) {
       var add = text.substring(0, text.indexOf("\n"));
       var s = document.createElement("span");
       s.append(document.createTextNode(add));
-      if(color) {
+      if (color) {
         s.style.color = color;
       }
       $("#console-output").append(s);
@@ -827,18 +836,18 @@ function println(text, color) {
 }
 
 //Utility and Misc
-String.prototype.hashCode = function() {
+String.prototype.hashCode = function () {
   //Simple hash function, thanks to http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
-	var hash = 0;
-	if (this.length == 0) return hash;
-	for (var i = 0; i < this.length; i++) {
-		var char = this.charCodeAt(i);
-		hash = ((hash<<5)-hash)+char;
-		hash = hash & hash; // Convert to 32bit integer
-	}
-	return hash;
+  var hash = 0;
+  if (this.length == 0) return hash;
+  for (var i = 0; i < this.length; i++) {
+    var char = this.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
 };
-Array.prototype.remove = function(element) {
+Array.prototype.remove = function (element) {
   var index = this.indexOf(element);
   if (index > -1) {
     this.splice(index, 1);
@@ -846,7 +855,7 @@ Array.prototype.remove = function(element) {
 };
 function blobToDataURL(blob, callback) {
   var a = new FileReader();
-  a.onload = function(e) {callback(e.target.result);};
+  a.onload = function (e) { callback(e.target.result); };
   a.readAsDataURL(blob);
 }
 function makeHeading(heading) {
