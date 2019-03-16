@@ -480,22 +480,21 @@ function my_callback() {
 }
 
 /* The following function changes the style of the fetch button in the Generate Exercise modal depending on the success of the fetch. */
-function fetchButtonStatus () {
-  console.log("button status");
-  if (document.getElementById("genex-board").value && document.getElementById("genex-directions").value && document.getElementById("genex-starting").value && document.getElementById("genex-complete").value) {
-    document.getElementById("fetchButton").className = "btn btn-success";
-    document.getElementById("fetchButton").innerHTML = "Success!";
-    print(document.getElementById("genex-directions").value);
-  } else {
-    document.getElementById("fetchButton").className = "btn btn-danger";
-    document.getElementById("fetchButton").innerHTML = "Failure!";
-  }
-}
+// function fetchButtonStatus () {
+//   console.log("button status");
+//   if (document.getElementById("genex-board").value && document.getElementById("genex-directions").value && document.getElementById("genex-starting").value && document.getElementById("genex-complete").value) {
+//     document.getElementById("fetchButton").className = "btn btn-success";
+//     document.getElementById("fetchButton").innerHTML = "Success!";
+//     print(document.getElementById("genex-directions").value);
+//   } else {
+//     document.getElementById("fetchButton").className = "btn btn-danger";
+//     document.getElementById("fetchButton").innerHTML = "Failure!";
+//   }
+// }
 
 function fetchButtonStatus() {
 
   if (document.getElementById("genex-board").value && document.getElementById("genex-directions").value && document.getElementById("genex-starting").value && document.getElementById("genex-complete").value) {
-    
     document.getElementById("fetchButton").className = "btn btn-success";
     document.getElementById("genexButton").disabled = false;
   } else {

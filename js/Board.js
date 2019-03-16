@@ -121,7 +121,7 @@ Board.prototype.addKeyframe = function(time, pin, value, table) {
   <td><button class="btn btn-danger keyframe-remove" onclick="currentBoard.removeKeyframe(this)">-</button></td>
   </tr>`);
   var t = $(table);
-  console.log(t);
+  // console.log(t);
   var c = newContent[0];
   t.append(c);
 
@@ -129,10 +129,10 @@ Board.prototype.addKeyframe = function(time, pin, value, table) {
   // console.log(time + ", " + pin + ", " + value);
 
   if (time) {
-    console.log(time);
+    // console.log(time);
     var timeField = newContent.find(".keyframe-time")[0];
     timeField.valueAsNumber = Number(time);
-    console.log(timeField);
+    // console.log(timeField);
   }
 
   if (pin) {
@@ -144,8 +144,6 @@ Board.prototype.addKeyframe = function(time, pin, value, table) {
     var valueField = newContent.find(".keyframe-value")[0];
     valueField.valueAsNumber = Number(value);
   }
-
-  console.log(newContent[0]);
 
   this.DOMKeyframes.push(newContent[0]);
 
@@ -170,7 +168,7 @@ Board.prototype.activate = function(idSelected, tableName){
             </thead>
             <tbody id="` + tableName + `"></tbody>
           </table>
-          <button class="btn btn-success" id="add-keyframe" onclick="currentBoard.addKeyframe(); saveContext()">Add</button>
+          <button class="btn btn-success" id="add-keyframe" onclick="currentBoard.addKeyframe(0, 0, 0, '#` + tableName + `'); saveContext()">Add</button>
           </div>
           `);
 
@@ -198,6 +196,7 @@ Board.prototype.updateInputs = function(){
     var keyframeValue = keyframe.find(".keyframe-value")[0].valueAsNumber;
     out.push({time: keyframeTime, pin: keyframePin, value: keyframeValue});
   }
+  console.log(this.pinKeyframes)
   this.pinKeyframes = out;
 };
 
