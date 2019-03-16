@@ -462,6 +462,7 @@ function fetchReplace(exercisenumber, url, id) {
     } else {
       handleError();
     }
+    fetchButtonStatus();
   };
   xhr.send();
 }
@@ -491,12 +492,36 @@ function fetchButtonStatus () {
   }
 }
 
+function fetchButtonStatus() {
+
+  if (document.getElementById("genex-board").value && document.getElementById("genex-directions").value && document.getElementById("genex-starting").value && document.getElementById("genex-complete").value) {
+    
+    document.getElementById("fetchButton").className = "btn btn-success";
+    document.getElementById("genexButton").disabled = false;
+  } else {
+    document.getElementById("fetchButton").className = "btn btn-danger";
+  }
+}
+
 /* The following function clears the values of any form items passed its way! Multiple form items should be passed in as an array */
 function clearValues(idArray) {
   for (var j = 0; j < idArray.length; j++) {
-    console.log(idArray[j]);
     document.getElementById(idArray[j]).value = " ";
   }
+
+  // Board.prototype.removeKeyframe = function (keyframe) {
+  //   this.DOMKeyframes.remove($(keyframe).parent().parent()[0]);
+  //   $(keyframe).parent().parent().remove();
+  //   saveContext(); //runs updateInputs
+  // };
+
+  document.getElementById("fetchButton").className = "btn btn-warning";
+  document.getElementById("genexButton").disabled = true;
+
+  if (document.getElementById("generate-keyframe-table-tbody")) {
+    $("#generate-keyframe-table-tbody").children().remove();
+  }
+
 }
 
 /* The following function parses files in an intentionally organized local directory and fills forms with their info. */
@@ -758,6 +783,8 @@ function saveExercise() {
 
 function generateExerciseModal() {
   $("#gen-modal").modal('show');
+  var idArray = ["genex-board", "genex-edit", "genex-directions", "genex-starting", "genex-complete"];
+  clearValues(idArray);
   console.log("Opening the genExercise modal!");
 }
 
@@ -771,7 +798,7 @@ function generateExercise() {
   exercise.directions = document.getElementById("genex-directions").value;
   document.getElementById("directions-content").innerHTML = exercise.directions;
 
-  var board
+  var board;
 
   editor.setValue("");
   editor.setValue(document.getElementById("genex-complete").value);
