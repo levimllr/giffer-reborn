@@ -15,7 +15,7 @@ void loop()
   int delayTime = 200;
   for (ledNumber = 2; ledNumber <= 15; ledNumber++)
   {
-    Serial.print("Turn  on  ledNumber "); // Send to Serial port for debug
+    Serial.print("Turn on ledNumber "); // Send to Serial port for debug
     Serial.println(ledNumber); // print a variable & finish printing the line
     digitalWrite(ledNumber, HIGH);
     delay(delayTime);
