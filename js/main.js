@@ -535,6 +535,10 @@ function fetchExercise(promptForOverwrite, fetchButtonStatus) {
     clearExercise();
     return;
   }
+  
+  if (exerciseNum < 10) {
+    exerciseNum = "0" + exerciseNum;
+  }
 
   // A little console indicator.
   console.log("Fetching Exercise " + exerciseNum + "...");
