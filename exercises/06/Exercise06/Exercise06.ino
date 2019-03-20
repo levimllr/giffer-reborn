@@ -1,40 +1,44 @@
-//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
+// ***************ACTIVITIES TO CHECK WHILE GRADING BEGIN*******************
 //
-//1.	Verify that the LEDs blink in this order: 4, 2, 3
-//2.	Verify that the parameters have been modified in the function calls to turn on LEDs 4, 2, 3
-//3.	Should repeat 5 times and then pause for 4 seconds
-//4.	Verify that parameters are used instead of typing out the numbers
+// 1.	LED9 should blink ON for 200ms and OFF for 200ms FOUR times
+// 2.	Then LED2 OFF for 5 seconds and then repeat
+// 3.	Change name of variable from t => waitTime
+// 4.	Change value of variable waitTime = 200; 
+// 5.	Final delay in loop() should be something like delay(waitTime*20);
 //
 // ***************ACTIVITIES TO CHECK WHILE GRADING END*********************
+
 void setup()
-{ 
-  pinMode(2, OUTPUT);
-  pinMode(3, OUTPUT);
-  pinMode(4, OUTPUT);
+{
+  pinMode(9, OUTPUT); // Enables pin 9 on the Arduino to Send enough power to turn on a LED
 }
 
 
 void loop()
-{ 
-  int x;
+{
+  int waitTime;		// creates an integer waitTime
+  waitTime = 200;           // puts the value 200 in the Arduinos waitTime memory location
 
-  for(x = 1; x <= 5; x++)
-  { 
-    blinkOnce(100, 4);
-    blinkOnce(100, 2);
-    blinkOnce(100, 3);
-  }
+  digitalWrite(9, HIGH); // Tells Arduino to send enough power to turn on LED 9
+  delay(waitTime);         // wait waitTime before going to the next line
+  digitalWrite(9, LOW);   // Tells Arduino to turn OFF LED 9
+  delay(waitTime);
 
-  delay(4000);
-}
+  digitalWrite(9, HIGH);
+  delay(waitTime);
+  digitalWrite(9, LOW);
+  delay(waitTime);
 
+  digitalWrite(9, HIGH);
+  delay(waitTime);
+  digitalWrite(9, LOW);
+  delay(waitTime);
 
-void blinkOnce(int t, int n)
-{ 
-  digitalWrite(n, HIGH);
-  delay(t);
-  digitalWrite(n, LOW);
-  delay(t);
+  digitalWrite(9, HIGH);
+  delay(waitTime);
+  digitalWrite(9, LOW);
+
+  delay(waitTime*20);  // wait waitTime x 20 milliseconds before going to the next line
 }
 
 // ************************************************BOARD+CONFIGURATION FOOTER BEGIN****************************************************
@@ -50,4 +54,3 @@ void blinkOnce(int t, int n)
 // ACTUAL:#%!"board": {"type":"LED Board", "setup":{"pinKeyframes":[]}}#%!
 //
 // *************************************************BOARD+CONFIGURATION FOOTER END*****************************************************
-

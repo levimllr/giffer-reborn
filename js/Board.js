@@ -121,18 +121,12 @@ Board.prototype.addKeyframe = function(time, pin, value, table) {
   <td><button class="btn btn-danger keyframe-remove" onclick="currentBoard.removeKeyframe(this)">-</button></td>
   </tr>`);
   var t = $(table);
-  // console.log(t);
   var c = newContent[0];
   t.append(c);
 
-  // console.log(newContent);
-  // console.log(time + ", " + pin + ", " + value);
-
   if (time) {
-    // console.log(time);
     var timeField = newContent.find(".keyframe-time")[0];
     timeField.valueAsNumber = Number(time);
-    // console.log(timeField);
   }
 
   if (pin) {
@@ -176,8 +170,6 @@ Board.prototype.activate = function(idSelected, tableName){
 
   for (var i = 0; i < this.pinKeyframes.length; i++) {
      var keyframe = this.pinKeyframes[i];
-     console.log("Keyframe");
-     console.log(keyframe);
      this.addKeyframe(keyframe.time, keyframe.pin, keyframe.value, "#" + tableName);
   }
 };
@@ -196,7 +188,6 @@ Board.prototype.updateInputs = function(){
     var keyframeValue = keyframe.find(".keyframe-value")[0].valueAsNumber;
     out.push({time: keyframeTime, pin: keyframePin, value: keyframeValue});
   }
-  console.log(this.pinKeyframes)
   this.pinKeyframes = out;
 };
 

@@ -433,8 +433,6 @@ function fetchReplace(exercisenumber, url, id) {
         var board = JSON.parse(completeCode.slice(startBoard, endBoard));
 
         // Fetch the current Board! And fill in drop-down menu (select-option menu in HTML).
-
-        // var board;
         var boardSelect = document.getElementById("genex-board");
         removeOptions(boardSelect);
         var option1 = document.createElement("option");
@@ -451,6 +449,7 @@ function fetchReplace(exercisenumber, url, id) {
         }
         boardSelect.add(option2);
 
+        // Fill in the board configuration table!
         currentBoard.pinKeyframes = board.setup.pinKeyframes;
         currentBoard.activate("#genex-edit", "generate-keyframe-table-tbody");
         currentBoard.activate("#edit", "keyframe-table-tbody");
@@ -475,23 +474,7 @@ function removeOptions(selectForm) {
   }
 }
 
-function my_callback() {
-  console.log("blah");
-}
-
-/* The following function changes the style of the fetch button in the Generate Exercise modal depending on the success of the fetch. */
-// function fetchButtonStatus () {
-//   console.log("button status");
-//   if (document.getElementById("genex-board").value && document.getElementById("genex-directions").value && document.getElementById("genex-starting").value && document.getElementById("genex-complete").value) {
-//     document.getElementById("fetchButton").className = "btn btn-success";
-//     document.getElementById("fetchButton").innerHTML = "Success!";
-//     print(document.getElementById("genex-directions").value);
-//   } else {
-//     document.getElementById("fetchButton").className = "btn btn-danger";
-//     document.getElementById("fetchButton").innerHTML = "Failure!";
-//   }
-// }
-
+/* Changes the style of the Fetch button in the Generate Exercise modal depending on whether the Board, Directions, and Starting and Complete Code fields are complete.*/
 function fetchButtonStatus() {
 
   if (document.getElementById("genex-board").value && document.getElementById("genex-directions").value && document.getElementById("genex-starting").value && document.getElementById("genex-complete").value) {
@@ -507,12 +490,6 @@ function clearValues(idArray) {
   for (var j = 0; j < idArray.length; j++) {
     document.getElementById(idArray[j]).value = " ";
   }
-
-  // Board.prototype.removeKeyframe = function (keyframe) {
-  //   this.DOMKeyframes.remove($(keyframe).parent().parent()[0]);
-  //   $(keyframe).parent().parent().remove();
-  //   saveContext(); //runs updateInputs
-  // };
 
   document.getElementById("fetchButton").className = "btn btn-warning";
   document.getElementById("genexButton").disabled = true;

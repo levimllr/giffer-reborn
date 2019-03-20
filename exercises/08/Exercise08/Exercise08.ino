@@ -1,40 +1,38 @@
-//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
+// ***************ACTIVITIES TO CHECK WHILE GRADING BEGIN*******************
 //
-//1.	Verify that the LEDs blink in this order: 4, 2, 3
-//2.	Verify that the parameters have been modified in the function calls to turn on LEDs 4, 2, 3
-//3.	Should repeat 5 times and then pause for 4 seconds
-//4.	Verify that parameters are used instead of typing out the numbers
+// 1.	LED9 should blink on and off 12 times rapidly with a 400ms delay between
+// 2.	Should pause for 4 seconds with all LEDS OFF and then repeat the sequence again
 //
 // ***************ACTIVITIES TO CHECK WHILE GRADING END*********************
+
 void setup()
-{ 
-  pinMode(2, OUTPUT);
+{
+  pinMode(9, OUTPUT); // Enables pin 9, 3, 4 on the Arduino to Send enough power to turn on a LED
   pinMode(3, OUTPUT);
   pinMode(4, OUTPUT);
 }
 
 
 void loop()
-{ 
-  int x;
+{
+  int waitTime; // creates an integer waitTime
 
-  for(x = 1; x <= 5; x++)
-  { 
-    blinkOnce(100, 4);
-    blinkOnce(100, 2);
-    blinkOnce(100, 3);
+  int count; // creates an integer count
+
+  waitTime = 400; // sets the value stored in waitTime
+
+  count = 1; // sets the value stored in count
+  while (count <= 12) // this while loop will repeat twelve times
+    // When count=1 through count=12.
+    // this while loop stops or no longer loops when count=13
+  {
+    digitalWrite(9, HIGH);
+    delay(waitTime);
+    digitalWrite(9, LOW);
+    delay(waitTime);
+    count = count + 1; // count gets the value of count + 1
   }
-
-  delay(4000);
-}
-
-
-void blinkOnce(int t, int n)
-{ 
-  digitalWrite(n, HIGH);
-  delay(t);
-  digitalWrite(n, LOW);
-  delay(t);
+  delay(waitTime * 10); // wait 4000ms or 4 seconds before going to the next line
 }
 
 // ************************************************BOARD+CONFIGURATION FOOTER BEGIN****************************************************

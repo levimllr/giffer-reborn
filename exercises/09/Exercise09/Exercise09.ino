@@ -1,18 +1,15 @@
-// ==============SOLVED EXERCISE ====END==========================
 // ***************ACTIVITIES TO CHECK WHILE GRADING BEGIN*******************
 //
-// 1.	LED 2 should blink on and off 2 times with a 200ms delay between.
-// 2.	LED 3 should blink on and off 3 times with a 200ms delay between.
-// 3.	LED 4 should blink on and off 4 times with a 200ms delay between.
+// 1.	LED2 should blink TWICE with a 400ms delay between
+// 2.	LED3 should blink THREE times with a 400ms delay between
+// 3.	LED4Should blink FOUR times with a 400ms delay between
 // 4.	Should pause for 8 seconds with all LEDS OFF and then repeat the sequence again
-// 5.	Verify that they have used THREE for loops and:
-//          Modified the counters to count 2, 3, 4 times
 //
 // ***************ACTIVITIES TO CHECK WHILE GRADING END*********************
 
 void setup()
 {
-  pinMode(2, OUTPUT);
+  pinMode(2, OUTPUT); // Enables pin 2, 3, 4 on the Arduino to Send enough power to turn on a LED
   pinMode(3, OUTPUT);
   pinMode(4, OUTPUT);
 }
@@ -20,37 +17,44 @@ void setup()
 
 void loop()
 {
-  int waitTime;
-  int count;
+  int waitTime; // creates an integer waitTime
 
-  waitTime = 200;
+  int count; // creates an integer count
 
+  waitTime = 400; // sets the value stored in waitTime
 
-  for(count = 1; count <= 2; count++)  // This for loop will repeat 2 times time
-  { 				            // LED 2 will blink on / off each time the loop repeats
+  count = 1; // sets the value stored in count
+  while (count <= 2) // this while loop will repeat two times
+  {
     digitalWrite(2, HIGH);
     delay(waitTime);
     digitalWrite(2, LOW);
     delay(waitTime);
+    count = count + 1; // count gets the value of count + 1
   }
-  
-  for(count = 1; count <= 3; count++)  // This for loop will repeat 3 times time
-  { 				            // LED 3 will blink on / off each time the loop repeats
+
+  count = 1; // resets the value stored in count
+  while (count <= 3) // this while loop will repeat three times
+  {
     digitalWrite(3, HIGH);
     delay(waitTime);
     digitalWrite(3, LOW);
     delay(waitTime);
+    count = count + 1; // count gets the value of count + 1
   }
 
-  for(count = 1; count <= 4; count++)  // This for loop will repeat 4 times time
-  { 				            // LED 4 will blink on / off each time the loop repeats
+  count = 1; // resets the value stored in count
+  while (count <= 4) // this while loop will repeat four times
+  {
     digitalWrite(4, HIGH);
     delay(waitTime);
     digitalWrite(4, LOW);
     delay(waitTime);
+    count = count + 1; // count gets the value of count + 1
   }
 
-  delay(waitTime*20);
+
+  delay(waitTime * 20); // wait 8000ms or 8 seconds before going to the next line
 }
 
 // ************************************************BOARD+CONFIGURATION FOOTER BEGIN****************************************************
@@ -66,4 +70,5 @@ void loop()
 // ACTUAL:#%!"board": {"type":"LED Board", "setup":{"pinKeyframes":[]}}#%!
 //
 // *************************************************BOARD+CONFIGURATION FOOTER END*****************************************************
+
 

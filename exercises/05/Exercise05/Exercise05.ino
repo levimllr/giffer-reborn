@@ -1,40 +1,28 @@
-//**************ACTIVITIES TO CHECK WHILE GRADING**********BEGIN*********
+// ***************ACTIVITIES TO CHECK WHILE GRADING BEGIN*******************
 //
-//1.	Verify that the LEDs blink in this order: 4, 2, 3
-//2.	Verify that the parameters have been modified in the function calls to turn on LEDs 4, 2, 3
-//3.	Should repeat 5 times and then pause for 4 seconds
-//4.	Verify that parameters are used instead of typing out the numbers
+// 1.	LED2 should go ON for 500ms
+// 2.	Then LED2 OFF for 5 seconds and then repeat
+// 3.	Change name of variable from x => t
+// 4.	Change value of variable t = 500;
 //
 // ***************ACTIVITIES TO CHECK WHILE GRADING END*********************
+
 void setup()
-{ 
-  pinMode(2, OUTPUT);
-  pinMode(3, OUTPUT);
-  pinMode(4, OUTPUT);
+{
+  pinMode(2, OUTPUT); // Enables pin 2 on the Arduino to Send enough power to turn on a LED
 }
 
-
-void loop()
-{ 
-  int x;
-
-  for(x = 1; x <= 5; x++)
-  { 
-    blinkOnce(100, 4);
-    blinkOnce(100, 2);
-    blinkOnce(100, 3);
-  }
-
-  delay(4000);
-}
-
-
-void blinkOnce(int t, int n)
-{ 
-  digitalWrite(n, HIGH);
-  delay(t);
-  digitalWrite(n, LOW);
-  delay(t);
+void loop() // turn on LED2 on for ½ second then turn it off and wait 5 seconds then repeat
+{
+  int t;                            // creates an integer t
+  t = 500;                          // puts the value 500 in the Arduinos t memory location
+  digitalWrite(2, HIGH);
+  delay(t);                         // delay(t); means that the Arduino looks at memory location t
+                                    // and delays t milliseconds
+  digitalWrite(2, LOW);
+  delay(t);                         // delay(t); means that the Arduino looks at memory location t
+                                    // and delays t milliseconds
+  delay(4500);  // wait 4500ms or 4.5 seconds before going to the next line
 }
 
 // ************************************************BOARD+CONFIGURATION FOOTER BEGIN****************************************************

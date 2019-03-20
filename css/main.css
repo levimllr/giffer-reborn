@@ -122,3 +122,9 @@ div.form-group label {
     background: LightCoral;
     position: absolute;
 }
+
+
+.table td,.table th {
+    text-align: left;
+    table-layout: auto;
+}
