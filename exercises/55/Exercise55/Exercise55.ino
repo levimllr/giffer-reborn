@@ -73,7 +73,7 @@ void loop()
 // EXAMPLE 1: "board": {"type":"LED Board", "setup":{"pinKeyframes":[]}}
 // EXAMPLE 2: "board": {"type":"KS Board", "setup":{"pinKeyframes":[{"time":0,"pin":5,"value":0},{"time":2750,"pin":5,"value":260}]}}
 //
-// ACTUAL:#%!"board": {"type":"LED Board", "setup":{"pinKeyframes":[]}}#%!
+// ACTUAL:#%!"board": {"type":"LED Board", "setup":{"pinKeyframes":[{"time":0,"pin":5,"value":0},{"time":2750,"pin":5,"value":260},{"time":5500,"pin":5,"value":512},{"time":8250,"pin":5,"value":770}]}}#%!
 //
 // *************************************************BOARD+CONFIGURATION FOOTER END*****************************************************
 
